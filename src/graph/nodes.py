@@ -45,7 +45,7 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     
     if not is_reasoning:
         # Simple QA: Sequential selection based on global index range
-        start_index = int(os.getenv("START_INDEX", "3167"))
+        start_index = int(os.getenv("START_INDEX", "5157"))
         end_index = int(os.getenv("END_INDEX", "0")) # 0 means no limit/all
         
         # Calculate which document to fetch: Start + current_iteration
