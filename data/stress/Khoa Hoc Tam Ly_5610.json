@@ -1,0 +1,696 @@
+[
+    {
+        "uuid": "cae8ce1a-2c63-4ca2-a8d9-07321d1acbc0",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nStress là phản ứng sinh lý bình thường của cơ thể. Tuy nhiên, stress kéo dài lại là một vấn đề nghiêm trọng, có thể gây ra hàng loạt tác hại đối với sức khỏe tinh thần lẫn thể chất. Người bị stress cần nhanh chóng hành động, khắc phục để thư giãn tinh thần, giải tỏa cảm xúc, ngăn ngừa các tác hại do stress kéo dài gây ra.  \n## Dấu hiệu bị stress kéo dài\n\n## Dấu hiệu bị stress kéo dài  \nStress kéo dài hay stress mãn tính là tình trạng cơ thể liên tục trải qua tình trạng lo lắng, căng thẳng trong thời gian dài, mà không có sự điều chỉnh hoặc giải tỏa. Đây là một phản ứng sinh lý lâu dài, gây ra nhiều ảnh hưởng nghiêm trọng cho sức khỏe.",
+        "summary": "Stress kéo dài, hay stress mãn tính, là tình trạng cơ thể liên tục trải qua lo lắng và căng thẳng trong thời gian dài mà không được giải tỏa. Đây là một phản ứng sinh lý nghiêm trọng, gây ra nhiều tác hại đối với sức khỏe tinh thần và thể chất. Việc nhận biết và hành động kịp thời để giải tỏa cảm xúc là cần thiết nhằm ngăn ngừa những ảnh hưởng tiêu cực.",
+        "keywords": [
+            "stress",
+            "stress kéo dài",
+            "stress mãn tính",
+            "lo lắng",
+            "căng thẳng",
+            "sức khỏe tinh thần",
+            "sức khỏe thể chất",
+            "tác hại stress",
+            "giải tỏa cảm xúc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2b9d8ec1-f814-48f0-b692-86552799c31b",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi một người trải qua căng thẳng, vùng dưới đồi trong não sẽ gửi tín hiệu, kích hoạt hệ thống báo động của cơ thể. Thúc đẩy tuyến thượng thận giải phóng một lượng lớn cortisol và adrenaline. Gây ra tình trạng tăng nhịp tim, tăng huyết áp, tăng lượng đường trong máu, tăng sử dụng chất trong cơ thể để sữa chữa các mô.  \nKhi hệ thống phản ứng căng thẳng bị kích hoạt thường xuyên, liên tục sẽ ảnh hưởng nhiều đến sức khỏe. Các dấu hiệu bị stress kéo dài bao gồm:  \n- Lo lắng, sợ hãi",
+        "summary": "Khi cơ thể trải qua căng thẳng, vùng dưới đồi trong não kích hoạt hệ thống báo động, khiến tuyến thượng thận giải phóng cortisol và adrenaline. Điều này dẫn đến các phản ứng sinh lý như tăng nhịp tim, huyết áp và đường huyết. Việc kích hoạt hệ thống này liên tục sẽ gây ảnh hưởng nghiêm trọng đến sức khỏe, biểu hiện qua các dấu hiệu như lo lắng và sợ hãi.",
+        "keywords": [
+            "stress",
+            "căng thẳng",
+            "phản ứng sinh lý",
+            "vùng dưới đồi",
+            "tuyến thượng thận",
+            "cortisol",
+            "adrenaline",
+            "nhịp tim",
+            "huyết áp",
+            "dấu hiệu stress",
+            "lo lắng",
+            "sợ hãi"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "35ee0ab5-262f-430c-abbd-612efd364477",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Lo lắng, sợ hãi  \n- Khó tập trung, suy nghĩ hỗn loạn",
+        "summary": "Stress kéo dài có thể gây ra nhiều triệu chứng tâm lý và nhận thức. Ngoài cảm giác lo lắng và sợ hãi, người bị stress mãn tính thường gặp khó khăn trong việc tập trung và có những suy nghĩ hỗn loạn, ảnh hưởng đến khả năng tư duy và làm việc hàng ngày.",
+        "keywords": [
+            "stress kéo dài",
+            "dấu hiệu stress",
+            "lo lắng",
+            "sợ hãi",
+            "khó tập trung",
+            "suy nghĩ hỗn loạn",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "aa487c48-d0da-47d3-a501-386528242988",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Cảm giác mệt mỏi, bất lực, mất kiểm soát, tuyệt vọng  \n- Thay đổi tâm trạng thất thường, dễ cáu kỉnh  \n- Đau nửa đầu  \n- Khó ngủ hoặc mất ngủ  \n- Chán ăn hoặc ăn quá nhiều, đặc biệt là đồ ngọt  \n- Giảm ham muốn tình dục  \n- Đầy bụng, khó tiêu, buồn nôn, đau dạ dày  \n- Thường xuyên bị bệnh hoặc nhiễm trùng  \n- Phục hồi chậm khi mắc bệnh hoặc nhiễm trùng…  \n## 5 Tác hại khi bị stress kéo dài\n\n## 5 Tác hại khi bị stress kéo dài  \nStress là phản ứng sinh lý bình thường của cơ thể khi đối mặt với căng thẳng. Tuy nhiên, stress kéo dài lại là một vấn đề nghiêm trọng cần được can thiệp. Dưới đây là một số tác hại do stress kéo dài gây ra:  \n### Ảnh hưởng đến ngoại hình",
+        "summary": "Stress kéo dài gây ra nhiều triệu chứng đa dạng, từ cảm giác mệt mỏi, bất lực, tuyệt vọng đến thay đổi tâm trạng thất thường và dễ cáu kỉnh. Các biểu hiện thể chất bao gồm đau nửa đầu, mất ngủ, rối loạn ăn uống, giảm ham muốn tình dục và các vấn đề tiêu hóa. Ngoài ra, stress mãn tính còn làm suy yếu hệ miễn dịch, khiến cơ thể dễ mắc bệnh và phục hồi chậm, đồng thời gây ra nhiều tác hại nghiêm trọng khác cần được can thiệp.",
+        "keywords": [
+            "stress kéo dài",
+            "dấu hiệu stress",
+            "mệt mỏi",
+            "bất lực",
+            "mất kiểm soát",
+            "tuyệt vọng",
+            "thay đổi tâm trạng",
+            "cáu kỉnh",
+            "đau nửa đầu",
+            "mất ngủ",
+            "rối loạn ăn uống",
+            "giảm ham muốn tình dục",
+            "vấn đề tiêu hóa",
+            "suy yếu miễn dịch",
+            "tác hại stress"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "090f4afd-52b7-48e2-8988-c3c291f0dd10",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### Ảnh hưởng đến ngoại hình  \nKhi bị stress, chúng ta thường có xu hướng bị mất ngủ làm đôi mắt thường trong trạng thái thâm quầng như “gấu trúc”, da sạm đi và nhăn nheo rõ rệt. Kể cả cho dù bạn có dùng bao nhiêu kem dưỡng da đắt đỏ nhưng nếu thường xuyên thức khuya, mất ngủ trong thời gian dài thì da vẫn không thể nào cải thiện.",
+        "summary": "Stress kéo dài có tác động tiêu cực đáng kể đến ngoại hình, chủ yếu do gây ra tình trạng mất ngủ. Thiếu ngủ liên tục dẫn đến đôi mắt thâm quầng, da trở nên sạm và xuất hiện nhiều nếp nhăn rõ rệt. Dù sử dụng các sản phẩm chăm sóc da đắt tiền, những vấn đề này khó có thể cải thiện nếu tình trạng mất ngủ do stress không được khắc phục.",
+        "keywords": [
+            "stress kéo dài",
+            "tác hại stress",
+            "ngoại hình",
+            "mất ngủ",
+            "thâm quầng mắt",
+            "da sạm",
+            "nếp nhăn",
+            "chăm sóc da"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "de0f8105-9969-4861-a098-28539b118cd7",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nMất ngủ và stress là nguyên nhân hàng đầu đẩy cơ thể đến quá trình lão hóa của tuổi tác nhanh hơn. Chẳng hạn bạn có thể thấy những người có xu hướng lo nghĩ nhiều, căng thẳng stress kéo dài nhìn sẽ chững chạc, già dặn hơn so với tuổi thật, tóc bạc nhiều hơn.",
+        "summary": "Mất ngủ và stress kéo dài là những yếu tố chính thúc đẩy quá trình lão hóa của cơ thể diễn ra nhanh hơn. Những người thường xuyên lo nghĩ và căng thẳng có thể trông già dặn hơn tuổi thật, với các dấu hiệu như tóc bạc sớm. Điều này cho thấy tác động rõ rệt của tâm lý lên ngoại hình và sức khỏe.",
+        "keywords": [
+            "mất ngủ",
+            "stress",
+            "lão hóa",
+            "tuổi tác",
+            "căng thẳng",
+            "tóc bạc",
+            "tác hại stress"
+        ]
+    },
+    {
+        "uuid": "85d87306-04d2-4cc1-8574-e769d8ff3a13",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTác hại khi bị stress kéo dài còn liên quan đến tình trạng béo phì hay gầy yếu quá mức. Một số người khi bị stress thường có xu hướng thèm ngọt, ăn đêm nhiều nên dễ bị béo phì trong khi đó một số khác lại bị chán ăn, ăn không ngon nên ngày càng gầy yếu. Và dù là gầy hay béo thì đều khiến ngoại hình kém hoàn hảo.",
+        "summary": "Stress kéo dài có thể gây ra những ảnh hưởng đáng kể đến cân nặng, dẫn đến tình trạng béo phì hoặc gầy yếu quá mức. Một số người có xu hướng thèm đồ ngọt và ăn đêm khi căng thẳng, dễ gây béo phì. Ngược lại, nhiều người khác lại bị chán ăn và sụt cân. Cả hai tình trạng này đều ảnh hưởng tiêu cực đến ngoại hình và sức khỏe.",
+        "keywords": [
+            "stress",
+            "béo phì",
+            "gầy yếu",
+            "thèm ngọt",
+            "chán ăn",
+            "cân nặng",
+            "ngoại hình",
+            "tác hại stress"
+        ]
+    },
+    {
+        "uuid": "8c5095bf-52c5-47d3-a74e-eab7d82be2d2",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác nghiên cứu cũng chỉ ra ở những người bị stress cũng thường gặp tình trạng rụng tóc thành từng mảng, dễ bị nổi mụn trứng cá. Những người bị ám ảnh về ngoại hình có thể bị căng thẳng stress nhiều hơn nếu tình trạng này không nhanh chóng giải quyết.  \n### Gia tăng nguy mắc các vấn đề về tâm lý – thần kinh",
+        "summary": "Stress không chỉ ảnh hưởng đến sức khỏe tâm thần mà còn biểu hiện rõ rệt qua các vấn đề thể chất như rụng tóc từng mảng và mụn trứng cá. Đặc biệt, những người quan tâm đến ngoại hình có thể trải qua mức độ căng thẳng cao hơn khi đối mặt với các vấn đề này. Điều này cũng làm gia tăng nguy cơ mắc các vấn đề về tâm lý và thần kinh.",
+        "keywords": [
+            "stress",
+            "rụng tóc",
+            "mụn trứng cá",
+            "ngoại hình",
+            "căng thẳng",
+            "tâm lý",
+            "thần kinh",
+            "tác hại stress"
+        ]
+    },
+    {
+        "uuid": "52936832-954c-4668-a943-23c9e1305c77",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nMột trong những tác hại nghiêm trọng khi bị stress kéo dài chính là gia tăng nguy cơ mắc rất nhiều bệnh tâm lý nguy hiểm, chẳng như như trầm cảm , rối loạn lo âu hay alzheimer. Nguyên nhân là khi bị stress cơ thể sẽ tăng sản sinh các hormone adrenaline, noradrenaline khiến chúng ta cảm thấy bồn chồn và lo lắng hơn đồng thời giảm sản sinh dopamine, Endorphin, serotonin khiến chúng ta ít cảm nhận được sự vui vẻ.",
+        "summary": "Stress kéo dài gây ra những tác hại nghiêm trọng, làm tăng nguy cơ mắc các bệnh tâm lý nguy hiểm như trầm cảm, rối loạn lo âu và Alzheimer. Khi căng thẳng, cơ thể tăng sản xuất hormone adrenaline và noradrenaline, gây bồn chồn lo lắng. Đồng thời, sự giảm sản xuất dopamine, endorphin và serotonin khiến con người ít cảm nhận được niềm vui, từ đó ảnh hưởng tiêu cực đến sức khỏe tinh thần.",
+        "keywords": [
+            "stress",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "Alzheimer",
+            "hormone",
+            "adrenaline",
+            "noradrenaline",
+            "dopamine",
+            "endorphin",
+            "serotonin"
+        ]
+    },
+    {
+        "uuid": "6384ffbb-a0c0-4787-b320-c6c1472a08e0",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nMột vài thống kê được thực hiện trên những người thường xuyên bị stress kéo dài (Nhóm A) và những người ít bị stress hoặc chỉ bị trong thời gian ngắn (Nhóm B) thì kết quả cho thấy ở những người nhóm A có xu hướng mất đi khả năng phục hồi trí não đồng thời điểm số các bài test trầm cảm đều rất cao.",
+        "summary": "Các thống kê đã chỉ ra rằng những người thường xuyên bị stress kéo dài có xu hướng mất đi khả năng phục hồi trí não. So với những người ít bị stress, nhóm đối tượng này cũng đạt điểm số rất cao trong các bài kiểm tra trầm cảm. Điều này nhấn mạnh tác động tiêu cực của stress mãn tính đến chức năng não bộ và sức khỏe tâm thần.",
+        "keywords": [
+            "stress",
+            "trí não",
+            "phục hồi trí não",
+            "trầm cảm",
+            "nghiên cứu",
+            "thống kê",
+            "sức khỏe tâm thần",
+            "tác hại stress"
+        ]
+    },
+    {
+        "uuid": "eeb93081-be3e-4c44-a9aa-d71143ca3c6a",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác bệnh tâm lý đều tiềm ẩn rất nhiều hệ lụy nguy hiểm đến người bệnh mà không ai được chủ quan. Nếu không sớm được phát hiện và điều trị kịp thời người bệnh có xu hướng tự làm đau bản thân, tìm cách tự tử như một cách giải tỏa những cảm xúc tiêu cực của bản thân. Rất nhiều các trường hợp tương tự đã xảy ra, thậm chí tỷ lệ tự tử do trầm cảm hay rối loạn lo âu đã nằm ở mức đáng báo động nên tuyệt đối không được coi thường các bệnh này.",
+        "summary": "Các bệnh tâm lý tiềm ẩn nhiều hệ lụy nguy hiểm, đặc biệt là nguy cơ tự làm đau bản thân và tự tử nếu không được phát hiện và điều trị kịp thời. Tỷ lệ tự tử do trầm cảm và rối loạn lo âu đang ở mức báo động, cho thấy sự cần thiết phải nghiêm túc nhìn nhận và can thiệp sớm các vấn đề sức khỏe tâm thần.",
+        "keywords": [
+            "bệnh tâm lý",
+            "hệ lụy",
+            "tự làm đau",
+            "tự tử",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "sức khỏe tâm thần",
+            "điều trị kịp thời",
+            "nguy hiểm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "13eeb885-6f2a-44cb-8028-eacb738e4f69",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### Tác hại khi bị stress kéo dài – gia tăng nguy cơ mắc rất nhiều bệnh lý  \nĐừng tưởng rằng stress là một vấn đề về cảm xúc mà lại không nguy hiểm cho thể chất. Các nghiên cứu đã chỉ ra stress là nguyên nhân hàng đầu gây ra rất nhiều vấn đề cho sức khỏe mà bạn không nên chủ quan. Bởi stress thường kéo theo tình trạng mất ngủ, lo âu, bồn chồn nên cũng khiến sức khỏe suy giảm nghiêm trọng.  \nCụ thể, những tác hại khi bị stress kéo dài trên mặt thể chất bao gồm:\n\nCụ thể, những tác hại khi bị stress kéo dài trên mặt thể chất bao gồm:  \n- Gia tăng các bệnh lý về tim mạch: hormone adrenaline, noradrenaline và cortisol được phóng thích vào máu khi bạn bị căng thẳng dẫn tới huyết áp tăng, nhịp tim tăng nên tăng nguy cơ mắc các bệnh về tim mạch. Người bị stress kéo dài rất dễ mắc các bệnh như nhồi máu cơ tim, suy tim hay xơ vữa động mạch..",
+        "summary": "Stress kéo dài không chỉ là vấn đề cảm xúc mà còn gây ra nhiều tác hại nghiêm trọng cho sức khỏe thể chất, bao gồm tình trạng mất ngủ, lo âu và suy giảm sức khỏe tổng thể. Đặc biệt, stress làm gia tăng nguy cơ mắc các bệnh lý về tim mạch do sự phóng thích hormone căng thẳng, dẫn đến tăng huyết áp, nhịp tim và các bệnh như nhồi máu cơ tim, suy tim.",
+        "keywords": [
+            "stress kéo dài",
+            "tác hại",
+            "sức khỏe thể chất",
+            "bệnh lý tim mạch",
+            "adrenaline",
+            "noradrenaline",
+            "cortisol",
+            "huyết áp cao",
+            "nhồi máu cơ tim",
+            "suy tim"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "34fcf015-cc1e-40d8-8017-d08e29c9ea0d",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Gia tăng các bệnh lý về dạ dày : nguyên nhân là stress và mất ngủ kích thích hệ tiêu hóa tăng sản xuất các acid dạ dày khiến người bệnh dễ bị trào ngược dạ dày, viêm loét dạ dày, viêm dạ dày cùng rất vấn đề nghiêm trọng khác.",
+        "summary": "Stress và mất ngủ kéo dài là nguyên nhân chính làm gia tăng các bệnh lý về dạ dày, do chúng kích thích hệ tiêu hóa sản xuất quá nhiều acid. Điều này dẫn đến các vấn đề như trào ngược dạ dày, viêm loét dạ dày và viêm dạ dày, gây ảnh hưởng nghiêm trọng đến sức khỏe.",
+        "keywords": [
+            "stress",
+            "mất ngủ",
+            "bệnh lý dạ dày",
+            "acid dạ dày",
+            "trào ngược dạ dày",
+            "viêm loét dạ dày",
+            "viêm dạ dày",
+            "hệ tiêu hóa"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "24203730-1245-4a2f-8b00-f11c5482f604",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các vấn đề não bộ: adrenalin và cortisol có thể tác động làm giãn mạch máu gây ra các chứng đau đầu, đau nửa đầu. Suy giảm trí nhớ cũng là một tác hại khi bị stress kéo dài mà rất nhiều người đang gặp phải hiện nay, kể cả những người trẻ. Nghiên cứu còn chỉ ra stress khiến lượng oxy đi lên não giảm và gia tăng nguy cơ bị teo não cùng các tổn thương nghiêm trọng khác.",
+        "summary": "Stress kéo dài có thể gây ra nhiều vấn đề nghiêm trọng cho não bộ, bao gồm các chứng đau đầu và đau nửa đầu do tác động của adrenalin và cortisol làm giãn mạch máu. Ngoài ra, stress còn dẫn đến suy giảm trí nhớ, giảm lượng oxy lên não và gia tăng nguy cơ teo não cùng các tổn thương não bộ khác.",
+        "keywords": [
+            "stress",
+            "não bộ",
+            "đau đầu",
+            "đau nửa đầu",
+            "adrenalin",
+            "cortisol",
+            "suy giảm trí nhớ",
+            "teo não",
+            "tổn thương não"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d2d4201e-67c8-4662-841e-a010a9ae969",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các vấn đề về xương khớp : các nghiên cứu cũng đã chỉ ra việc căng thẳng stress có thể làm gia tăng các phản ứng viêm của cơ thể, bao gồm cả hệ thống xương khớp. Đồng thời kết hợp với việc máu huyết lưu thông kém khiến những người này thường xuyên bị căng cơ, tê bì chân tay, khả năng tái tạo kém nên dễ gặp các vấn đề về xương khớp, quá trình lão hóa của xương khớp được đẩy nhanh hơn bình thường.",
+        "summary": "Căng thẳng (stress) có thể gây ra nhiều vấn đề về xương khớp bằng cách làm gia tăng các phản ứng viêm trong cơ thể và ảnh hưởng đến hệ thống xương khớp. Ngoài ra, stress còn làm máu huyết lưu thông kém, dẫn đến căng cơ, tê bì chân tay, khả năng tái tạo kém, từ đó đẩy nhanh quá trình lão hóa và dễ phát sinh các bệnh lý xương khớp.",
+        "keywords": [
+            "stress",
+            "xương khớp",
+            "phản ứng viêm",
+            "máu huyết lưu thông",
+            "căng cơ",
+            "tê bì chân tay",
+            "lão hóa xương khớp",
+            "bệnh lý xương khớp"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "02d692b7-6561-4189-abc7-7d2a64efd3fe",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "- Các vấn đề về răng miệng : người bị stress cũng dễ bị viêm nướu, viêm răng miệng hay nhiệt miệng  \n- Suy giảm hệ miễn dịch : stress khiến cơ thể giảm khả năng chống chọi với các tác nhân lạ xâm nhập từ bên ngoài. Có thể thấy rõ ràng rằng mỗi bạn bận rộn quá mức với áp lực công việc thường dễ bị cảm cúm hơn.",
+        "summary": "Stress có thể gây ra nhiều vấn đề sức khỏe, bao gồm các bệnh về răng miệng như viêm nướu và nhiệt miệng. Ngoài ra, stress còn làm suy giảm hệ miễn dịch của cơ thể, khiến cá nhân dễ mắc các bệnh truyền nhiễm như cảm cúm, đặc biệt khi phải đối mặt với áp lực công việc kéo dài.",
+        "keywords": [
+            "stress",
+            "tác hại stress",
+            "sức khỏe răng miệng",
+            "viêm nướu",
+            "nhiệt miệng",
+            "hệ miễn dịch",
+            "suy giảm miễn dịch",
+            "cảm cúm",
+            "áp lực công việc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "24112454-d5af-49be-ad25-4d2c7df5c5cf",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "- Tăng nguy cơ bị đái tháo đường : bệnh có thể xuất hiện ở những người có xu hướng lạm dụng đồ ngọt quá mức để giải tỏa cảm xúc. Đồng thời do stress cũng làm gia tăng nồng độ glucose trong máu nên cũng khiến rất nhiều người bị tiểu đường tuýp 2  \n- Bệnh hen suyễn : Những người bị stress có thể làm nghiêm trọng hơn tình trạng hen suyễn trước đó hoặc nếu bố mẹ gặp tình trạng stress ở giai đoạn mang thai thì nguy cơ con mắc bệnh cũng là rất cao",
+        "summary": "Stress làm tăng nguy cơ mắc bệnh đái tháo đường tuýp 2, một phần do xu hướng lạm dụng đồ ngọt để giải tỏa cảm xúc và sự gia tăng nồng độ glucose trong máu. Ngoài ra, stress cũng có thể làm trầm trọng thêm tình trạng hen suyễn hiện có, và thậm chí có thể ảnh hưởng đến nguy cơ mắc bệnh hen suyễn ở trẻ nếu cha mẹ bị stress trong thai kỳ.",
+        "keywords": [
+            "stress",
+            "tác hại stress",
+            "đái tháo đường",
+            "tiểu đường tuýp 2",
+            "glucose máu",
+            "hen suyễn",
+            "thai kỳ",
+            "sức khỏe",
+            "bệnh mãn tính"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e81c3c6c-d618-443c-a7b9-1996017ee1c1",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "- Tăng nguy cơ mắc ung thư : stress kéo dài có thể gây ung thư là một trong những nghiên cứu đã được rất nhiều nhà khoa học chỉ ra. Nguyên nhân là do stress làm cơ thể sản sinh nhiều hormone có khả năng bất hoạt quá trình anoikis nên không thể ngăn ngừa được các tác nhân, tế bào ung thư. Đồng thời do khi stress cơ thể dễ mắc nhiều bệnh lý, ăn uống không đầy đủ, hệ miễn dịch suy yếu theo nên nếu tiếp diễn trong thời gian dài thì việc bị ung thư cũng không phải quá lạ.",
+        "summary": "Stress kéo dài được nhiều nhà khoa học chứng minh là có thể làm tăng nguy cơ mắc ung thư. Điều này là do stress kích thích cơ thể sản sinh hormone bất hoạt quá trình anoikis, làm giảm khả năng ngăn ngừa tế bào ung thư. Thêm vào đó, stress còn làm suy yếu hệ miễn dịch và dẫn đến các bệnh lý khác, tạo điều kiện thuận lợi cho sự phát triển của ung thư.",
+        "keywords": [
+            "stress",
+            "tác hại stress",
+            "ung thư",
+            "stress kéo dài",
+            "hormone",
+            "anoikis",
+            "tế bào ung thư",
+            "hệ miễn dịch",
+            "sức khỏe",
+            "nghiên cứu khoa học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "78452443-b7b9-4c15-8509-660d6b3afe3d",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "- Dễ bị đột quỵ: Do có thể gây ra các vấn đề liên quan đến huyết áp, tim mạch nên những người bị stress trong thời gian dài cũng có nguy cơ đột quỵ rất cao.",
+        "summary": "Stress kéo dài có thể gây ra các vấn đề nghiêm trọng về huyết áp và tim mạch. Những tình trạng này làm tăng đáng kể nguy cơ đột quỵ ở những người phải đối mặt với stress trong thời gian dài.",
+        "keywords": [
+            "stress",
+            "tác hại stress",
+            "đột quỵ",
+            "huyết áp",
+            "tim mạch",
+            "nguy cơ đột quỵ",
+            "sức khỏe"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0c58e82f-1abd-4830-98fe-5d17c1726406",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "Thực tế đã chứng minh, những người hay bị stress hoặc bị stress trong thời gian dài thường có tuổi thọ ngắn hơn những người có cuộc sống vui vẻ, lạc quan, tích cực. Nguyên nhân cũng có thể liên quan đến các bệnh lý hoặc do quá trình sản sinh và nuôi dưỡng các tế bào trong cơ thể bị ảnh hưởng nên thường có tuổi thọ ngắn. Với những tác hại khi bị stress kéo dài này thì tuyệt đối không thể chủ quan.  \n### Stress làm ảnh hưởng đến chức năng tình dục",
+        "summary": "Những người thường xuyên hoặc bị stress kéo dài có xu hướng có tuổi thọ ngắn hơn do các bệnh lý liên quan và ảnh hưởng đến quá trình sản sinh tế bào. Ngoài ra, stress còn được chứng minh là gây ảnh hưởng tiêu cực đến chức năng tình dục, cho thấy những tác hại nghiêm trọng của tình trạng này đối với sức khỏe tổng thể.",
+        "keywords": [
+            "stress",
+            "tác hại stress",
+            "tuổi thọ",
+            "sức khỏe",
+            "bệnh lý",
+            "tế bào",
+            "chức năng tình dục",
+            "stress kéo dài"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b4686af3-4283-4420-ae00-1bd01ec86e73",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### Stress làm ảnh hưởng đến chức năng tình dục  \nStress cũng chính là nguyên nhân hàng đầu khiến rất nhiều người bị suy giảm ham muốn, suy giảm khả năng tình dục, có thể gặp ở cả nam và nữ giới. Nguyên nhân là do khi hệ thần kinh bị ức chế sẽ khiến cho các mạch máu và cơ trơn của thể hang bị co mạch. Tình trạng này làm cho máu và oxy không thể di chuyển thuận lợi giúp nam giới đạt được trạng thái cương dương và khoái cảm.",
+        "summary": "Stress là nguyên nhân hàng đầu gây suy giảm ham muốn và khả năng tình dục ở cả nam và nữ giới. Khi hệ thần kinh bị ức chế, các mạch máu và cơ trơn của thể hang co lại, cản trở lưu thông máu và oxy. Điều này gây khó khăn trong việc đạt được trạng thái cương dương và khoái cảm, ảnh hưởng tiêu cực đến đời sống tình dục.",
+        "keywords": [
+            "stress",
+            "chức năng tình dục",
+            "suy giảm ham muốn",
+            "rối loạn cương dương",
+            "khoái cảm",
+            "tâm lý",
+            "sức khỏe sinh sản"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9bd2663c-afbb-4c2a-a30c-d4bf7ef1bde0",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nMặt khác khi tinh thần cảm thấy mệt mỏi, chán nản, u uất thì cũng không thể nào hào hứng trong việc chăn gối được. Tất nhiên thực tế vẫn rất có thể chọn cách giải tỏa stress bằng việc quan hệ tình dục nhưng đây vẫn chỉ là trạng thái tạm thời, stress kéo dài thì việc suy giảm ham muốn là điều không thể tránh khỏi. Đây cũng là một trong những tác hại khi bị stress kéo dài đã khiến những cặp vợ chồng khó có con lại càng khó hơn.  \n### Tác hại khi bị stress kéo dài – ảnh hưởng đến các mối quan hệ",
+        "summary": "Tinh thần mệt mỏi, chán nản do stress kéo dài sẽ làm giảm hứng thú trong quan hệ tình dục, dù việc này đôi khi được dùng để giải tỏa stress tạm thời. Stress kéo dài không chỉ gây suy giảm ham muốn mà còn khiến các cặp vợ chồng khó có con hơn. Đoạn văn cũng đề cập đến việc stress ảnh hưởng tiêu cực đến các mối quan hệ xã hội.",
+        "keywords": [
+            "stress kéo dài",
+            "ham muốn tình dục",
+            "sức khỏe tinh thần",
+            "vô sinh",
+            "mối quan hệ",
+            "tác hại của stress",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "78bc878c-aca5-41dc-8cca-2b5fbdfba444",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi bị stress chúng ta thường có xu hướng dễ trở nên tiêu cực, dễ cáu kỉnh, tức giận với tất cả mọi thứ, đặc biệt càng là những người thân thiết thì càng dễ trở nên kích động hơn. Đôi khi những lời hỏi thăm từ mọi người xung quanh đều mang hàm ý tốt nhưng do bản thân quá tiêu cực khiến chúng ta nhìn nhận nó theo chiều hướng xấu nên không đón nhận thành ý từ những người đối diện.",
+        "summary": "Stress khiến con người dễ trở nên tiêu cực, cáu kỉnh và tức giận với mọi thứ, đặc biệt là với những người thân thiết xung quanh. Khi bị stress, chúng ta có xu hướng nhìn nhận những lời hỏi thăm tốt đẹp theo chiều hướng xấu, từ đó không đón nhận được thành ý từ người khác. Điều này gây ảnh hưởng đến giao tiếp và các mối quan hệ.",
+        "keywords": [
+            "stress",
+            "tiêu cực",
+            "cáu kỉnh",
+            "tức giận",
+            "mối quan hệ",
+            "giao tiếp",
+            "tâm lý",
+            "cảm xúc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f14e88bc-ef42-4e65-88c3-22d6497b6aa1",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nHơn hết việc làm bạn với một người tiêu cực, luôn cáu kỉnh khó chịu là điều không ai mong muốn. Nếu cứ giữ mãi trạng thái này sẽ khiến cho các mối quan hệ xung quanh dần trở nên xa lánh bạn, không có ai bên cạnh để chia sẻ. Những suy nghĩ xấu xí và tiêu cực nếu cứ giữ mãi trong tâm trí sẽ giống như một nhà giam trói buộc bạn khiến bạn ngày càng chán chường, mệt mỏi và cô đơn.",
+        "summary": "Không ai muốn kết bạn với một người luôn tiêu cực và cáu kỉnh. Việc duy trì trạng thái này sẽ khiến các mối quan hệ dần xa lánh, dẫn đến sự cô đơn và thiếu người chia sẻ. Những suy nghĩ tiêu cực kéo dài trong tâm trí sẽ trói buộc cá nhân, gây ra cảm giác chán chường, mệt mỏi và cô lập.",
+        "keywords": [
+            "stress",
+            "tiêu cực",
+            "cáu kỉnh",
+            "mối quan hệ xã hội",
+            "cô đơn",
+            "sức khỏe tinh thần",
+            "tâm lý",
+            "hậu quả stress"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "895aca02-f797-4165-ad56-38b94bd7c619",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nThực tế thì chính bản thân chúng ta khi bị stress cũng cảm thấy mệt mỏi, chán ghét chính mình. Những cảm xúc tiêu cực cứ chi phối mọi vấn đề quanh cuộc sống khiến chúng ta nhìn mọi thứ đều thấy đen tối, không hiểu vì sao những thứ xui xẻo áp lực cứ đến với mình. Nếu không vượt qua được giai đoạn stress sẽ rất nhanh dẫn đến trầm cảm và việc chọn cách tự tử giống như là bước đường cùng bởi họ không thoát ra khỏi sự khó khăn trong tâm trí của bản thân.",
+        "summary": "Khi bị stress, bản thân chúng ta cũng cảm thấy mệt mỏi và chán ghét chính mình, với những cảm xúc tiêu cực chi phối mọi khía cạnh cuộc sống. Điều này khiến mọi thứ trở nên đen tối và khó khăn. Nếu không vượt qua được giai đoạn stress, người bệnh có nguy cơ cao dẫn đến trầm cảm và có thể tìm đến cái chết như một lối thoát cuối cùng khỏi những khó khăn trong tâm trí.",
+        "keywords": [
+            "stress",
+            "mệt mỏi",
+            "chán ghét bản thân",
+            "cảm xúc tiêu cực",
+            "trầm cảm",
+            "tự tử",
+            "sức khỏe tâm thần",
+            "áp lực"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f71fcbc8-ad39-43ce-ab29-e18dd67a0db6",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Bị căng thẳng, stress kéo dài làm sao giải toả?  \nLàm thế nào để có thể loại bỏ stress chính là băn khoăn của rất nhiều người hiện nay, tuy nhiên cũng hề dễ dàng. Bản chất của stress chính là khiến tâm trí chúng ta tích tụ toàn những điều xấu xí nên các hành vi, nhận thức của chúng ta cũng sẽ hoạt động theo cách đó. Nếu bản thân chúng ta không tự nhận thức được và quyết tâm thay đổi thì cũng rất khó để loại bỏ những điều này.  \n### Thực hiện các liệu pháp thư giãn\n\n### Thực hiện các liệu pháp thư giãn  \nChúng ta thấy stress là bởi có quá nhiều điều tiêu cực tích tụ trong đầu, vì thế hãy tìm cách loại bỏ sớm những điều này. Có rất nhiều cách để thư giãn và đẩy lùi những suy nghĩ tiêu cực ra khỏi tâm trí mà bạn có thể áp dụng để tinh thần luôn trong trạng thái tươi mới, lạc quan trở lại. Cụ thể như",
+        "summary": "Stress kéo dài là một vấn đề phổ biến, gây tích tụ những điều tiêu cực trong tâm trí và ảnh hưởng đến hành vi, nhận thức. Việc loại bỏ stress đòi hỏi sự tự nhận thức và quyết tâm thay đổi từ bản thân. Một trong những phương pháp hiệu quả là thực hiện các liệu pháp thư giãn để đẩy lùi suy nghĩ tiêu cực và khôi phục tinh thần lạc quan.",
+        "keywords": [
+            "căng thẳng",
+            "stress",
+            "giải tỏa stress",
+            "tâm lý",
+            "suy nghĩ tiêu cực",
+            "thư giãn",
+            "liệu pháp thư giãn",
+            "tinh thần",
+            "thay đổi bản thân"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "40854a48-20aa-413a-9704-ca3d4ee72909",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thiền, yoga hay chỉ đơn giản là đi bộ, tập thể dục hằng ngày chính là biện pháp có thể giúp cân bằng tâm trí, thư giãn tinh thần, giải tỏa sớm những suy nghĩ tiêu cực  \n- Tắm với nước nóng vào cuối ngày để giúp toàn thân được thư giãn, thả lỏng  \n- Âm nhạc cũng là liệu pháp giúp thư giãn tinh thần, kích thích những điều lạc quan cho bạn. Bạn có thể nghe nhạc thiền hay các bản nhạc yêu thích để chăm sóc cho đời sống tinh thần của mình",
+        "summary": "Để thư giãn tinh thần và giải tỏa stress, có nhiều phương pháp hiệu quả bao gồm thiền, yoga và tập thể dục hàng ngày giúp cân bằng tâm trí. Ngoài ra, tắm nước nóng vào cuối ngày có thể giúp cơ thể thư giãn. Âm nhạc cũng là một liệu pháp tuyệt vời để chăm sóc đời sống tinh thần, kích thích sự lạc quan.",
+        "keywords": [
+            "thiền",
+            "yoga",
+            "tập thể dục",
+            "cân bằng tâm trí",
+            "thư giãn tinh thần",
+            "tắm nước nóng",
+            "âm nhạc",
+            "giải tỏa stress",
+            "lạc quan"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b686156a-9d20-45ef-993e-126d888231f7",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Viết nhật ký cũng là một cách hay để loại bỏ những câu chuyện, những suy nghĩ xấu xí vào mỗi cuối ngày  \n- Đảm bảo ngủ đủ giấc hằng ngày để nạp lại năng lượng cho cơ thể, qua đó giúp tinh thần tỉnh táo, lạc quan hơn vào ngày hôm sau  \n- Xông hơi tinh dầu, dùng nến thơm hay uống các loại trà thảo mộc cũng rất tốt cho tâm trí\n\n- Xông hơi tinh dầu, dùng nến thơm hay uống các loại trà thảo mộc cũng rất tốt cho tâm trí  \n- Dành cho bản thân thời gian nghỉ ngơi phù hợp, hạn chế gắng sức làm việc, hãy dành cho bản thân ít nhất 1 tiếng để thư giãn hằng ngày hoặc 1 ngày nghỉ trong tuần để nạp lại năng lượng  \n- Tìm kiếm những thú vui mới để giải tỏa căng thẳng  \n- Tránh xa bia rượu, đồ uống có cồn, thuốc lá hay các chất kích thích  \n- Tự thưởng cho bản thân những món quà xứng đáng với những nỗ lực mà mình đã bỏ ra",
+        "summary": "Để duy trì sức khỏe tinh thần và giảm căng thẳng, có thể áp dụng nhiều biện pháp như viết nhật ký để giải tỏa suy nghĩ tiêu cực và đảm bảo ngủ đủ giấc để nạp lại năng lượng. Các liệu pháp thư giãn như xông hơi tinh dầu, dùng nến thơm và uống trà thảo mộc cũng rất có lợi cho tâm trí. Bên cạnh đó, cần dành thời gian nghỉ ngơi hợp lý, tìm kiếm thú vui mới, tránh xa các chất kích thích và tự thưởng cho bản thân để khuyến khích tinh thần.",
+        "keywords": [
+            "viết nhật ký",
+            "ngủ đủ giấc",
+            "xông hơi tinh dầu",
+            "nến thơm",
+            "trà thảo mộc",
+            "nghỉ ngơi",
+            "thú vui mới",
+            "tránh chất kích thích",
+            "tự thưởng",
+            "giảm căng thẳng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "28b71119-c1ce-4c25-8039-ae51fe018198",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Tự thưởng cho bản thân những món quà xứng đáng với những nỗ lực mà mình đã bỏ ra  \n- Chia sẻ nhiều hơn với mọi người xung quanh để tìm kiếm những lời khuyên hữu ích. Làm bạn với những người tích cực cũng giúp bạn thấy vui vẻ và có những lời khuyên bổ ích hơn  \n### Coi stress là thử thách",
+        "summary": "Để vượt qua stress, việc tự thưởng cho bản thân những món quà xứng đáng là một cách để công nhận nỗ lực của mình. Đồng thời, chia sẻ cảm xúc và tìm kiếm lời khuyên từ những người xung quanh, đặc biệt là những người tích cực, có thể mang lại sự vui vẻ và những góc nhìn hữu ích. Một cách tiếp cận khác là coi stress như một thử thách để thúc đẩy bản thân phát triển.",
+        "keywords": [
+            "tự thưởng",
+            "chia sẻ",
+            "lời khuyên",
+            "người tích cực",
+            "vui vẻ",
+            "stress",
+            "thử thách",
+            "tâm lý",
+            "quan hệ xã hội"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "6b20c2ea-929e-435f-b40d-bc8392f374c5",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### Coi stress là thử thách  \nThực tế thì stress cũng không hẳn là xấu, quan trọng là cách chúng ta nhìn nhận nó như thế nào. Có một câu nói rằng ” Áp lực tạo ra kim cương”, chính bởi những áp lực, stress ấy khiến chúng ta muốn cố gắng hơn. Chẳng hạn một người bị stress bởi bạn bè thăng tiến nhanh, giàu có sẽ không ngừng nỗ lực làm việc để bằng với các bạn. Như vậy, chẳng phải là stress chính là một chiếc”mô tơ” thúc đẩy chúng ta tiến nhanh hơn hay sao.",
+        "summary": "Stress không phải lúc nào cũng tiêu cực; cách chúng ta nhìn nhận nó mới là điều quan trọng. Giống như câu nói “Áp lực tạo ra kim cương”, stress có thể trở thành động lực mạnh mẽ thúc đẩy chúng ta cố gắng và nỗ lực hơn trong cuộc sống. Ví dụ, việc bị stress khi thấy bạn bè thăng tiến nhanh có thể khuyến khích bản thân làm việc chăm chỉ hơn để đạt được thành công tương tự.",
+        "keywords": [
+            "stress",
+            "thử thách",
+            "áp lực",
+            "động lực",
+            "cố gắng",
+            "nỗ lực",
+            "thành công",
+            "tâm lý tích cực",
+            "phát triển bản thân"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "3e3eaa0f-6443-4dc3-ba7a-74e76808a81f",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nVì vậy thay vì nhìn nhận vào những điều xấu xí mà stress đem lại bạn hãy thử học cách vận dụng nó theo hướng tích cực hơn. Thay vì than vãn rằng “dạo này stress với công việc khiến mình muốn nghỉ việc quá” thì có thể nhìn nhận rằng mình thật tuyệt vời vì có thể vượt qua được khối lượng công việc lớn như thế.",
+        "summary": "Bài viết khuyến khích việc thay đổi góc nhìn về stress, từ bỏ những suy nghĩ tiêu cực để học cách vận dụng nó theo hướng tích cực. Thay vì than vãn về áp lực, hãy tự công nhận khả năng vượt qua khối lượng công việc lớn. Việc này giúp biến stress thành động lực và nhận ra giá trị của bản thân.",
+        "keywords": [
+            "stress",
+            "tích cực",
+            "nhận thức",
+            "vượt qua",
+            "áp lực công việc",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "673841ad-91ff-4761-a2cf-2c66457d4fc8",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTất nhiên không phải lúc nào cũng có thể nhìn nhận stress một cách tích cực nhưng hãy coi nó như một thử thách thú vị mà chúng ta phải vượt qua và giảm tối đa sự tiêu cực cho nó để tránh các tác hại khi bị stress kéo dài xuất hiện.",
+        "summary": "Bài viết nhấn mạnh rằng không phải lúc nào cũng dễ dàng nhìn nhận stress một cách tích cực, nhưng chúng ta nên coi nó như một thử thách. Mục tiêu là giảm thiểu tối đa sự tiêu cực để tránh những tác hại nghiêm trọng khi stress kéo dài. Việc này giúp duy trì sức khỏe tinh thần và đối phó hiệu quả hơn với căng thẳng.",
+        "keywords": [
+            "stress",
+            "thử thách",
+            "tiêu cực",
+            "tác hại",
+            "kiểm soát stress",
+            "sức khỏe tinh thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "52b89af5-db01-4fe3-993d-788870fe4b91",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### Gặp gỡ các chuyên gia tâm lý  \nTừ giai đoạn stress kéo dài tiến tới các bệnh tâm lý là rất ngắn, vì vậy nếu cảm thấy tâm trí bản thân có quá nhiều vướng mắc, nặng nề thì người bệnh nên tìm đến sự trợ giúp từ các chuyên gia tâm lý. Stress vẫn chỉ là vấn đề về mặt cảm xúc nên hầu hết không được điều trị bằng thuốc như trầm cảm hay rối loạn lo âu nên tâm lý trị liệu chính là giải pháp hữu ích nhất cho bạn ngay lúc này.\n\nThông qua việc trò chuyện, chuyên gia tâm lý sẽ tháo gỡ giúp bạn những vướng mắc trong tâm trí để tinh thần bạn thoải mái hơn, không còn lo lắng suy nghĩ quá nhiều. Nhà trị liệu cũng hướng dẫn bạn cách kiểm soát cảm xúc, đối diện với căng thẳng hay thực hiện các liệu pháp chăm sóc tinh thần hằng ngày để tâm trí luôn ở trạng thái tốt nhất. Do đó nếu không làm cách nào để chấm dứt được chuỗi ngày stress của bản thân thì tốt nhất hãy tìm đến sự trợ giúp từ các chuyên gia tâm lý.",
+        "summary": "Khi stress kéo dài có thể nhanh chóng dẫn đến các bệnh tâm lý, việc tìm kiếm sự trợ giúp từ chuyên gia tâm lý là vô cùng cần thiết. Stress chủ yếu là vấn đề cảm xúc và thường được điều trị hiệu quả thông qua tâm lý trị liệu, không dùng thuốc. Các chuyên gia sẽ giúp tháo gỡ vướng mắc, hướng dẫn cách kiểm soát cảm xúc, đối diện với căng thẳng và thực hiện các liệu pháp chăm sóc tinh thần để duy trì trạng thái tốt nhất.",
+        "keywords": [
+            "chuyên gia tâm lý",
+            "stress kéo dài",
+            "bệnh tâm lý",
+            "tâm lý trị liệu",
+            "kiểm soát cảm xúc",
+            "căng thẳng",
+            "sức khỏe tinh thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "04e16955-d7ec-4f05-a0dc-12f1f3182fd7",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNhững tác hại khi bị stress kéo dài làm ảnh hưởng rất nhiều đến sức khỏe, cuộc sống, tinh thần của mỗi người nên cần tìm cách loại bỏ nhanh chóng. Bản thân mỗi chúng ta cũng cần thay đổi lối sống lành mạnh hơn, yêu thương bản thân nhiều hơn và học cách suy nghĩ tích cực để hạn chế gặp các cảm xúc xấu xí này trong cuộc sống.",
+        "summary": "Stress kéo dài gây ra nhiều tác hại nghiêm trọng đến sức khỏe, cuộc sống và tinh thần, do đó cần được loại bỏ nhanh chóng. Bài viết khuyến nghị mỗi người nên thay đổi lối sống theo hướng lành mạnh hơn, học cách yêu thương bản thân và rèn luyện tư duy tích cực. Điều này giúp hạn chế những cảm xúc tiêu cực và nâng cao chất lượng cuộc sống.",
+        "keywords": [
+            "stress kéo dài",
+            "tác hại",
+            "sức khỏe",
+            "tinh thần",
+            "lối sống lành mạnh",
+            "suy nghĩ tích cực",
+            "yêu thương bản thân"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "23e3fc9b-01a0-43a3-bcdd-cfc6c617bfb6",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- 10 Loại thảo dược thiên nhiên giúp đánh bay stress hiệu quả  \n- Căng thẳng stress gây mất ngủ và cách khắc phục hiệu quả",
+        "summary": "Đoạn văn này liệt kê hai chủ đề liên quan đến việc quản lý stress. Thứ nhất là việc sử dụng 10 loại thảo dược thiên nhiên được cho là có hiệu quả trong việc giảm stress. Thứ hai là mối liên hệ giữa căng thẳng, stress và tình trạng mất ngủ, cùng với các phương pháp khắc phục hiệu quả.",
+        "keywords": [
+            "thảo dược",
+            "stress",
+            "giảm stress",
+            "căng thẳng",
+            "mất ngủ",
+            "khắc phục",
+            "sức khỏe tinh thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2ab7134c-58e0-4eef-a542-f42ac9269199",
+        "headers": [
+            "Khoa Hoc Tam Ly_5610"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrở thành người đầu tiên bình luận cho bài viết này!  \nEmail của bạn sẽ không được hiển thị công khai. Các trường bắt buộc được đánh dấu *  \nLưu tên của tôi, email, và trang web trong trình duyệt này cho lần bình luận kế tiếp của tôi.  \nΔ  \nTin liên quan  \n#### Stress là gì? Nguyên nhân, dấu hiệu và cách thoát khỏi  \n#### 15 cách vượt qua áp lực trong cuộc sống, giải toả cảm xúc  \n#### 7 triệu chứng stress ở nữ giới thường gặp và điều cần biết  \n#### Stress khi mang thai: Dấu hiệu và điều mẹ bầu cần biết  \n#### Căng thẳng Stress có làm trễ kinh không? Làm sao có lại?  \n#### 9 kỹ thuật hít thở giảm stress hiệu quả, dễ thực hiện  \nChuyên gia tư vấn",
+        "summary": "Phần này giới thiệu về Khoa Học Tâm Lý, một lĩnh vực nghiên cứu sâu rộng về tâm lý con người. Ngoài ra, nó còn gợi ý các chủ đề liên quan như stress, áp lực trong cuộc sống, các triệu chứng stress ở nữ giới, stress khi mang thai và các kỹ thuật giảm stress hiệu quả. Đây là một điểm khởi đầu để khám phá các khía cạnh khác nhau của tâm lý học.",
+        "keywords": [
+            "Khoa học tâm lý",
+            "Tâm lý học",
+            "Stress",
+            "Áp lực",
+            "Sức khỏe tinh thần",
+            "Giảm stress",
+            "Kiến thức tâm lý"
+        ],
+        "type": "kiến thức"
+    }
+]

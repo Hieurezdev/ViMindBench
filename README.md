@@ -1,0 +1,1 @@
+kaggle kernels output hiudev/pretrain-qwen3 -p /path/to/dest

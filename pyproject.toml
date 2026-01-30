@@ -1,0 +1,13 @@
+[project]
+name = "pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=1.2.7",
+    "openai>=2.16.0",
+    "pymongo>=4.16.0",
+    "python-dotenv>=1.2.1",
+    "sentence-transformers>=5.2.2",
+]

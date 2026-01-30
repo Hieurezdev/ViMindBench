@@ -1,0 +1,889 @@
+[
+    {
+        "uuid": "c606338c-aca4-437b-9878-a2083ba70b0e",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\nCác loại rối loạn lo âu thường gặp hiện nay như rối loạn lo âu lan tỏa, rối loạn lo âu xã hội, rối loạn stress sau sang chấn, rối loạn hoảng loạn,… Mặc dù được chia thành nhiều loại khác nhau nhưng đặc điểm chung của các bệnh lý này tình trạng lo âu, căng thẳng và sợ hãi quá mức, xảy ra trong một thời gian dài. Để nhận biết cần tìm hiểu kỹ các biểu hiện của từng loại.  \n## Các loại rối loạn lo âu thường gặp  \nRối loạn lo âu (Anxiety Disorder) là một trong những vấn đề tâm lý phổ biến nhất hiện nay. Hội chứng này đặc trưng bởi sự lo âu, phiền muộn và căng thẳng quá mức về một hoặc nhiều đối tượng/ tình huống trong cuộc sống. Đôi khi, người bệnh có cảm giác lo âu dai dẳng và kéo dài nhưng mơ hồ và không xác định được nguồn gốc của nỗi lo.",
+        "summary": "Bài viết giới thiệu về các loại rối loạn lo âu phổ biến như rối loạn lo âu lan tỏa, rối loạn xã hội, PTSD và rối loạn hoảng loạn. Đặc điểm chung của chúng là tình trạng lo âu, căng thẳng và sợ hãi quá mức kéo dài. Rối loạn lo âu là một vấn đề tâm lý phổ biến, đặc trưng bởi sự lo lắng, phiền muộn và căng thẳng quá mức, đôi khi không xác định được nguyên nhân.",
+        "keywords": [
+            "Rối loạn lo âu",
+            "Anxiety Disorder",
+            "lo âu lan tỏa",
+            "lo âu xã hội",
+            "stress sau sang chấn",
+            "hoảng loạn",
+            "căng thẳng",
+            "sợ hãi",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4f4ba17a-6497-49d3-8e2b-71dbc8316467",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrên thực tế, không ít bệnh nhân nhận thấy rõ sự lo âu của bản thân là vô lý và thừa thãi nhưng không thể nào chế ngự. Lo âu kéo dài, lặp đi lặp lại gây ra tâm trạng buồn bã, chán nản, mệt mỏi,… Người bệnh trở nên nhạy cảm và dễ cáu gắt với những người xung quanh một cách vô lý.",
+        "summary": "Nhiều bệnh nhân rối loạn lo âu nhận thức được sự vô lý trong nỗi lo của mình nhưng không thể kiểm soát. Tình trạng lo âu kéo dài và lặp lại này dẫn đến tâm trạng buồn bã, chán nản và mệt mỏi. Điều này cũng khiến người bệnh trở nên nhạy cảm và dễ cáu gắt một cách không lý do với những người xung quanh.",
+        "keywords": [
+            "Rối loạn lo âu",
+            "lo âu vô lý",
+            "tâm trạng buồn bã",
+            "chán nản",
+            "mệt mỏi",
+            "cáu gắt",
+            "nhạy cảm",
+            "triệu chứng lo âu"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4289bbf2-7984-4a5d-b73d-f37f4a8a2313",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn lo âu có thể gặp ở mọi lứa tuổi nhưng ảnh hưởng nhiều hơn đến người trưởng thành. Thống kê cho thấy, khoảng 15% dân số mắc chứng bệnh này và tỷ lệ cao hơn ở nữ giới. Biểu hiện của bệnh rất đa dạng và mức độ có sự khác biệt ở từng bệnh nhân.",
+        "summary": "Rối loạn lo âu có thể xuất hiện ở mọi lứa tuổi nhưng thường ảnh hưởng nhiều hơn đến người trưởng thành. Thống kê cho thấy khoảng 15% dân số mắc chứng bệnh này, với tỷ lệ cao hơn ở nữ giới. Các biểu hiện của bệnh rất đa dạng và mức độ nghiêm trọng khác nhau tùy từng bệnh nhân.",
+        "keywords": [
+            "Rối loạn lo âu",
+            "lứa tuổi",
+            "người trưởng thành",
+            "tỷ lệ mắc bệnh",
+            "nữ giới",
+            "biểu hiện bệnh",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "91f4d0ae-bfce-427e-893a-47d166cc95dc",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nDựa vào đặc điểm và biểu hiện lâm sàng, rối loạn lo âu được chia thành nhiều dạng khác nhau. Đôi khi bệnh nhân cũng có thể mắc đồng thời từ 2 – 3 dạng. Trong những năm gần đây, tỷ lệ người bị trầm cảm và rối loạn lo âu tăng lên đáng kể. Do đó, chủ động trang bị cho bản thân những kiến thức hữu ích sẽ giúp bạn đọc biết cách phòng ngừa, phát hiện sớm và chủ động hơn trong quá trình thăm khám – điều trị.",
+        "summary": "Rối loạn lo âu được phân loại thành nhiều dạng dựa trên đặc điểm và biểu hiện lâm sàng, và bệnh nhân có thể mắc đồng thời nhiều dạng. Tỷ lệ trầm cảm và rối loạn lo âu đã tăng đáng kể trong những năm gần đây. Việc trang bị kiến thức về các rối loạn này là cần thiết để phòng ngừa, phát hiện sớm và chủ động trong quá trình điều trị.",
+        "keywords": [
+            "Rối loạn lo âu",
+            "phân loại",
+            "biểu hiện lâm sàng",
+            "trầm cảm",
+            "tỷ lệ mắc bệnh",
+            "phòng ngừa",
+            "phát hiện sớm",
+            "điều trị"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0a58ac18-1eec-4f96-b9e6-72531c813491",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNhư đã đề cập, rối loạn lo âu được chia thành nhiều loại khác nhau, trong đó thường gặp nhất 8 loại sau:  \n### 1. Rối loạn lo âu lan tỏa (GAD)  \nRối loạn lo âu lan tỏa (GAD – Generalized Anxiety Disorder) là một trong những loại rối loạn lo âu phổ biến. Hội chứng này còn được biết đến với những tên gọi khác là rối loạn lo âu toàn thể . GAD cũng đặc trưng bởi sự lo lắng, căng thẳng quá mức và kéo dài. Sự lo lắng ở người mắc hội chứng này thường liên quan đến những vấn đề xoay quanh cuộc sống như quan hệ vợ chồng, gia đình, tài chính, nghề nghiệp, việc học,…",
+        "summary": "Rối loạn lo âu được chia thành nhiều loại, trong đó rối loạn lo âu lan tỏa (GAD) là một dạng phổ biến. GAD, hay rối loạn lo âu toàn thể, đặc trưng bởi sự lo lắng và căng thẳng quá mức, kéo dài. Nỗi lo lắng này thường xoay quanh các vấn đề cuộc sống hàng ngày như quan hệ gia đình, tài chính, công việc hay học tập.",
+        "keywords": [
+            "Rối loạn lo âu",
+            "Rối loạn lo âu lan tỏa",
+            "GAD",
+            "Generalized Anxiety Disorder",
+            "lo lắng quá mức",
+            "căng thẳng",
+            "rối loạn lo âu toàn thể",
+            "triệu chứng GAD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "81838930-f864-426c-b6c3-e346a7c67e23",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhác với sự lo lắng thông thường, người mắc chứng rối loạn lo âu lan tỏa (GAD) thường lo lắng thái quá và mức độ không tương xứng với tính chất nghiêm trọng của vấn đề/ tình huống. Tình trạng lo lắng, phiền muộn do GAD gây ra kéo dài liên tục trong ít nhất 6 tháng và gây ra những ảnh hưởng đáng kể đối với sức khỏe, chất lượng cuộc sống.  \nMột số biểu hiện thường gặp ở người mắc chứng rối loạn lo âu lan tỏa (GAD):\n\nMột số biểu hiện thường gặp ở người mắc chứng rối loạn lo âu lan tỏa (GAD):  \n- Thường trực sự lo lắng về nhiều vấn đề của cuộc sống và mức độ lo âu thường không tương xứng với tính chất của vấn đề.  \n- Có xu hướng nhìn nhận mọi sự việc theo chiều hướng bi quan trong khi thực tế, sự việc này có mức độ không quá nghiêm trọng và hoàn toàn không đe dọa đến sức khỏe hay chất lượng cuộc sống.",
+        "summary": "Rối loạn lo âu lan tỏa (GAD) là tình trạng lo lắng thái quá, không tương xứng với mức độ nghiêm trọng của vấn đề, kéo dài ít nhất 6 tháng và ảnh hưởng đến chất lượng cuộc sống. Người mắc GAD thường xuyên lo lắng về nhiều khía cạnh cuộc sống và có xu hướng nhìn nhận mọi việc theo chiều hướng bi quan, ngay cả khi thực tế không quá nghiêm trọng.",
+        "keywords": [
+            "rối loạn lo âu lan tỏa",
+            "GAD",
+            "lo lắng thái quá",
+            "biểu hiện GAD",
+            "lo âu kéo dài",
+            "sức khỏe tâm thần",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "31f29485-d202-4e0c-8203-426718ba4e09",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Dành nhiều thời gian để suy nghĩ về mối lo và tìm các giải pháp để đối phó nếu tình huống xấu nhất xảy ra.",
+        "summary": "Người mắc chứng rối loạn lo âu lan tỏa thường dành nhiều thời gian để suy nghĩ về các mối lo. Họ cũng có xu hướng tìm kiếm các giải pháp để đối phó với những tình huống xấu nhất có thể xảy ra, thể hiện mức độ lo lắng cao và kéo dài.",
+        "keywords": [
+            "rối loạn lo âu lan tỏa",
+            "GAD",
+            "suy nghĩ quá mức",
+            "lo lắng",
+            "đối phó tình huống xấu",
+            "biểu hiện tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8bcbcdf1-794e-4cc7-976b-60a71cd41e1e",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sự lo âu quá mức và kéo dài khiến người bệnh chần chừ, do dự và thường tham khảo ý kiến của người khác trước khi đưa ra quyết định – ngay cả với những quyết định không quan trọng.  \n- Lo lắng, căng thẳng kéo dài dẫn đến giảm khả năng tập trung, người bệnh trở nên nhạy cảm, dễ cáu gắt, bực bội và gần như không bao giờ cảm thấy thoải mái hay thư giãn  \nNgoài những triệu chứng về mặt cảm xúc, rối loạn lo âu lan tỏa còn gây ra các biểu hiện thể chất như:  \n- Khó ngủ, mất ngủ",
+        "summary": "Lo âu quá mức và kéo dài do GAD gây ra sự chần chừ, do dự trong việc đưa ra quyết định và làm giảm khả năng tập trung. Người bệnh cũng trở nên nhạy cảm, dễ cáu gắt, bực bội và khó thư giãn. Bên cạnh các triệu chứng cảm xúc, GAD còn biểu hiện qua các triệu chứng thể chất như khó ngủ và mất ngủ.",
+        "keywords": [
+            "rối loạn lo âu lan tỏa",
+            "GAD",
+            "khó quyết định",
+            "giảm tập trung",
+            "cáu gắt",
+            "khó ngủ",
+            "mất ngủ",
+            "triệu chứng thể chất"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "79d729c7-2da1-4952-8466-314705f17287",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Khó ngủ, mất ngủ  \n- Căng cơ dẫn đến đau nhức vai gáy, đau thắt lưng, ê mỏi toàn thân  \n- Tim đập nhanh, đổ mồ hôi, đau thắt ngực, bất an, hồi hộp  \n- Tiểu tiện nhiều lần  \n- Kích thích các bệnh mãn tính bùng phát như viêm dạ dày, loét dạ dày, hội chứng ruột kích thích, viêm mũi dị ứng, mề đay, các bệnh da mãn tính,…  \n- Gây rối loạn tiêu hóa, đầy hơi, khó tiêu, chướng bụng,…  \n- Đau đầu, uể oải",
+        "summary": "Rối loạn lo âu lan tỏa (GAD) gây ra nhiều triệu chứng thể chất đa dạng. Các biểu hiện bao gồm khó ngủ, mất ngủ, căng cơ dẫn đến đau nhức toàn thân, tim đập nhanh, đổ mồ hôi, đau thắt ngực, và tiểu tiện nhiều lần. GAD cũng có thể kích thích bùng phát các bệnh mãn tính như viêm dạ dày, hội chứng ruột kích thích, và gây rối loạn tiêu hóa, đau đầu, uể oải.",
+        "keywords": [
+            "rối loạn lo âu lan tỏa",
+            "GAD",
+            "triệu chứng thể chất",
+            "khó ngủ",
+            "căng cơ",
+            "tim đập nhanh",
+            "rối loạn tiêu hóa",
+            "bệnh mãn tính",
+            "đau đầu"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "259c4e07-77b7-48ec-9b34-55e0d5dcdf64",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Gây rối loạn tiêu hóa, đầy hơi, khó tiêu, chướng bụng,…  \n- Đau đầu, uể oải  \nRối loạn lo âu lan tỏa (GAD) gặp nhiều hơn ở nữ giới và thường khởi phát trong giai đoạn từ 20 – 30 tuổi. Loại rối loạn lo âu này có liên quan mật thiết đến căng thẳng thần kinh, triệu chứng thường xuất hiện một cách từ từ nhưng dai dẳng và dễ tái phát.  \n### 2. Rối loạn stress sau sang chấn (PTSD)",
+        "summary": "Rối loạn lo âu lan tỏa (GAD) gây ra các vấn đề như rối loạn tiêu hóa, đầy hơi, khó tiêu, chướng bụng, đau đầu và uể oải. GAD phổ biến hơn ở nữ giới, thường khởi phát trong độ tuổi 20-30, có liên quan chặt chẽ đến căng thẳng thần kinh. Các triệu chứng thường xuất hiện từ từ, dai dẳng và dễ tái phát.",
+        "keywords": [
+            "rối loạn lo âu lan tỏa",
+            "GAD",
+            "rối loạn tiêu hóa",
+            "đau đầu",
+            "đối tượng mắc GAD",
+            "nguyên nhân GAD",
+            "căng thẳng thần kinh",
+            "triệu chứng dai dẳng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "1014e7f8-c2ba-4170-9099-7c248f4e5619",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress sau sang chấn (Post-traumatic Stress Disorder) cũng là một trong những loại rối loạn lo âu thường gặp. PTSD còn được biết đến với nhiều tên gọi như hậu chấn tâm lý, rối loạn căng thẳng sau chấn thương,… Hội chứng này gặp ở người phải trải qua hoặc chứng kiến những sự kiện có tính chất kinh khủng như tai nạn thảm khốc, chiến tranh, bị lạm dụng, cưỡng bức, suýt bị sát hại, bị bắt cóc, đe dọa hoặc chứng kiến những người khác phải trải qua những sự kiện tương tự.",
+        "summary": "Rối loạn stress sau sang chấn (PTSD) là một dạng rối loạn lo âu phổ biến, còn được gọi là hậu chấn tâm lý hoặc rối loạn căng thẳng sau chấn thương. Hội chứng này thường xuất hiện ở những người đã trải qua hoặc chứng kiến các sự kiện kinh hoàng. Các sự kiện này có thể bao gồm tai nạn thảm khốc, chiến tranh, lạm dụng, cưỡng bức, hoặc các mối đe dọa nghiêm trọng đến tính mạng.",
+        "keywords": [
+            "Rối loạn stress sau sang chấn",
+            "PTSD",
+            "hậu chấn tâm lý",
+            "rối loạn căng thẳng sau chấn thương",
+            "rối loạn lo âu",
+            "sang chấn tâm lý",
+            "sự kiện kinh khủng",
+            "tai nạn thảm khốc",
+            "chiến tranh",
+            "lạm dụng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2782813f-bb98-4934-946c-ef16c9f8add9",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nSau khi trải qua những sự kiện gây sang chấn, tâm trạng sẽ bị ảnh hưởng trong một thời gian nhất định. Trong đó, sẽ có một số trường hợp không thể tự điều chỉnh cảm xúc và phát triển thành rối loạn stress sau sang chấn. PTSD thường xảy ra trong vòng 6 tháng kể từ thời điểm sự kiện sang chấn xảy ra và triệu chứng kéo dài ít nhất trong vòng 1 tháng.",
+        "summary": "Sau khi trải qua các sự kiện gây sang chấn, tâm trạng của một người có thể bị ảnh hưởng đáng kể. Một số trường hợp không thể tự điều chỉnh cảm xúc sẽ phát triển thành rối loạn stress sau sang chấn (PTSD). Hội chứng này thường khởi phát trong vòng 6 tháng kể từ khi sự kiện sang chấn xảy ra. Các triệu chứng của PTSD kéo dài ít nhất một tháng.",
+        "keywords": [
+            "PTSD",
+            "rối loạn stress sau sang chấn",
+            "sang chấn tâm lý",
+            "ảnh hưởng tâm trạng",
+            "điều chỉnh cảm xúc",
+            "thời gian khởi phát",
+            "triệu chứng PTSD",
+            "thời gian kéo dài"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "1cf8897b-0b59-4983-b3a2-63a38e761631",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress sau sang chấn là tình trạng người bệnh xuất hiện những hồi tưởng (giấc mơ, suy nghĩ) có tính chất thâm nhập, tái hiện về sự kiện gây tổn thương tâm lý. Sự tái hiện của những sự kiện này gây ra rối nhiễu tâm trí, cảm xúc và cuộc sống của người bệnh. Người mắc phải chứng bệnh này sẽ gặp phải 4 nhóm triệu chứng chính sau:  \nHồi tưởng ký ức có tính chất thâm nhập:  \n- Người bệnh thường mơ hoặc gặp ác mộng về sự kiện đã xảy ra một cách rất chân thực\n\n- Người bệnh thường mơ hoặc gặp ác mộng về sự kiện đã xảy ra một cách rất chân thực  \n- Xuất hiện ý nghĩ về sự kiện đau buồn một cách không tự chủ và có tính chất lặp đi lặp lại  \n- Khác với sự hồi tưởng thông thường, bệnh nhân PTSD thường xuất hiện ý nghĩ một cách không tự chủ và sự hồi tưởng này có tính chất thâm nhập khiến bệnh nhân cảm nhận rõ trải nghiệm và cảm giác tại thời điểm chứng kiến/ trải qua sự kiện này.",
+        "summary": "Rối loạn stress sau sang chấn (PTSD) đặc trưng bởi sự xuất hiện của những hồi tưởng thâm nhập, tái hiện các sự kiện gây tổn thương tâm lý. Những hồi tưởng này gây rối loạn tâm trí, cảm xúc và ảnh hưởng đến cuộc sống của người bệnh. Một trong bốn nhóm triệu chứng chính là hồi tưởng ký ức có tính chất thâm nhập, biểu hiện qua những giấc mơ, ác mộng chân thực và ý nghĩ lặp đi lặp lại, không tự chủ về sự kiện đau buồn, khiến bệnh nhân cảm nhận rõ ràng trải nghiệm đó.",
+        "keywords": [
+            "Rối loạn stress sau sang chấn",
+            "PTSD",
+            "hồi tưởng thâm nhập",
+            "tái hiện sự kiện",
+            "tổn thương tâm lý",
+            "rối nhiễu tâm trí",
+            "triệu chứng PTSD",
+            "giấc mơ",
+            "ác mộng",
+            "ý nghĩ không tự chủ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a94ee439-dcac-4600-a509-25161c50a82a",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sau khi hồi tưởng, bệnh nhân thường rơi vào trạng thái hoảng loạn, sợ hãi và đau khổ.  \n- Xuất hiện cảm giác đau khổ tột độ khi phải đối diện với những tình huống, sự việc gợi nhắc về sự kiện đã xảy ra trong quá khứ.  \nPhản ứng, hành động né tránh:  \n- Sự sợ hãi, hoảng loạn và đau khổ khi hồi tưởng về những sự kiện đã xảy ra khiến bệnh nhân né tránh hoàn toàn những lời nói, suy nghĩ có liên quan đến sự kiện này.",
+        "summary": "Sau khi trải qua các hồi tưởng về sự kiện sang chấn, bệnh nhân PTSD thường rơi vào trạng thái hoảng loạn, sợ hãi và đau khổ tột độ. Họ cũng trải qua cảm giác đau khổ mãnh liệt khi đối diện với các tình huống hoặc sự việc gợi nhắc về quá khứ. Điều này dẫn đến phản ứng né tránh, khiến bệnh nhân hoàn toàn tránh né những lời nói và suy nghĩ liên quan đến sự kiện đã xảy ra.",
+        "keywords": [
+            "PTSD",
+            "hồi tưởng",
+            "hoảng loạn",
+            "sợ hãi",
+            "đau khổ",
+            "phản ứng né tránh",
+            "gợi nhắc quá khứ",
+            "tránh né suy nghĩ",
+            "triệu chứng PTSD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "62e2cfa4-dec4-45c0-9341-7514be943755",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Tránh tiếp xúc với những đối tượng, địa điểm, hoạt động có liên quan đến những sự kiện sang chấn.  \n- Phản ứng quá khích, gây hấn khi có người yêu cầu diễn tả lại cảm xúc và tình tiết của sự kiện.  \nTâm trạng, nhận thức thay đổi:  \n- Bi quan, tiêu cực và vô vọng về tương lai  \n- Xuất hiện suy nghĩ tiêu cực về bản thân và những người xung quanh  \n- Bắt đầu hình thành tâm lý tự đổ lỗi cho bản thân hoặc những người xung quanh về nguyên nhân, hậu quả của sự kiện.",
+        "summary": "Người mắc PTSD thường tránh tiếp xúc với các đối tượng, địa điểm hoặc hoạt động liên quan đến sự kiện sang chấn. Họ có thể phản ứng quá khích hoặc gây hấn khi được yêu cầu diễn tả lại cảm xúc hoặc tình tiết của sự kiện. Ngoài ra, bệnh nhân còn trải qua những thay đổi về tâm trạng và nhận thức, bao gồm sự bi quan, tiêu cực, vô vọng về tương lai, và hình thành tâm lý tự đổ lỗi cho bản thân hoặc người khác về nguyên nhân và hậu quả của sự kiện.",
+        "keywords": [
+            "PTSD",
+            "né tránh",
+            "phản ứng quá khích",
+            "gây hấn",
+            "thay đổi tâm trạng",
+            "thay đổi nhận thức",
+            "bi quan",
+            "tiêu cực",
+            "vô vọng",
+            "tự đổ lỗi"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "96570c57-d935-4652-bed8-05e1cf3a0e4e",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thường sợ hãi tột độ, hoảng loạn, tức giận xen lẫn với tâm trạng xấu hổ, tội lỗi  \n- Giảm hứng thú và sự quan tâm với các hoạt động, bao gồm cả các sở thích trước đây  \n- Mất cảm giác, tê liệt hoàn toàn với mọi thứ  \n- Cảm thấy bản thân tách biệt với mọi người, luôn có cảm giác cô đơn và lạc lõng",
+        "summary": "Nội dung mô tả các triệu chứng tâm lý nghiêm trọng bao gồm cảm giác sợ hãi tột độ, hoảng loạn, tức giận xen lẫn với xấu hổ và tội lỗi. Người bệnh trải qua sự giảm sút hứng thú đối với các hoạt động, mất cảm giác và cảm thấy tê liệt hoàn toàn. Ngoài ra, họ còn có xu hướng tự tách biệt, cảm thấy cô đơn và lạc lõng.",
+        "keywords": [
+            "sợ hãi",
+            "hoảng loạn",
+            "tức giận",
+            "xấu hổ",
+            "tội lỗi",
+            "giảm hứng thú",
+            "mất cảm giác",
+            "cô đơn",
+            "lạc lõng",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c0ca310b-b982-4541-8513-3d38862f1798",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Mất hẳn các cảm xúc tích cực  \n- Trí nhớ bị gián đoạn và suy giảm, thường là mất một đoạn ký ức về sự kiện gây sang chấn (đặc biệt là các chi tiết quan trọng nhất)  \nCảm xúc và phản ứng thể chất thay đổi:  \n- Hay giật mình, dễ sợ hãi  \n- Chú ý quan sát và luôn có sự đề phòng vì tin rằng xung quanh luôn tiềm ẩn nguy hiểm  \n- Ngủ chập chờn, khó ngủ, thường gặp ác mộng  \n- Giảm khả năng tập trung  \n- Hành vi hung hăng, dễ tức giận và gắt gỏng",
+        "summary": "Đoạn văn mô tả các triệu chứng tâm lý và thể chất bao gồm mất cảm xúc tích cực và suy giảm trí nhớ, đặc biệt là về các sự kiện gây sang chấn. Người bệnh biểu hiện sự thay đổi trong cảm xúc và phản ứng thể chất như dễ giật mình, sợ hãi, luôn đề phòng nguy hiểm. Ngoài ra, họ còn gặp khó khăn về giấc ngủ với ác mộng, giảm khả năng tập trung và hành vi trở nên hung hăng, dễ tức giận.",
+        "keywords": [
+            "mất cảm xúc tích cực",
+            "suy giảm trí nhớ",
+            "sang chấn",
+            "giật mình",
+            "đề phòng",
+            "khó ngủ",
+            "ác mộng",
+            "giảm tập trung",
+            "hung hăng",
+            "dễ tức giận"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ecd5949a-09bd-4840-a4ea-272f2478444b",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Giảm khả năng tập trung  \n- Hành vi hung hăng, dễ tức giận và gắt gỏng  \n- Gia tăng các hành vi thiếu thận trọng, có thể hủy hoại và làm tổn thương bản thân như uống rượu bia, đua xe,…",
+        "summary": "Nội dung này tiếp tục liệt kê các triệu chứng tâm lý như giảm khả năng tập trung và hành vi hung hăng, dễ tức giận. Đặc biệt, người bệnh có thể gia tăng các hành vi thiếu thận trọng, có khả năng tự hủy hoại hoặc gây tổn thương cho bản thân. Các hành vi này bao gồm lạm dụng rượu bia hoặc tham gia đua xe.",
+        "keywords": [
+            "giảm tập trung",
+            "hung hăng",
+            "dễ tức giận",
+            "hành vi thiếu thận trọng",
+            "tự hủy hoại",
+            "tổn thương bản thân",
+            "rượu bia",
+            "đua xe",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "99fe966b-ebc9-4e38-a235-807873ce4d67",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgười bị rối loạn stress sau sang chấn (PTSD) bị rối nhiễu cuộc sống nghiêm trọng, sức khỏe và chức năng xã hội cũng suy giảm theo thời gian. Tỷ lệ người mắc chứng bệnh này trọn đời chiếm 9% và khoảng 4% bệnh nhân có thể khỏi bệnh trong vòng 1 năm đầu tiên. Tương tự như các rối loạn lo âu khác, PTSD được điều trị bằng tâm lý trị liệu và sử dụng thuốc.  \n### 3. Rối loạn ám ảnh cưỡng chế (OCD)",
+        "summary": "Đoạn văn mô tả về Rối loạn stress sau sang chấn (PTSD), một tình trạng gây rối nhiễu nghiêm trọng đến cuộc sống, sức khỏe và chức năng xã hội. Tỷ lệ mắc PTSD trọn đời là 9%, với khoảng 4% bệnh nhân có thể hồi phục trong năm đầu tiên. PTSD được điều trị bằng tâm lý trị liệu và thuốc, tương tự như các rối loạn lo âu khác.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "PTSD",
+            "rối nhiễu cuộc sống",
+            "suy giảm chức năng xã hội",
+            "tỷ lệ mắc",
+            "tâm lý trị liệu",
+            "thuốc",
+            "rối loạn lo âu",
+            "điều trị PTSD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "3ad5b8d6-ff8c-422b-bb80-f886a3ce05e3",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 3. Rối loạn ám ảnh cưỡng chế (OCD)  \nRối loạn ám ảnh cưỡng chế (Obsessive Compulsive Disorder – OCD) hay rối loạn ám ảnh nghi thức là một loại rối loạn lo âu tương đối ít gặp. Bệnh ảnh hưởng đến khoảng 0.05 – 1% dân số thế giới với tỷ lệ cân bằng ở cả nam và nữ giới.",
+        "summary": "Nội dung giới thiệu về Rối loạn ám ảnh cưỡng chế (OCD), còn được gọi là rối loạn ám ảnh nghi thức. Đây là một dạng rối loạn lo âu tương đối ít gặp, ảnh hưởng đến khoảng 0.05 – 1% dân số toàn cầu. Bệnh có tỷ lệ mắc cân bằng ở cả nam và nữ giới.",
+        "keywords": [
+            "rối loạn ám ảnh cưỡng chế",
+            "OCD",
+            "Obsessive Compulsive Disorder",
+            "rối loạn ám ảnh nghi thức",
+            "rối loạn lo âu",
+            "tỷ lệ mắc",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "431299d9-a4ef-43e5-ba15-dee889b09640",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nOCD là một loại rối loạn lo âu đặc trưng bởi sự xuất hiện về một hoặc nhiều ý nghĩ lặp đi lặp lại và có tính chất tái diễn. Những suy nghĩ này tạo ra sự ám ảnh, gia tăng mức độ lo âu, căng thẳng, bức bối nhằm thôi thúc người bệnh thực hiện các hành vi cưỡng chế.",
+        "summary": "Rối loạn ám ảnh cưỡng chế (OCD) là một dạng rối loạn lo âu, nổi bật với những ý nghĩ lặp đi lặp lại và có tính chất tái diễn. Những suy nghĩ này gây ra sự ám ảnh, làm tăng mức độ lo âu, căng thẳng, từ đó thôi thúc người bệnh thực hiện các hành vi cưỡng chế để giảm bớt khó chịu. Đây là một trong những đặc điểm chính của OCD.",
+        "keywords": [
+            "OCD",
+            "rối loạn ám ảnh cưỡng chế",
+            "rối loạn lo âu",
+            "ý nghĩ lặp lại",
+            "ám ảnh",
+            "hành vi cưỡng chế",
+            "căng thẳng",
+            "bức bối"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "463c6802-7ca1-4943-9663-9e1e0a054ebe",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nSau khi thực hiện các hành vi cưỡng chế, mức độ lo âu và căng thẳng sẽ giảm đi, bệnh nhân cảm thấy dễ chịu hơn. Tuy nhiên, bệnh nhân hoàn toàn không có cảm giác hài lòng hay thích thú khi thực hiện những hành vi này. Ngược lại, không ít bệnh nhân chống đối với chứng OCD bằng cách không thực hiện hành vi cưỡng chế dẫn đến sự bức bội, khó chịu, lo âu, căng thẳng và buộc phải tiếp tục thực hiện các hành vi này.  \nNgười mắc chứng rối loạn ám ảnh cưỡng chế thường có những biểu hiện như:",
+        "summary": "Bệnh nhân OCD thường cảm thấy nhẹ nhõm tạm thời sau khi thực hiện hành vi cưỡng chế, dù không hề có sự hài lòng hay thích thú. Việc cố gắng chống lại các hành vi này lại gây ra sự bức bối, khó chịu và tăng cường lo âu, buộc người bệnh phải tiếp tục thực hiện. Điều này tạo nên một vòng luẩn quẩn trong chứng rối loạn ám ảnh cưỡng chế.",
+        "keywords": [
+            "OCD",
+            "hành vi cưỡng chế",
+            "giảm lo âu",
+            "cảm giác dễ chịu",
+            "chống đối OCD",
+            "bức bội",
+            "khó chịu",
+            "lo âu",
+            "căng thẳng",
+            "biểu hiện OCD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4ab999aa-b44a-498f-b777-365d81ebacf5",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Ám ảnh về suy nghĩ bị nhiễm bệnh do tiếp xúc với đất cát, bụi bẩn, nhiễm virus, vi khuẩn dẫn đến thôi thúc hành vi rửa tay rất nhiều lần trong ngày.  \n- Dọn dẹp nhà cửa quá mức, sắp xếp đồ vật ngăn nắp, trật tự và rất khó chịu khi người khác thay đổi vị trí của vật dụng.  \n- Luôn hình thành sự lo lắng về những vấn đề như đã khóa cửa nhà, đã tắt bếp gas , đóng cửa sổ, khóa ba lô, túi xách, đã sắp xếp đủ hành lý hay chưa,… Sự nghi ngờ này thôi thúc người bệnh phải kiểm tra rất nhiều lần.",
+        "summary": "Các biểu hiện phổ biến của OCD bao gồm ám ảnh về việc nhiễm bệnh, dẫn đến hành vi rửa tay liên tục và quá mức. Người bệnh cũng có thể dọn dẹp nhà cửa quá mức, sắp xếp đồ đạc theo trật tự nghiêm ngặt và khó chịu khi có sự thay đổi. Ngoài ra, họ thường xuyên lo lắng và phải kiểm tra nhiều lần các vấn đề như khóa cửa, tắt bếp hay sắp xếp hành lý, gây ảnh hưởng đến cuộc sống hàng ngày.",
+        "keywords": [
+            "OCD",
+            "ám ảnh nhiễm bệnh",
+            "rửa tay nhiều lần",
+            "dọn dẹp quá mức",
+            "sắp xếp đồ vật",
+            "kiểm tra lặp lại",
+            "khóa cửa",
+            "tắt bếp",
+            "biểu hiện OCD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e70b9729-aa50-4280-9f1d-0239b356607d",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Một số bệnh nhân có thể xuất hiện những suy nghĩ ám ảnh một cách không chủ đích như ý nghĩ tục tĩu, muốn giết hại đứa con của mình, có ý nghĩ về hành vi xâm phạm tình dục,… Tuy nhiên, những trường hợp này chỉ xuất hiện ý nghĩ ám ảnh nhưng không phát sinh hành vi cưỡng chế. Tỷ lệ bệnh nhân gặp phải dạng OCD này ít hơn, chỉ khoảng 25%.",
+        "summary": "Một số bệnh nhân OCD có thể trải qua những suy nghĩ ám ảnh không chủ đích, bao gồm các ý nghĩ tục tĩu, bạo lực hay xâm phạm tình dục. Điều quan trọng là những trường hợp này chỉ dừng lại ở ý nghĩ ám ảnh mà không phát sinh hành vi cưỡng chế thực tế. Dạng OCD này ít phổ biến hơn, chiếm khoảng 25% tổng số bệnh nhân.",
+        "keywords": [
+            "OCD",
+            "suy nghĩ ám ảnh",
+            "ý nghĩ tục tĩu",
+            "ý nghĩ bạo lực",
+            "xâm phạm tình dục",
+            "không hành vi cưỡng chế",
+            "dạng OCD hiếm",
+            "rối loạn ám ảnh cưỡng chế"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5498845f-e344-46b6-ac7f-24f0e38c4026",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Người mắc chứng rối loạn ám ảnh cưỡng chế mất ít nhất 1 giờ mỗi ngày để suy nghĩ và thực hiện các hành vi cưỡng bức. Điều này làm gián đoạn quá trình sinh hoạt, ảnh hưởng đến công việc, học tập và nhiều dự định trong ngày.  \n- Một số bệnh nhân có thể nhận thấy sự thừa thãi của những hành vi này nhưng không thể nào chế ngự và ngăn chặn.",
+        "summary": "Người mắc OCD thường dành ít nhất một giờ mỗi ngày để suy nghĩ ám ảnh và thực hiện các hành vi cưỡng chế, gây gián đoạn nghiêm trọng đến sinh hoạt, công việc và học tập. Mặc dù một số bệnh nhân nhận thức được sự vô lý và thừa thãi của những hành vi này, họ vẫn không thể tự mình chế ngự hay ngăn chặn chúng. Điều này cho thấy tính chất khó kiểm soát của rối loạn.",
+        "keywords": [
+            "OCD",
+            "rối loạn ám ảnh cưỡng chế",
+            "thời gian thực hiện",
+            "gián đoạn sinh hoạt",
+            "ảnh hưởng công việc",
+            "ảnh hưởng học tập",
+            "hành vi cưỡng bức",
+            "không thể ngăn chặn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "98c6c118-38e1-420c-a0ce-75e7a3068a61",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn ám ảnh cưỡng chế (OCD) dễ bị nhầm lẫn với rối loạn nhân cách ám ảnh cưỡng chế. Ngoài ra, không ít người lầm tưởng OCD gắn liền với sự trật tự, ngăn nắp và sạch sẽ. Tuy nhiên trên thực tế, biểu hiện của chứng bệnh này khá đa dạng và có không ít bệnh nhân mắc OCD vẫn có lối sống cẩu thả, bừa bộn.  \n### 4. Rối loạn hoảng loạn/ hoảng sợ",
+        "summary": "Rối loạn ám ảnh cưỡng chế (OCD) thường bị nhầm lẫn với rối loạn nhân cách ám ảnh cưỡng chế và quan niệm sai lầm rằng bệnh gắn liền với sự ngăn nắp, sạch sẽ. Thực tế, biểu hiện của OCD rất đa dạng, thậm chí có bệnh nhân vẫn có lối sống bừa bộn. Điều này cho thấy sự phức tạp và đa chiều của chứng bệnh này, không chỉ giới hạn ở các hành vi trật tự. Đoạn văn cũng giới thiệu về rối loạn hoảng loạn.",
+        "keywords": [
+            "Rối loạn ám ảnh cưỡng chế",
+            "OCD",
+            "rối loạn nhân cách ám ảnh cưỡng chế",
+            "nhầm lẫn",
+            "biểu hiện đa dạng",
+            "tâm lý học",
+            "rối loạn hoảng loạn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "99f06631-30f6-4ce3-93bd-3a1d0715036c",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 4. Rối loạn hoảng loạn/ hoảng sợ  \nRối loạn hoảng loạn (Panic Disorder) là một dạng rối loạn lo âu phổ biến. Tỷ lệ mắc bệnh chiếm từ 2 – 3% dân số thế giới trong giai đoạn từ 15 – 25 tuổi với tỷ lệ cao hơn ở nữ giới. Rối loạn hoảng sợ là tình trạng xuất hiện cơn lo âu cấp tính, có tính chất đột ngột và khởi phát mà không có yếu tố báo trước.",
+        "summary": "Rối loạn hoảng loạn (Panic Disorder) là một dạng rối loạn lo âu phổ biến, ảnh hưởng đến 2-3% dân số thế giới trong độ tuổi 15-25, với tỷ lệ cao hơn ở nữ giới. Bệnh đặc trưng bởi các cơn lo âu cấp tính xuất hiện đột ngột và không có yếu tố báo trước. Đây là một tình trạng tâm lý cần được nhận biết và hiểu rõ.",
+        "keywords": [
+            "Rối loạn hoảng loạn",
+            "Panic Disorder",
+            "rối loạn lo âu",
+            "lo âu cấp tính",
+            "tỷ lệ mắc bệnh",
+            "triệu chứng đột ngột",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "822f79bf-b98e-411d-aef2-034125d7ec2e",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrong cơn lo âu cấp tính, bệnh nhân có biểu hiện hoảng loạn, sợ hãi tột độ và có nỗi sợ mạnh mẽ về những vấn đề như sợ chết, sợ mất kiểm soát, sợ mất trí nhớ,… Thông thường, cơn hoảng loạn thường xảy ra trong 20 – 30 phút và gần như không bao giờ kéo dài quá 1 giờ. Vì không có yếu tố báo trước nên các cơn hoảng loạn, lo âu cấp tính có thể xảy ra ở nơi công cộng, trường học và nơi làm việc. Điều này ảnh hưởng rất lớn đến tâm lý và chất lượng cuộc sống của bệnh nhân.\n\nCác biểu hiện thường gặp ở bệnh nhân bị rối loạn hoảng sợ:  \n- Xuất hiện cơn lo âu cấp tính một cách đột ngột, kịch phát mà không có yếu tố báo trước  \n- Bệnh nhân rơi vào trạng thái hoảng loạn và sợ hãi mạnh mẽ  \n- Cảm giác sợ hãi kích thích bùng phát các triệu chứng thần kinh thực vật như bồn chồn, khó thở, đánh trống ngực, đau vùng ngực, đổ mồ hôi, tay chân nóng bừng hoặc lạnh cóng,…",
+        "summary": "Các cơn lo âu cấp tính trong rối loạn hoảng sợ thường biểu hiện bằng sự hoảng loạn và sợ hãi tột độ, bao gồm nỗi sợ chết hoặc mất kiểm soát. Những cơn này thường kéo dài 20-30 phút, hiếm khi quá một giờ, và có thể xảy ra bất ngờ ở bất kỳ đâu, ảnh hưởng nghiêm trọng đến chất lượng cuộc sống. Các triệu chứng vật lý đi kèm bao gồm bồn chồn, khó thở, đánh trống ngực và đổ mồ hôi.",
+        "keywords": [
+            "Rối loạn hoảng sợ",
+            "cơn lo âu cấp tính",
+            "triệu chứng hoảng loạn",
+            "sợ hãi tột độ",
+            "triệu chứng thần kinh thực vật",
+            "ảnh hưởng chất lượng cuộc sống",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8d709878-edd9-4f04-bd1f-e241e93d99c0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sự sợ hãi tăng dần lên trong các cơn hoảng loạn và bệnh nhân có xu hướng thoát khỏi tình huống để tìm kiếm sự giúp đỡ  \n- Nếu đã từng khởi phát cơn lo âu cấp tính ở nơi công cộng, bệnh nhân có xu hướng né tránh việc đi ra ngoài hoặc thậm chí từ chối việc đi học và lựa chọn làm việc tại nhà.",
+        "summary": "Trong các cơn hoảng loạn, mức độ sợ hãi của bệnh nhân tăng dần, khiến họ có xu hướng tìm cách thoát khỏi tình huống và tìm kiếm sự giúp đỡ. Đặc biệt, nếu đã từng trải qua cơn lo âu cấp tính ở nơi công cộng, bệnh nhân thường phát triển hành vi né tránh, từ chối ra ngoài, đi học hoặc làm việc tại nhà để tránh tái diễn trải nghiệm tiêu cực.",
+        "keywords": [
+            "Cơn hoảng loạn",
+            "sợ hãi",
+            "hành vi né tránh",
+            "lo âu cấp tính",
+            "rối loạn hoảng sợ",
+            "tâm lý học",
+            "ảnh hưởng xã hội"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d266e626-93dd-4b8b-9dd5-139e0518857d",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn hoảng sợ không được điều trị gây ra vô số ảnh hưởng đối với sức khỏe và chất lượng cuộc sống. Thực tế cho thấy, người mắc chứng bệnh này có thể phát triển một số loại rối loạn lo âu khác như rối loạn lo âu xã hội, chứng sợ khoảng rộng ,…  \n### 5. Rối loạn lo âu xã hội",
+        "summary": "Rối loạn hoảng sợ nếu không được điều trị kịp thời sẽ gây ra nhiều ảnh hưởng tiêu cực đến sức khỏe và chất lượng cuộc sống của người bệnh. Đặc biệt, nó có thể dẫn đến sự phát triển của các rối loạn lo âu khác như rối loạn lo âu xã hội hoặc chứng sợ khoảng rộng. Đoạn văn cũng giới thiệu về rối loạn lo âu xã hội.",
+        "keywords": [
+            "Rối loạn hoảng sợ",
+            "biến chứng",
+            "rối loạn lo âu",
+            "rối loạn lo âu xã hội",
+            "chứng sợ khoảng rộng",
+            "điều trị",
+            "sức khỏe tâm thần",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "fb1ce9a3-abc9-4295-a7cb-6d413e295605",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 5. Rối loạn lo âu xã hội  \nRối loạn lo âu xã hội (Social Anxiety Disorder – SAD) là dạng lâm sàng của rối loạn lo âu. Chứng bệnh này còn được biết đến với tên gọi là hội chứng sợ xã hội, ám ảnh sợ xã hội,… Đúng như tên gọi, người mắc chứng SAD thường trực sự sợ hãi, lo âu và căng thẳng quá mức về những tình huống xã hội thông thường như gặp người lạ, ăn uống nơi công cộng, trò chuyện qua điện thoại, hẹn hò và nói chuyện trước đám đông.",
+        "summary": "Rối loạn lo âu xã hội (SAD) là một dạng lâm sàng của rối loạn lo âu, còn được biết đến là hội chứng sợ xã hội hoặc ám ảnh sợ xã hội. Người mắc chứng này thường xuyên trải qua sự sợ hãi, lo âu và căng thẳng quá mức. Các tình huống xã hội thông thường như gặp người lạ, ăn uống nơi công cộng, hay nói chuyện trước đám đông đều có thể gây ra những cảm xúc tiêu cực này.",
+        "keywords": [
+            "Rối loạn lo âu xã hội",
+            "Social Anxiety Disorder",
+            "SAD",
+            "hội chứng sợ xã hội",
+            "ám ảnh sợ xã hội",
+            "lo âu",
+            "sợ hãi",
+            "căng thẳng",
+            "tình huống xã hội"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "81cde81b-8964-4824-8bc9-34b0c2e2db32",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn lo âu xã hội thường khởi phát sớm hơn các dạng rối loạn lo âu khác, độ tuổi khởi phát trung bình từ 11 – 19 tuổi và tỷ lệ mắc bệnh cao hơn ở nữ giới. So với các rối loạn lo âu khác, hội chứng này làm suy giảm trầm trọng chức năng xã hội của người bệnh. Nếu không được điều trị, bệnh nhân gần như không thể kết hôn vì lo sợ hẹn hò và bắt chuyện với người lạ.  \nCác dấu hiệu thường gặp ở bệnh nhân bị rối loạn lo âu xã hội:",
+        "summary": "Rối loạn lo âu xã hội thường khởi phát sớm, với độ tuổi trung bình từ 11 đến 19 tuổi và có tỷ lệ mắc bệnh cao hơn ở nữ giới. Hội chứng này gây suy giảm nghiêm trọng chức năng xã hội của người bệnh, ảnh hưởng đến khả năng giao tiếp và hình thành các mối quan hệ. Nếu không được điều trị kịp thời, bệnh nhân có thể gặp khó khăn lớn trong việc kết hôn do nỗi sợ hẹn hò và giao tiếp với người lạ.",
+        "keywords": [
+            "Rối loạn lo âu xã hội",
+            "khởi phát",
+            "độ tuổi",
+            "nữ giới",
+            "suy giảm chức năng xã hội",
+            "ảnh hưởng hôn nhân",
+            "điều trị"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e03ef88f-fe68-4e28-986e-49ee497d927a",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác dấu hiệu thường gặp ở bệnh nhân bị rối loạn lo âu xã hội:  \n- Luôn thường trực cảm giác lo âu, sợ hãi, căng thẳng trước những tình huống xã hội. Cảm giác này kéo dài trong nhiều tháng khiến bệnh nhân có xu hướng né tránh các tình huống xã hội không hề tiềm ẩn mối đe dọa đối với bản thân.  \n- Bệnh nhân không thể gặp gỡ và giao tiếp với người lạ, hầu như chỉ thực hiện hoạt động giao tiếp với người thân trong gia đình.  \n- Luôn lo sợ cảm giác bị bẽ mặt, xấu hổ trước đám đông.\n\n- Luôn lo sợ cảm giác bị bẽ mặt, xấu hổ trước đám đông.  \n- Người bệnh thường có phản ứng sợ hãi quá mức khi người khác chú ý quan sát và đưa ra lời phê bình, đánh giá bản thân một cách tiêu cực. Ngoài ra, người mắc chứng bệnh này cũng rất sợ để người khác phát hiện ra sự căng thẳng và sợ hãi của bản thân.  \n- Luôn lo lắng về các tình huống xã hội chưa bao giờ xảy ra (hẹn hò, kết hôn) và luôn dự đoán kết quả xấu nhất khi bản thân tham gia vào các tình huống, hoạt động xã hội.",
+        "summary": "Các dấu hiệu của rối loạn lo âu xã hội bao gồm cảm giác lo âu, sợ hãi và căng thẳng dai dẳng trước các tình huống xã hội, dẫn đến xu hướng né tránh. Bệnh nhân gặp khó khăn trong giao tiếp với người lạ, chỉ thoải mái với người thân trong gia đình, và thường xuyên lo sợ bị bẽ mặt hoặc xấu hổ trước đám đông. Họ cũng phản ứng quá mức với sự chú ý hay phê bình từ người khác, đồng thời lo lắng về việc người khác phát hiện ra sự căng thẳng của mình, và thường dự đoán kết quả tiêu cực cho các tình huống xã hội chưa xảy ra.",
+        "keywords": [
+            "Rối loạn lo âu xã hội",
+            "dấu hiệu",
+            "triệu chứng",
+            "lo âu",
+            "sợ hãi",
+            "căng thẳng",
+            "né tránh xã hội",
+            "sợ bị bẽ mặt",
+            "sợ bị đánh giá",
+            "giao tiếp"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c0c8275b-7bab-4697-b930-c9e369032067",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgười mắc chứng rối loạn lo âu xã hội thường tách rời với cộng đồng và có xu hướng tự cô lập bản thân. Bệnh nhân gặp khó khăn khi học tập, làm việc và thường không có cơ hội để thể hiện năng lực bản thân do sợ giao tiếp, gặp gỡ và thiếu kỹ năng sống trầm trọng.  \n### 6. Rối loạn lo âu chia ly",
+        "summary": "Người mắc rối loạn lo âu xã hội có xu hướng tách rời và tự cô lập bản thân khỏi cộng đồng. Điều này gây ra những khó khăn đáng kể trong học tập và công việc, hạn chế cơ hội phát triển năng lực cá nhân. Nguyên nhân chính là do nỗi sợ giao tiếp, gặp gỡ người khác và thiếu hụt trầm trọng các kỹ năng sống.",
+        "keywords": [
+            "Rối loạn lo âu xã hội",
+            "tự cô lập",
+            "tách rời cộng đồng",
+            "khó khăn học tập",
+            "khó khăn làm việc",
+            "sợ giao tiếp",
+            "thiếu kỹ năng sống"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "42f08612-6f63-44e2-a5cc-67b03b922a41",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 6. Rối loạn lo âu chia ly  \nRối loạn lo âu chia ly (Separation Anxiety Disorder) là một loại rối loạn lo âu thường gặp ở trẻ từ 8 – 24 tháng tuổi. Hội chứng này đặc trưng bởi sự sợ hãi, lo lắng và căng thẳng quá mức về việc phải rời xa bố mẹ và người thân trong gia đình. Phản ứng này thường xuất hiện lần đầu tiên khi trẻ đến trường học..",
+        "summary": "Rối loạn lo âu chia ly (Separation Anxiety Disorder) là một dạng rối loạn lo âu phổ biến ở trẻ nhỏ, thường gặp nhất ở độ tuổi từ 8 đến 24 tháng. Hội chứng này được đặc trưng bởi sự sợ hãi, lo lắng và căng thẳng quá mức khi trẻ phải rời xa bố mẹ hoặc người thân trong gia đình. Phản ứng này thường biểu hiện rõ rệt lần đầu tiên khi trẻ bắt đầu đi học.",
+        "keywords": [
+            "Rối loạn lo âu chia ly",
+            "Separation Anxiety Disorder",
+            "trẻ em",
+            "lo âu",
+            "sợ hãi",
+            "căng thẳng",
+            "chia ly",
+            "rời xa bố mẹ",
+            "đi học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b49048d4-d27a-4eea-ae12-a579a79462cc",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nQuấy khóc, đeo bám và la hét là phản ứng thường thấy ở trẻ khi mới đến trường và phải rời xa gia đình. Tuy nhiên, tình trạng này sẽ nhanh chóng được cải thiện khi trẻ quen dần với môi trường mới. Hơn nữa khi trẻ lớn lên, nỗi sợ về việc xa bố mẹ cũng sẽ giảm đi do trẻ đã dạn dĩ và hiểu biến hơn về thế giới.",
+        "summary": "Trẻ nhỏ thường có phản ứng quấy khóc, đeo bám khi mới đi học và phải rời xa gia đình. Đây là những biểu hiện bình thường và sẽ dần được cải thiện khi trẻ thích nghi với môi trường mới. Khi lớn hơn, trẻ cũng sẽ dạn dĩ và hiểu biết hơn, giúp giảm bớt nỗi sợ xa bố mẹ.",
+        "keywords": [
+            "quấy khóc",
+            "đeo bám",
+            "la hét",
+            "trẻ đi học",
+            "xa gia đình",
+            "thích nghi",
+            "nỗi sợ xa bố mẹ",
+            "tâm lý trẻ em"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ce986e27-6b08-42b7-9e5c-e580e8656eb0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nChứng rối loạn lo âu chia ly được chẩn đoán khi tình trạng sợ hãi, căng thẳng, lo lắng khi phải xa bố mẹ và người thân trong gia đình xảy ra trong thời gian ít nhất 4 tuần. Đồng thời tình trạng này phải gây ra những ảnh hưởng nhất định đối với quá trình học tập và vui chơi của trẻ.  \nBiểu hiện của trẻ mắc chứng rối loạn lo âu chia ly:\n\nBiểu hiện của trẻ mắc chứng rối loạn lo âu chia ly:  \n- Trẻ có phản ứng than thở, cầu xin, khóc lóc khi phải rời xa bố mẹ và người thân. Nếu không được đáp ứng, trẻ sẽ có phản ứng mạnh hơn như la hét, cáu kỉnh, đeo bám và ăn vạ.  \n- Bản thân trẻ mắc chứng rối loạn lo âu chia ly luôn thường trực sự lo lắng, sợ hãi và đau khổ.  \n- Trẻ thường lo lắng bố mẹ và người thân có thể gặp phải tai nạn, mắc bệnh và thậm chí là qua đời trong thời gian phải tách xa gia đình.",
+        "summary": "Chứng rối loạn lo âu chia ly được chẩn đoán khi trẻ có biểu hiện sợ hãi, căng thẳng kéo dài ít nhất 4 tuần khi phải xa người thân, gây ảnh hưởng đến học tập và vui chơi. Các biểu hiện bao gồm than thở, khóc lóc, la hét, đeo bám và luôn lo lắng về sự an toàn của bố mẹ. Trẻ thường xuyên sợ hãi và đau khổ khi phải tách rời khỏi gia đình.",
+        "keywords": [
+            "rối loạn lo âu chia ly",
+            "chẩn đoán",
+            "biểu hiện",
+            "sợ hãi",
+            "căng thẳng",
+            "xa bố mẹ",
+            "tâm lý trẻ em",
+            "lo lắng",
+            "đeo bám",
+            "khóc lóc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d89ae612-0742-4fb9-b123-6db77fb3c9aa",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Trẻ không thích ngủ một mình và luôn muốn ngủ cùng bố mẹ, đồng thời bày tỏ thái độ không muốn đi học hay đến đến những địa điểm khác mà không có người thân đi cùng.  \n- Trẻ mắc chứng rối loạn lo âu chia ly thường gặp phải ác mộng với nội dung là bị tách rời khỏi gia đình  \n- Sự lo lắng và đau khổ quá mức khiến trẻ không tập trung trong giờ học, luôn buồn bã và không tham gia các hoạt động vui chơi cùng với bạn bè cùng trang lứa.",
+        "summary": "Trẻ mắc chứng rối loạn lo âu chia ly thường có biểu hiện không thích ngủ một mình, luôn muốn ngủ cùng bố mẹ và từ chối đi học hoặc đến những nơi không có người thân. Trẻ thường gặp ác mộng về việc bị tách rời khỏi gia đình. Sự lo lắng và đau khổ quá mức này còn ảnh hưởng đến khả năng tập trung học tập và tham gia các hoạt động vui chơi xã hội của trẻ.",
+        "keywords": [
+            "rối loạn lo âu chia ly",
+            "biểu hiện",
+            "ngủ một mình",
+            "ác mộng",
+            "không tập trung",
+            "tách rời gia đình",
+            "tâm lý trẻ em"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e5996537-fb34-4476-8dbc-098d24c569b5",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn lo âu chia ly khiến trẻ buồn bã, đau khổ và lo lắng kéo dài. Nếu không được thăm khám và điều trị sớm, chứng bệnh này làm gián đoạn việc học của trẻ dẫn đến tình trạng trẻ chậm tiếp thu, phát triển và hạn chế sự hiểu biết về cuộc sống. Ngoài ra, rối loạn lo âu chia ly cũng gia tăng nguy cơ phát triển các rối loạn tâm lý và gây lệch lạc, méo mó trong quá trình hình thành nhân cách.  \n### 7. Rối loạn lo âu bệnh tật (chứng nghi bệnh)",
+        "summary": "Rối loạn lo âu chia ly gây ra nỗi buồn, đau khổ và lo lắng kéo dài ở trẻ. Nếu không được điều trị kịp thời, chứng bệnh này có thể làm gián đoạn quá trình học tập, khiến trẻ chậm tiếp thu và hạn chế sự phát triển. Hơn nữa, rối loạn lo âu chia ly còn làm tăng nguy cơ phát triển các rối loạn tâm lý khác và ảnh hưởng tiêu cực đến sự hình thành nhân cách của trẻ.",
+        "keywords": [
+            "rối loạn lo âu chia ly",
+            "hậu quả",
+            "điều trị sớm",
+            "chậm tiếp thu",
+            "rối loạn tâm lý",
+            "hình thành nhân cách",
+            "tâm lý trẻ em"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5224dac6-d09f-4c51-8e58-9577c3d7bdb2",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn lo âu bệnh tật (Illness anxiety disorder) hay chứng nghi bệnh là một loại rối loạn lo âu ít gặp (0.8%). Người mắc chứng bệnh này luôn cho rằng bản thân mắc các vấn đề sức khỏe thể chất nghiêm trọng mặc dù không có bất cứ biểu hiện nào. Đồng thời có xu hướng quy chụp các triệu chứng và cảm giác gặp phải đều là dấu hiệu cảnh báo bệnh tật.\n\nBệnh nhân mắc hội chứng rối loạn lo âu bệnh tật luôn thường trực sự sợ hãi vô lý, thậm chí hoang đường về việc bản thân mắc bệnh. Ngay cả khi đã khám sức khỏe và được chẩn đoán khỏe mạnh, tình trạng sợ hãi và lo lắng về bệnh tật vẫn tiếp diễn. Tương tự như các loại rối loạn lo âu khác, chứng nghi bệnh gây ra sự đau khổ, phiền muộn, căng thẳng và ảnh hưởng nghiêm trọng đến chất lượng cuộc sống.  \nCác biểu hiện thường gặp ở người mắc chứng nghi bệnh (rối loạn lo âu bệnh tật):\n\nCác biểu hiện thường gặp ở người mắc chứng nghi bệnh (rối loạn lo âu bệnh tật):  \n- Cho rằng bản thân mắc các vấn đề sức khỏe nghiêm trọng như ung thư và các bệnh lý nguy hiểm không thể chữa trị.  \n- Nỗi sợ về bệnh tật kéo dài trong nhiều tháng mặc dù cơ thể hoàn toàn khỏe mạnh và không có bất cứ triệu chứng nào khác thường.  \n- Cố gắng tìm kiếm các dấu hiệu bệnh tật trên cơ thể và quy chụp các biểu hiện, cảm giác gặp phải (dù không nghiêm trọng) đều là dấu hiệu cảnh báo bệnh lý.",
+        "summary": "Rối loạn lo âu bệnh tật, hay chứng nghi bệnh, là một loại rối loạn lo âu hiếm gặp, khiến người bệnh luôn tin rằng mình mắc các vấn đề sức khỏe nghiêm trọng dù không có triệu chứng thực thể. Họ thường xuyên sợ hãi vô lý về bệnh tật, ngay cả khi đã được chẩn đoán khỏe mạnh. Chứng bệnh này gây ra đau khổ, căng thẳng và ảnh hưởng nghiêm trọng đến chất lượng cuộc sống, với các biểu hiện như luôn tìm kiếm dấu hiệu bệnh và quy chụp các cảm giác bình thường thành triệu chứng bệnh lý.",
+        "keywords": [
+            "rối loạn lo âu bệnh tật",
+            "chứng nghi bệnh",
+            "Illness anxiety disorder",
+            "sợ hãi vô lý",
+            "lo lắng về sức khỏe",
+            "triệu chứng",
+            "tâm lý",
+            "chất lượng cuộc sống"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a20146ed-b5b1-49e5-b0fb-d4087eadd6df",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thường xuyên đến bệnh viện để kiểm tra sức khỏe. Tuy nhiên, sự sợ hãi và lo lắng gần như không thuyên giảm ngay cả khi được chẩn đoán hoàn toàn khỏe mạnh. Một số bệnh nhân có thể né tránh đến bệnh viện/ phòng khám do lo sợ về việc sẽ bị chẩn đoán mắc các bệnh nan y.  \n- Sự sợ hãi, lo âu quá mức về bệnh tật khiến bệnh nhân đau khổ, buồn bã, chán nản và luôn bất an.\n\n- Sự sợ hãi, lo âu quá mức về bệnh tật khiến bệnh nhân đau khổ, buồn bã, chán nản và luôn bất an.  \nNgười mắc chứng nghi bệnh thường rơi vào trạng thái buồn bã, đau khổ và thường trực cảm giác bất an. So với các chứng rối loạn lo âu khác, người mắc chứng bệnh này phải đối mặt với áp lực tài chính lớn hơn do thường xuyên nghỉ làm và đến bệnh viện kiểm tra sức khỏe quá nhiều lần.  \n### 8. Rối loạn ám ảnh sợ đặc hiệu",
+        "summary": "Người mắc chứng nghi bệnh thường xuyên lo lắng và sợ hãi quá mức về sức khỏe, ngay cả khi được chẩn đoán khỏe mạnh. Nỗi sợ hãi này gây ra sự đau khổ, buồn bã, chán nản và cảm giác bất an thường trực. Họ có thể né tránh bệnh viện hoặc ngược lại, thăm khám quá nhiều lần, dẫn đến áp lực tài chính đáng kể.",
+        "keywords": [
+            "chứng nghi bệnh",
+            "rối loạn lo âu",
+            "sợ hãi bệnh tật",
+            "lo lắng sức khỏe",
+            "áp lực tài chính",
+            "bất an",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "6c872ac6-2036-488d-868b-51d677f35b49",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn ám ảnh sợ đặc hiệu là loại rối loạn lo âu thường gặp. Người mắc chứng bệnh này thường sợ hãi, căng thẳng và lo lắng quá mức trước những tình huống/ đối tượng không tiềm ẩn bất cứ mối đe dọa nào.\n\nBiểu hiện của chứng rối loạn ám ảnh sợ đặc hiệu tương đối đa dạng. Mỗi bệnh nhân sẽ sợ hãi với một hoặc nhiều đối tượng khác nhau, trong đó thường gặp nhất là chứng sợ không gian hẹp, khoảng trống, sợ động vật, độ cao, sợ kim tiêm, máu,… Rối loạn ám ảnh sợ đặc hiệu được chẩn đoán khi nỗi sợ kéo dài ít nhất 6 tháng và gây ra những ảnh hưởng đáng kể đối với cuộc sống.  \nCác dạng rối loạn ám ảnh sợ đặc hiệu thường gặp bao gồm:\n\nCác dạng rối loạn ám ảnh sợ đặc hiệu thường gặp bao gồm:  \n- Các hiện tượng thiên nhiên: Sóng thần, giông bão, sấm chớp, mưa bão, lốc xoáy,…  \n- Sợ động vật: Sâu, bò cạp, nhện, chó, mèo, rắn rết,…  \n- Các thủ thuật y tế: Sợ phẫu thuật, sợ vết tiêm, sợ máu, sợ kim tiêm và các vật dụng được sử dụng trong y tế  \n- Sợ các tình huống cụ thể: Đi máy bay, sợ không gian hẹp, sợ bóng tối, sợ đi học,…  \n- Một số dạng ám ảnh sợ đặc hiệu ít gặp hơn như sợ chú hề, sợ độ cao, sợ tiếng động lớn,…\n\n- Một số dạng ám ảnh sợ đặc hiệu ít gặp hơn như sợ chú hề, sợ độ cao, sợ tiếng động lớn,…  \nNgười mắc chứng rối loạn ám ảnh sợ đặc hiệu thường có những biểu hiện như:  \n- Luôn thường trực cảm giác sợ hãi, lo lắng về những đối tượng, tình huống cụ thể.  \n- Bệnh nhân luôn né tránh những tình huống và đối tượng gây ra sự sợ hãi. Điều này dẫn đến nhiều phiền toái trong cuộc sống.",
+        "summary": "Rối loạn ám ảnh sợ đặc hiệu là một dạng rối loạn lo âu phổ biến, đặc trưng bởi nỗi sợ hãi và lo lắng quá mức trước các đối tượng hoặc tình huống không gây nguy hiểm. Các biểu hiện đa dạng, bao gồm sợ không gian hẹp, động vật, độ cao, kim tiêm, hoặc các hiện tượng tự nhiên. Tình trạng này được chẩn đoán khi nỗi sợ kéo dài ít nhất 6 tháng và ảnh hưởng đáng kể đến cuộc sống, khiến người bệnh luôn né tránh đối tượng gây sợ hãi.",
+        "keywords": [
+            "rối loạn ám ảnh sợ đặc hiệu",
+            "rối loạn lo âu",
+            "ám ảnh sợ",
+            "sợ hãi",
+            "né tránh",
+            "sợ động vật",
+            "sợ độ cao",
+            "sợ không gian hẹp",
+            "sợ kim tiêm",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0224ce7b-53f7-4906-bd6f-8b5cea394374",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Khi phải đối mặt với đối tượng, tình huống gây ra sự sợ hãi, bệnh nhân sẽ xuất hiện các biểu hiện như nôn mửa, ngất xỉu, buồn nôn, đổ mồ hôi, choáng váng, tức ngực, khó thở,…  \nRất ít bệnh nhân bị có duy nhất 1 nỗi sợ. Thống kê cho thấy, khoảng 75% bệnh nhân sợ hãi về 3 tình huống/ đối tượng cụ thể và đặc biệt là các đối tượng này thường có mối liên hệ mật thiết.",
+        "summary": "Khi đối mặt với đối tượng hoặc tình huống gây sợ hãi, người bệnh có thể xuất hiện các triệu chứng thể chất như nôn mửa, ngất xỉu, buồn nôn, đổ mồ hôi, choáng váng, tức ngực và khó thở. Đa số bệnh nhân không chỉ có một nỗi sợ duy nhất; thống kê cho thấy khoảng 75% người bệnh có nỗi sợ liên quan đến ba tình huống hoặc đối tượng cụ thể, thường có mối liên hệ mật thiết với nhau.",
+        "keywords": [
+            "rối loạn ám ảnh sợ",
+            "triệu chứng sợ hãi",
+            "phản ứng cơ thể",
+            "nôn mửa",
+            "ngất xỉu",
+            "khó thở",
+            "đa nỗi sợ",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b5210eda-8619-415e-9507-a2411f3aef9a",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrên đây là thông tin về 8 loại rối loạn lo âu thường gặp có thể xuất hiện ở cả trẻ em và người lớn. Nếu nghi ngờ mắc chứng bệnh này, bạn nên chủ động thăm khám để được chẩn đoán và điều trị sớm. Bên cạnh đó, cần nâng cao kiến thức của bản thân về sức khỏe tâm thần để kịp thời phát hiện và điều trị các vấn đề tâm lý.  \nCó thể bạn quan tâm:  \n- Rối loạn lo âu có tự khỏi không hay phải điều trị?  \n- 9 Cách vượt qua rối loạn lo âu đơn giản tại nhà bạn nên áp dụng",
+        "summary": "Bài viết tổng hợp thông tin về 8 loại rối loạn lo âu phổ biến ở cả trẻ em và người lớn. Khuyến nghị người đọc chủ động thăm khám nếu nghi ngờ mắc bệnh để được chẩn đoán và điều trị kịp thời. Đồng thời, nhấn mạnh tầm quan trọng của việc nâng cao kiến thức về sức khỏe tâm thần để phát hiện và xử lý sớm các vấn đề tâm lý.",
+        "keywords": [
+            "rối loạn lo âu",
+            "sức khỏe tâm thần",
+            "chẩn đoán",
+            "điều trị",
+            "kiến thức tâm lý",
+            "vấn đề tâm lý",
+            "trẻ em",
+            "người lớn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "77958340-af82-43dd-b17a-670fa95dd1d9",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- 9 Cách vượt qua rối loạn lo âu đơn giản tại nhà bạn nên áp dụng  \nTrở thành người đầu tiên bình luận cho bài viết này!  \nEmail của bạn sẽ không được hiển thị công khai. Các trường bắt buộc được đánh dấu *  \nLưu tên của tôi, email, và trang web trong trình duyệt này cho lần bình luận kế tiếp của tôi.  \nΔ  \nTin liên quan  \n#### Hội chứng sợ tiếng ồn (âm thanh lớn) và Cách vượt qua  \n#### 2 bài test rối loạn ám ảnh cưỡng chế OCD nhanh, miễn phí",
+        "summary": "Phần này giới thiệu các nội dung liên quan đến sức khỏe tâm lý, bao gồm 9 cách đơn giản để vượt qua rối loạn lo âu tại nhà. Ngoài ra, nó còn đề cập đến các bài viết khác như hội chứng sợ tiếng ồn và 2 bài test nhanh về rối loạn ám ảnh cưỡng chế (OCD).",
+        "keywords": [
+            "rối loạn lo âu",
+            "cách vượt qua lo âu",
+            "sức khỏe tâm thần",
+            "hội chứng sợ tiếng ồn",
+            "rối loạn ám ảnh cưỡng chế",
+            "OCD",
+            "bài test tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "cd1893e9-09bb-42ed-86bf-89db7cfbbed8",
+        "headers": [
+            "Khoa Hoc Tam Ly_2207"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n#### 2 bài test rối loạn ám ảnh cưỡng chế OCD nhanh, miễn phí  \n#### 10 cây thuốc nam chữa rối loạn lo âu, cải thiện hiệu quả  \n#### Test hội chứng sợ đám đông – Thực hiện online, nhanh chóng  \n#### Suy nghĩ quá nhiều và những tác hại khôn lường phía sau  \n#### Hồi hộp lo âu kéo dài: Nguyên nhân và cách khắc phục  \nChuyên gia tư vấn",
+        "summary": "Phần này tổng hợp các chủ đề về khoa học tâm lý, bao gồm các bài kiểm tra nhanh và miễn phí cho rối loạn ám ảnh cưỡng chế (OCD) và hội chứng sợ đám đông. Nội dung cũng đề cập đến 10 loại cây thuốc nam hiệu quả trong việc chữa rối loạn lo âu. Ngoài ra, nó còn phân tích tác hại của việc suy nghĩ quá nhiều và cung cấp nguyên nhân cùng cách khắc phục tình trạng hồi hộp lo âu kéo dài.",
+        "keywords": [
+            "rối loạn ám ảnh cưỡng chế",
+            "OCD",
+            "rối loạn lo âu",
+            "cây thuốc nam",
+            "hội chứng sợ đám đông",
+            "suy nghĩ quá nhiều",
+            "hồi hộp lo âu",
+            "tâm lý",
+            "test tâm lý",
+            "khắc phục"
+        ],
+        "type": "kiến thức"
+    }
+]

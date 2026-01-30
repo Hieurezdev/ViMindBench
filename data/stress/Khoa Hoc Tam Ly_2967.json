@@ -1,0 +1,918 @@
+[
+    {
+        "uuid": "c214f7fc-1f4d-4f52-ba77-6c8a0f5e6682",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "Rối loạn stress cấp tính (Acute Stress Disorder – ASD) là một dạng rối loạn tâm lý chỉ kéo dài trong 3 – 30 ngày và thường khởi phát sau vài ngày trải qua sự kiện gây sang chấn mạnh. Các triệu chứng của ASD giống với rối loạn stress sau sang chấn (PTSD) nhưng thời gian tiến triển ngắn hơn. Rối loạn stress cấp tính (Acute Stress Disorder – ASD) là một dạng rối loạn tâm lý xảy ra trong khoảng 1 tháng kể từ thời điểm trải qua hoặc chứng kiến sự kiện gây ra sang chấn tâm lý mạnh. Các triệu chứng của ASD thường khởi phát trong 2 – 4 ngày sau sang chấn, xảy ra trong ít nhất 3 ngày và kéo dài không quá 1 tháng.",
+        "summary": "Rối loạn stress cấp tính (ASD) là một dạng rối loạn tâm lý khởi phát sau khi trải qua hoặc chứng kiến sự kiện sang chấn mạnh. Các triệu chứng của ASD thường xuất hiện trong 2-4 ngày và kéo dài từ 3 ngày đến không quá 1 tháng. Rối loạn này có nhiều điểm tương đồng với rối loạn stress sau sang chấn (PTSD) nhưng thời gian tiến triển ngắn hơn, thường chỉ kéo dài 3-30 ngày.",
+        "keywords": [
+            "Rối loạn stress cấp tính",
+            "ASD",
+            "Acute Stress Disorder",
+            "Rối loạn tâm lý",
+            "Sang chấn tâm lý",
+            "Triệu chứng",
+            "PTSD",
+            "Thời gian tiến triển"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a3212003-52be-4b75-a90a-7b8787e8dff0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "Rối loạn này đặc trưng bởi sự suy sụp tinh thần rõ rệt, với triệu chứng điển hình là sự xuất hiện không chủ ý và có tính chất thâm nhập của các sự kiện gây sang chấn (có thể xuất hiện ở dạng giấc mơ, ác mộng, ảo tưởng hoặc ý nghĩ). Người bệnh có phản ứng né tránh các không gian, đối tượng và lời nói gợi nhắc đến sự kiện, đi kèm với sự tiêu cực trong tâm trạng – phản ứng và đôi khi xuất hiện các triệu chứng phân ly.",
+        "summary": "Rối loạn stress cấp tính (ASD) được đặc trưng bởi sự suy sụp tinh thần rõ rệt. Các triệu chứng điển hình bao gồm sự xuất hiện không chủ ý và có tính chất thâm nhập của các sự kiện gây sang chấn, như giấc mơ, ác mộng hoặc ý nghĩ lặp đi lặp lại. Người bệnh cũng có xu hướng né tránh các yếu tố gợi nhắc đến sự kiện, đi kèm với tâm trạng tiêu cực và đôi khi là các triệu chứng phân ly.",
+        "keywords": [
+            "Rối loạn stress cấp tính",
+            "ASD",
+            "Triệu chứng",
+            "Suy sụp tinh thần",
+            "Sang chấn",
+            "Giấc mơ",
+            "Ác mộng",
+            "Né tránh",
+            "Phân ly",
+            "Tâm trạng tiêu cực"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a3b9664b-ddd9-4f89-ad82-ebd36ac6e17a",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "Rối loạn stress cấp tính là vấn đề tâm lý tương đối mới và chỉ được đề cập từ năm 1994. Các triệu chứng của rối loạn này có nhiều điểm tương đồng với rối loạn stress sang sang chấn (PTSD). Tuy nhiên, ASD chỉ phát sinh triệu chứng trong vòng 3 – 30 ngày. Trong khi PTSD có triệu chứng kéo dài ít nhất trong vòng 1 tháng.",
+        "summary": "Rối loạn stress cấp tính (ASD) là một vấn đề tâm lý tương đối mới, được đề cập lần đầu vào năm 1994. Các triệu chứng của ASD có nhiều điểm tương đồng với rối loạn stress sau sang chấn (PTSD). Tuy nhiên, điểm khác biệt chính là thời gian phát sinh triệu chứng: ASD chỉ kéo dài trong vòng 3-30 ngày, trong khi PTSD có triệu chứng kéo dài ít nhất 1 tháng.",
+        "keywords": [
+            "Rối loạn stress cấp tính",
+            "ASD",
+            "PTSD",
+            "Lịch sử tâm lý",
+            "Triệu chứng",
+            "So sánh rối loạn",
+            "Thời gian triệu chứng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "67d723b2-940c-4c13-a75a-3b48d220f08",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "Nguy cơ mắc ASD phụ thuộc vào ngưỡng chịu đựng sang chấn tâm lý của từng người. Điều này phụ thuộc vào mức độ của sự kiện gây sang chấn, kinh nghiệm sống, nền văn hóa, độ tuổi, giới tính,… Chính vì sự đa dạng trong mức độ chịu đựng sang chấn tâm lý nên hiện nay, tỷ lệ người mắc ASD vẫn chưa được thống kê đầy đủ. Theo ghi nhận của các bệnh viện, khoảng 6 – 33% các cựu chiến binh Hoa Kỳ có biểu hiện ASD sau khi trải qua các trận chiến khốc liệt.",
+        "summary": "Nguy cơ mắc rối loạn stress cấp tính (ASD) phụ thuộc vào ngưỡng chịu đựng sang chấn tâm lý của mỗi cá nhân, bị ảnh hưởng bởi nhiều yếu tố như mức độ sự kiện sang chấn, kinh nghiệm sống, văn hóa, độ tuổi và giới tính. Do sự đa dạng này, tỷ lệ người mắc ASD chưa được thống kê đầy đủ. Tuy nhiên, các ghi nhận cho thấy khoảng 6-33% cựu chiến binh Hoa Kỳ có biểu hiện ASD sau khi trải qua các trận chiến khốc liệt.",
+        "keywords": [
+            "ASD",
+            "Rối loạn stress cấp tính",
+            "Nguy cơ",
+            "Sang chấn tâm lý",
+            "Yếu tố ảnh hưởng",
+            "Tỷ lệ mắc",
+            "Cựu chiến binh",
+            "Thống kê"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "87419a21-e311-47af-a658-b6cecdf613e4",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "Rối loạn stress cấp tính (ASD) thường xảy ra sau 2 – 4 ngày kể từ thời điểm trải qua các sự kiện có tính chất đau buồn. Tuy nhiên như đã đề cập, việc phát triển rối loạn này phụ thuộc vào ngưỡng chịu đựng chấn thương tâm lý ở mỗi người.",
+        "summary": "Rối loạn stress cấp tính (ASD) thường khởi phát trong khoảng 2-4 ngày sau khi một người trải qua các sự kiện đau buồn. Tuy nhiên, nguyên nhân chính và việc phát triển rối loạn này không chỉ do sự kiện mà còn phụ thuộc đáng kể vào ngưỡng chịu đựng chấn thương tâm lý của từng cá nhân.",
+        "keywords": [
+            "Rối loạn stress cấp tính",
+            "ASD",
+            "Nguyên nhân",
+            "Sự kiện đau buồn",
+            "Chấn thương tâm lý",
+            "Ngưỡng chịu đựng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d5ae5bc7-0b22-42af-8427-22fb2aa7dcb0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nVề cơ chế bệnh sinh, các chuyên gia nhận thấy khi bị chấn thương tâm lý mạnh, cortisol và catecholamine có hiện tượng tăng bài tiết dẫn đến sự đáp ứng của hàng loạt các cơ quan trong cơ thể. Tình trạng này kiến cho nồng độ serotonin giảm thấp và ảnh hưởng đến hoạt động của một số bộ phận bên trong não bộ. Đây chính là lý do dẫn đến các triệu chứng của ASD và rối loạn stress sau sang chấn (PTSD) .  \nCác sự kiện có thể gây ra rối loạn stress cấp tính bao gồm:",
+        "summary": "Khi bị chấn thương tâm lý mạnh, cơ thể tăng tiết cortisol và catecholamine, đồng thời giảm nồng độ serotonin, ảnh hưởng đến hoạt động của não bộ. Đây là cơ chế bệnh sinh dẫn đến các triệu chứng của rối loạn stress cấp tính (ASD) và rối loạn stress sau sang chấn (PTSD). Các chuyên gia cũng chỉ ra rằng nhiều sự kiện khác nhau có thể gây ra rối loạn stress cấp tính.",
+        "keywords": [
+            "chấn thương tâm lý",
+            "cortisol",
+            "catecholamine",
+            "serotonin",
+            "ASD",
+            "PTSD",
+            "cơ chế bệnh sinh",
+            "rối loạn stress cấp tính",
+            "rối loạn stress sau sang chấn",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "55f8ca18-9bcf-45d0-a44e-55e5e6d5661b",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác sự kiện có thể gây ra rối loạn stress cấp tính bao gồm:  \n- Cái chết của người thân, bạn bè hoặc bạn đời  \n- Trải qua thảm họa thiên nhiên có tính chất nghiêm trọng gây tổn thất lớn về người và của  \n- Tai nạn xe hơi, máy bay  \n- Bị chấn thương nặng (thường là chấn thương sọ não)  \n- Được chẩn đoán mắc các bệnh nan y như ung thư  \n- Bị ngược đãi, bạo lực, cưỡng hiếp và tấn công tình dục  \n- Bị bắt cóc và đe dọa bằng vũ lực",
+        "summary": "Rối loạn stress cấp tính (ASD) có thể phát sinh từ nhiều sự kiện đau thương và gây sốc. Các nguyên nhân phổ biến bao gồm cái chết của người thân, trải qua thảm họa thiên nhiên nghiêm trọng, tai nạn giao thông hoặc máy bay, và chấn thương nặng. Ngoài ra, việc bị chẩn đoán mắc bệnh nan y, bị ngược đãi, bạo lực, cưỡng hiếp hoặc bị bắt cóc cũng là những yếu tố nguy cơ cao gây ra ASD.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "nguyên nhân",
+            "chấn thương tâm lý",
+            "cái chết người thân",
+            "thảm họa thiên nhiên",
+            "tai nạn",
+            "bạo lực",
+            "cưỡng hiếp",
+            "bệnh nan y"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "10ccad3c-8eb2-4db3-9979-21d8430db61a",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrên thực tế, ASD không chỉ xảy ra khi người bệnh chứng kiến và trải qua những sự kiện trên. Rối loạn này hoàn toàn có thể phát triển ngay cả khi bệnh nhân chỉ trải nghiệm gián tiếp thông qua lời kể của người khác. Trong đó đa phần người phải trải qua sự kiện gây sang chấn thường là những người thân thiết như bố mẹ, bạn thân, vợ/ chồng hoặc con cái. Chẳng hạn như người mẹ có thể bị ASD hoặc PTSD khi biết con cái bị bạo hành, ngược đãi và cưỡng hiếp.",
+        "summary": "Rối loạn stress cấp tính (ASD) và rối loạn stress sau sang chấn (PTSD) không chỉ xảy ra khi người bệnh trực tiếp trải qua sự kiện đau buồn. Chúng còn có thể phát triển khi bệnh nhân chỉ trải nghiệm gián tiếp thông qua lời kể của người khác, đặc biệt là khi sự kiện đó liên quan đến người thân thiết. Ví dụ, một người mẹ có thể mắc ASD hoặc PTSD khi biết con mình bị bạo hành hoặc cưỡng hiếp.",
+        "keywords": [
+            "ASD",
+            "PTSD",
+            "chấn thương gián tiếp",
+            "trải nghiệm gián tiếp",
+            "người thân",
+            "bạo hành",
+            "ngược đãi",
+            "cưỡng hiếp",
+            "sang chấn tâm lý",
+            "rối loạn stress"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c6de8791-f949-47fb-bb0c-ceb70b9d0032",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nViệc trải qua những sự kiện đau buồn sẽ gây ra sự suy sụp về tinh thần đối với hầu hết mọi người. Tuy nhiên, chỉ có một số trường hợp phát triển các triệu chứng rối loạn stress cấp tính. Các chuyên gia nhận thấy, nguy cơ mắc rối loạn này tăng lên đáng kể khi có các yếu tố như:  \n- Đã từng trải qua các sự kiện tương tự (nhất là vào giai đoạn thời thơ ấu)  \n- Mắc các rối loạn tâm thần như trầm cảm, rối loạn lo âu, rối loạn hoang tưởng,…",
+        "summary": "Mặc dù các sự kiện đau buồn gây suy sụp tinh thần cho nhiều người, nhưng chỉ một số ít phát triển rối loạn stress cấp tính. Nguy cơ mắc rối loạn này tăng lên đáng kể ở những người đã từng trải qua các sự kiện tương tự, đặc biệt là trong thời thơ ấu. Ngoài ra, những người mắc các rối loạn tâm thần khác như trầm cảm, rối loạn lo âu hoặc rối loạn hoang tưởng cũng có nguy cơ cao hơn.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "nguy cơ",
+            "chấn thương tâm lý",
+            "thời thơ ấu",
+            "rối loạn tâm thần",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "rối loạn hoang tưởng",
+            "yếu tố nguy cơ",
+            "ASD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "3bea81b4-a924-456d-a3fd-fd432d3faa32",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Mắc các rối loạn tâm thần như trầm cảm, rối loạn lo âu, rối loạn hoang tưởng,…  \n- Từng xuất hiện rối loạn phân ly sau khi chứng kiến/ trải qua các sự kiện có tính chất đau buồn  \nCác chuyên gia cũng nhận thấy, nữ giới dưới 40 tuổi có khả năng mắc rối loạn stress cấp tính cao hơn so với nam giới và người trên 40 tuổi. Giả thuyết được đưa ra là nữ giới có tính cách mềm yếu, dễ tổn thương và bị ám ảnh khi chứng kiến các hành vi man rợ, khủng khiếp hơn so với nam giới.",
+        "summary": "Những người mắc các rối loạn tâm thần như trầm cảm, rối loạn lo âu, rối loạn hoang tưởng hoặc từng trải qua rối loạn phân ly sau các sự kiện đau buồn có nguy cơ cao mắc rối loạn stress cấp tính. Nghiên cứu cũng chỉ ra rằng nữ giới dưới 40 tuổi có khả năng mắc rối loạn này cao hơn nam giới và người trên 40 tuổi, có thể do tính cách mềm yếu và dễ bị tổn thương hơn khi đối mặt với các hành vi man rợ.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "rối loạn tâm thần",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "rối loạn hoang tưởng",
+            "rối loạn phân ly",
+            "yếu tố nguy cơ",
+            "giới tính",
+            "tuổi",
+            "tổn thương tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "7422083e-094b-406a-8822-cb9486d7317c",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nHơn nữa, người dưới 40 tuổi có kinh nghiệm sống còn hạn chế nên ngưỡng chịu đựng cũng thấp hơn so với người từ 40 tuổi trở lên. Tuy nhiên, con số này chỉ có tính chất tương đối vì trên thực tế, ngưỡng chịu đựng chấn thương tâm lý phụ thuộc vào yếu tố văn hóa, tính cách,…  \n## Triệu chứng của rối loạn stress cấp tính (ASD)",
+        "summary": "Ngưỡng chịu đựng chấn thương tâm lý có thể thấp hơn ở người dưới 40 tuổi do kinh nghiệm sống hạn chế. Tuy nhiên, yếu tố này chỉ mang tính tương đối vì ngưỡng chịu đựng còn phụ thuộc vào văn hóa và tính cách của mỗi người. Đoạn văn cũng giới thiệu về các triệu chứng của rối loạn stress cấp tính (ASD).",
+        "keywords": [
+            "ngưỡng chịu đựng",
+            "chấn thương tâm lý",
+            "rối loạn stress cấp tính",
+            "ASD",
+            "tuổi tác",
+            "văn hóa",
+            "tính cách",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f3da2380-f7a9-4766-a63d-50c25508f026",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Triệu chứng của rối loạn stress cấp tính (ASD)  \nRối loạn stress cấp tính (ASD) có triệu chứng tương tự như rối loạn căng thẳng sau chấn thương (PTSD) và chỉ có sự khác biệt về thời gian. Rối loạn này có 5 nhóm triệu chứng chính bao gồm sự hồi tưởng sự kiện có tính chất thâm nhập; tâm trạng tiêu cực; phản ứng né tránh; các triệu chứng phân ly; phản ứng thể chất – cảm xúc.  \nSự hồi tưởng về sự kiện có tính chất thâm nhập:",
+        "summary": "Rối loạn stress cấp tính (ASD) có các triệu chứng tương tự rối loạn căng thẳng sau chấn thương (PTSD), chỉ khác biệt về thời gian. Rối loạn này bao gồm 5 nhóm triệu chứng chính: hồi tưởng sự kiện thâm nhập, tâm trạng tiêu cực, phản ứng né tránh, triệu chứng phân ly và phản ứng thể chất – cảm xúc. Bài viết bắt đầu đi sâu vào triệu chứng hồi tưởng sự kiện có tính chất thâm nhập.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "PTSD",
+            "triệu chứng tâm lý",
+            "hồi tưởng thâm nhập",
+            "tâm trạng tiêu cực",
+            "phản ứng né tránh",
+            "triệu chứng phân ly",
+            "phản ứng thể chất",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ce1d62e4-7a2a-45d5-9fbc-ba51caaaf1f2",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sau khoảng 2 – 4 ngày trải qua sự kiện gây sang chấn, bệnh nhân có thể xuất hiện ý nghĩ không chủ ý với nội dung là sự kiện gây đau buồn. Ngoài ý nghĩ, sự kiện cũng có thể được hồi tưởng thông qua giấc mơ hoặc ác mộng.  \n- Điểm đặc biệt là các ý nghĩ, giấc mơ này có tính chất thâm nhập, bệnh nhân cảm nhận rõ cảm xúc và có cảm giác mọi thứ đang diễn ra trước mắt.",
+        "summary": "Sau 2-4 ngày trải qua sang chấn, bệnh nhân rối loạn stress cấp tính có thể xuất hiện ý nghĩ không chủ ý hoặc hồi tưởng sự kiện đau buồn qua giấc mơ, ác mộng. Những hồi tưởng này có tính chất thâm nhập, khiến bệnh nhân cảm nhận rõ cảm xúc và có cảm giác sự kiện đang diễn ra trực tiếp trước mắt.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "hồi tưởng thâm nhập",
+            "sang chấn tâm lý",
+            "ý nghĩ không chủ ý",
+            "giấc mơ",
+            "ác mộng",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ec86c81b-e872-4c4c-b1dc-c571bd5117a6",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Nếu nằm mơ hoặc gặp ác mộng, bệnh nhân có thể tỉnh giấc, cảm nhận được tính chân thực của giấc mơ cùng với cảm xúc dữ dội (sợ hãi, khóc lóc) và nhiều luồng suy nghĩ đan xen.  \n- Sự tái hiện có tính chất thâm nhập này diễn ra liên tục và lặp đi lặp lại khiến bệnh nhân trải qua cảm giác đau khổ và suy sụp về tinh thần.  \nCác phản ứng né tránh:",
+        "summary": "Khi gặp ác mộng hoặc mơ về sự kiện sang chấn, bệnh nhân rối loạn stress cấp tính thường tỉnh giấc với cảm xúc dữ dội như sợ hãi hay khóc lóc. Sự tái hiện liên tục và lặp đi lặp lại của những hình ảnh này gây ra đau khổ và suy sụp tinh thần nghiêm trọng cho người bệnh. Đoạn văn cũng giới thiệu về các phản ứng né tránh.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "ác mộng",
+            "giấc mơ",
+            "tái hiện sang chấn",
+            "đau khổ tinh thần",
+            "suy sụp",
+            "triệu chứng tâm lý",
+            "phản ứng né tránh"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "38e79a86-36bf-422e-a0d4-ac7ed18b7de3",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác phản ứng né tránh:  \n- Bên cạnh sự hồi tưởng có tính chất thâm nhập, bệnh nhân rối loạn stress cấp tính còn có các phản ứng né tránh như cố gắng né tránh các đối tượng, sự việc, không gian, địa điểm,… gợi nhắc đến những sự kiện gây ra tổn thương tâm lý.  \n- Người bệnh cố gắng không nhắc đến sự kiện cả trong lời nói và suy nghĩ. Tuy nhiên, các sự kiện có thể xuất hiện trong ý nghĩ một cách không tự chủ, có tính chất dai dẳng và lặp đi lặp lại.\n\n- Né tránh khi có ai đó yêu cầu kể lại sự kiện. Thậm chí, người bệnh có thể phản ứng quá khích nếu người khác liên tục nhắc đến sự kiện gây đau buồn và yêu cầu bản thân bảy tỏ thái độ, cảm xúc về sự kiện này.  \nTâm trạng, phản ứng tiêu cực:  \n- Sự xuất hiện liên tục của các ý nghĩ, giấc mơ và ác mộng với nội dung là sự kiện gây sang chấn khiến tâm trạng của người bệnh giảm thấp.",
+        "summary": "Ngoài hồi tưởng thâm nhập, bệnh nhân rối loạn stress cấp tính còn biểu hiện các phản ứng né tránh, cố gắng tránh xa mọi thứ gợi nhắc đến sự kiện gây tổn thương tâm lý. Họ né tránh nhắc đến sự kiện cả trong lời nói và suy nghĩ, thậm chí phản ứng quá khích khi bị yêu cầu kể lại. Sự xuất hiện liên tục của các ý nghĩ và giấc mơ về sang chấn cũng làm tâm trạng người bệnh suy giảm nghiêm trọng.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "phản ứng né tránh",
+            "hồi tưởng thâm nhập",
+            "tổn thương tâm lý",
+            "tâm trạng tiêu cực",
+            "sang chấn tâm lý",
+            "triệu chứng tâm lý",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "12f33064-429b-481b-b70e-bb499afaca56",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Bệnh nhân bắt đầu hình thành suy nghĩ tiêu cực về bản thân và loài người. Thậm chí một số người cảm thấy ghê tởm sự độc ác của con người.  \n- Dần hình thành sự méo mó trong nhận thức, người bệnh thường suy nghĩ sai lệch về nguyên nhân và hậu quả của các sự kiện sang chấn. Đôi khi tự đổ lỗi cho bản thân hoặc những người xung quanh để tránh cảm giác xấu hổ, bi quan, tuyệt vọng.  \n- Thường trực cảm giác sợ hãi, xấu hổ, tức giận, bồn chồn, lo lắng, tội lỗi,…",
+        "summary": "Bệnh nhân thường hình thành suy nghĩ tiêu cực về bản thân và loài người, thậm chí cảm thấy ghê tởm sự độc ác. Họ có thể trải qua sự méo mó trong nhận thức, dẫn đến việc suy nghĩ sai lệch về nguyên nhân và hậu quả của các sự kiện sang chấn, thường tự đổ lỗi để tránh cảm giác xấu hổ. Các cảm xúc tiêu cực như sợ hãi, xấu hổ, tức giận, bồn chồn, lo lắng và tội lỗi thường trực xuất hiện.",
+        "keywords": [
+            "suy nghĩ tiêu cực",
+            "méo mó nhận thức",
+            "tự đổ lỗi",
+            "sang chấn tâm lý",
+            "cảm giác sợ hãi",
+            "xấu hổ",
+            "tức giận",
+            "lo lắng",
+            "tội lỗi",
+            "tâm lý bệnh nhân"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "50ee8a93-4469-4897-9b6b-2cf0ca5c9bb4",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sự giảm thấp của tâm trạng khiến người bệnh giảm hoặc mất hứng thú với các hoạt động xung quanh  \n- Bản thân người bệnh có thể mất cảm giác và tê liệt với mọi thứ  \n- Luôn cảm thấy cô đơn, lạc lõng và tách biệt với mọi người  \n- Sự ám ảnh và sợ hãi quá mức có thể gây ra một số vấn đề về trí nhớ. Thường gặp nhất là tình trạng mất một đoạn ký ức liên quan đến sự kiện sang chấn.  \n- Mất hoàn toàn các cảm xúc tích cực như yêu thương, hài lòng, vui vẻ, hạnh phúc,…  \nCác triệu chứng phân ly:",
+        "summary": "Người bệnh thường trải qua sự giảm sút tâm trạng, mất hứng thú với các hoạt động và cảm thấy tê liệt cảm xúc. Họ có thể cảm thấy cô đơn, lạc lõng và bị tách biệt. Ám ảnh và sợ hãi quá mức có thể dẫn đến các vấn đề về trí nhớ, đặc biệt là mất ký ức liên quan đến sự kiện sang chấn, cùng với việc mất hoàn toàn các cảm xúc tích cực.",
+        "keywords": [
+            "giảm hứng thú",
+            "mất cảm giác",
+            "tê liệt cảm xúc",
+            "cô đơn",
+            "lạc lõng",
+            "mất trí nhớ",
+            "sang chấn",
+            "mất cảm xúc tích cực",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ee7bc47d-0363-484e-948a-1214e83c7548",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác triệu chứng phân ly:  \n- Rối loạn phân ly thường xảy ra sau khi trải qua các sự kiện gây tổn thương tâm lý mạnh.  \n- Bệnh nhân ASD sẽ gặp phải các triệu chứng như thay đổi cảm giác với mọi thứ xung quanh, mất đi ký ức quan trọng trong sự kiện (quên phân ly), giảm nhận thức về môi trường xung quanh.  \n- Có cảm giác những sự kiện đã xảy ra đang tái hiện trước mắt  \n- Mất cảm giác về thực tại (tri giác thay đổi, cảm thấy thời gian trôi chậm lại, sững sờ,…)",
+        "summary": "Rối loạn phân ly thường xuất hiện sau các sự kiện gây tổn thương tâm lý mạnh. Bệnh nhân có thể trải qua các triệu chứng như thay đổi cảm giác về môi trường, mất ký ức quan trọng liên quan đến sự kiện (quên phân ly), và giảm nhận thức. Ngoài ra, họ còn có thể có cảm giác sự kiện đã xảy ra đang tái hiện và mất cảm giác về thực tại, với tri giác thay đổi hoặc thời gian trôi chậm lại.",
+        "keywords": [
+            "rối loạn phân ly",
+            "tổn thương tâm lý",
+            "mất ký ức",
+            "quên phân ly",
+            "giảm nhận thức",
+            "tái hiện sự kiện",
+            "mất cảm giác thực tại",
+            "tri giác thay đổi",
+            "ASD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ce429908-5d63-484e-948a-1214e83c7548",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Mất cảm giác về thực tại (tri giác thay đổi, cảm thấy thời gian trôi chậm lại, sững sờ,…)  \n- Bệnh nhân có cảm giác rằng cảm xúc và suy nghĩ gần như không thuộc về bản thân mà là của một người khác.  \nPhản ứng thể chất – cảm xúc:  \n- Các nhóm triệu chứng trên tác động đáng kể đến cảm xúc và thể chất của người bệnh.Người bị rối loạn stress cấp tính thường bị rối loạn giấc ngủ, dễ tỉnh giấc do gặp ác mộng, hay giật mình, sợ hãi tột độ,…",
+        "summary": "Bệnh nhân có thể mất cảm giác về thực tại, với tri giác thay đổi, cảm thấy thời gian trôi chậm lại hoặc sững sờ. Họ cũng có thể trải nghiệm cảm giác cảm xúc và suy nghĩ không thuộc về bản thân. Những triệu chứng này tác động mạnh mẽ đến cả cảm xúc và thể chất, khiến người bị rối loạn stress cấp tính thường gặp rối loạn giấc ngủ, dễ tỉnh giấc vì ác mộng, và có phản ứng giật mình, sợ hãi tột độ.",
+        "keywords": [
+            "mất cảm giác thực tại",
+            "tri giác thay đổi",
+            "tách rời cảm xúc",
+            "rối loạn stress cấp tính",
+            "rối loạn giấc ngủ",
+            "ác mộng",
+            "giật mình",
+            "sợ hãi",
+            "phản ứng thể chất"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "467d8441-258c-464b-b08a-157f0525e471",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Nóng nảy, dễ tức giận và có các hành vi quá khích, hung hăng,… Một số bệnh nhân có thể phát sinh các hành vi không suy nghĩ và thiếu thận trọng (uống nhiều rượu bia, đua xe, lái xe thiếu thận trọng,…)  \n- Luôn quan sát mọi thứ xung quanh với tâm thế đề phòng cao độ. Biểu hiện thường thấy là bệnh nhân luôn nhìn ngó xung quanh với ánh mắt nghi ngờ và sự căng thẳng hiện rõ trên khuôn mặt.  \n- Khó tập trung và dễ bị kích thích.",
+        "summary": "Bệnh nhân thường biểu hiện sự nóng nảy, dễ tức giận và có thể có các hành vi quá khích, hung hăng. Một số người còn phát sinh các hành vi thiếu suy nghĩ và không thận trọng như lạm dụng rượu bia hoặc lái xe liều lĩnh. Họ luôn trong tâm thế đề phòng cao độ, quan sát mọi thứ với ánh mắt nghi ngờ và căng thẳng, đồng thời gặp khó khăn trong việc tập trung và dễ bị kích thích.",
+        "keywords": [
+            "nóng nảy",
+            "tức giận",
+            "hành vi hung hăng",
+            "hành vi thiếu thận trọng",
+            "đề phòng cao độ",
+            "căng thẳng",
+            "khó tập trung",
+            "dễ bị kích thích",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b298f2e6-e9c0-4b49-90d2-4bad89bc33cc",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác triệu chứng rối loạn stress cấp tính có thể đi kèm với biểu hiện trầm cảm và rối loạn lo âu. Trong những trường hợp này, triệu chứng sẽ đa dạng và khó nhận biết hơn. Với trẻ dưới 6 tuổi, ASD có thể được biểu hiện qua sự sợ hãi, kinh hoàng và la hét khi ai đó đề cập đến sự kiện gây đau buồn. Trẻ thường xuyên gặp phải ác mộng và đôi khi tái hiện lại sự kiện thông qua trò chơi.  \n## Ảnh hưởng của rối loạn stress cấp tính",
+        "summary": "Rối loạn stress cấp tính (ASD) có thể đi kèm với các biểu hiện trầm cảm và rối loạn lo âu, khiến triệu chứng trở nên đa dạng và khó nhận biết. Ở trẻ dưới 6 tuổi, ASD thường biểu hiện qua sự sợ hãi, la hét khi nhắc đến sự kiện đau buồn, thường xuyên gặp ác mộng và tái hiện sự kiện qua trò chơi.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "triệu chứng ASD",
+            "trẻ em",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "ác mộng",
+            "sợ hãi",
+            "tâm lý trẻ em"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "36336fb3-d936-4343-a486-0e16e6f8dc39",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Ảnh hưởng của rối loạn stress cấp tính  \nRối loạn stress cấp tính (ASD) là rối loạn tâm lý xảy ra trong thời gian ngắn, kéo dài ít nhất 3 ngày và tối đa là 1 tháng. Ảnh hưởng đầu tiên của rối loạn này là giảm đáp ứng cảm xúc, bệnh nhân bị suy sụp tinh thần, luôn có cảm giác tội lỗi, buồn bã, bi quan, sợ hãi, kinh hoàng,… Bên cạnh đó, phản ứng né tránh và sự thay đổi về nhận thức – cảm xúc cũng gây ra những ảnh hưởng đáng kể đối với chất lượng cuộc sống.",
+        "summary": "Rối loạn stress cấp tính (ASD) là một rối loạn tâm lý ngắn hạn, kéo dài từ 3 ngày đến 1 tháng, gây ra nhiều ảnh hưởng tiêu cực. Các tác động chính bao gồm giảm đáp ứng cảm xúc, suy sụp tinh thần, cảm giác tội lỗi, buồn bã, bi quan, sợ hãi và kinh hoàng. Ngoài ra, phản ứng né tránh cùng sự thay đổi nhận thức – cảm xúc cũng ảnh hưởng đáng kể đến chất lượng cuộc sống của người bệnh.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "định nghĩa ASD",
+            "thời gian mắc bệnh",
+            "triệu chứng ASD",
+            "suy sụp tinh thần",
+            "giảm cảm xúc",
+            "phản ứng né tránh",
+            "chất lượng cuộc sống"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d54eec26-0665-4a76-a776-87d5e7b4f2d5",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi trải qua rối loạn stress cấp tính, bệnh nhân gần như không thể học tập và làm việc bình thường do giảm khả năng tập trung. Các mâu thuẫn và xung đột cũng có thể gia tăng do người bệnh dễ kích động và nảy sinh các hành vi thiếu thận trọng. Ngoài ra, sự quan sát và chú ý quá mức của người bệnh cũng khiến những người xung quanh cảm thấy không thoải mái. Do đó, bệnh nhân ASD còn phải đối mặt với nguy cơ đánh mất các mối quan hệ thân thiết và gặp nhiều phiền toái trong cuộc sống.",
+        "summary": "Rối loạn stress cấp tính (ASD) ảnh hưởng nghiêm trọng đến khả năng học tập và làm việc do giảm tập trung. Người bệnh dễ bị kích động và có hành vi thiếu thận trọng, dẫn đến gia tăng mâu thuẫn và xung đột trong các mối quan hệ. Sự quan sát và chú ý quá mức của họ cũng gây khó chịu cho người xung quanh, khiến bệnh nhân ASD đối mặt với nguy cơ mất đi các mối quan hệ thân thiết và nhiều phiền toái xã hội.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "ảnh hưởng xã hội",
+            "khó khăn học tập",
+            "khó khăn làm việc",
+            "mất tập trung",
+            "dễ kích động",
+            "xung đột",
+            "mối quan hệ",
+            "chất lượng cuộc sống"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a07000f2-432b-4b4c-9290-ec1dcc6aa254",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTuy nhiên, nếu được thăm khám và điều trị sớm, rối loạn stress cấp tính hoàn toàn có thể chữa khỏi. Vì triệu chứng chỉ xảy ra trong tối đa 1 tháng nên các ảnh hưởng của rối loạn này thường nhẹ hơn so với PTSD – rối loạn stress sau sang chấn. Ngược lại, những trường hợp không được điều trị có thể phát triển thành PTSD, đồng thời gia tăng nguy cơ trầm cảm, rối loạn lo âu và các rối loạn tâm thần khác.  \n## Chẩn đoán rối loạn stress cấp tính (ASD)",
+        "summary": "Rối loạn stress cấp tính (ASD) hoàn toàn có thể chữa khỏi nếu được thăm khám và điều trị sớm. Các ảnh hưởng của ASD thường nhẹ hơn so với PTSD do triệu chứng chỉ kéo dài tối đa 1 tháng. Tuy nhiên, nếu không được điều trị, ASD có thể tiến triển thành PTSD, đồng thời làm tăng nguy cơ mắc trầm cảm, rối loạn lo âu và các rối loạn tâm thần khác.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "điều trị ASD",
+            "chữa khỏi",
+            "PTSD",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "rối loạn tâm thần",
+            "can thiệp sớm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "479627a3-027e-461d-b887-fc904ea25c35",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress cấp tính (ASD) được chẩn đoán thông qua DSM-5 hoặc ICD-10. Cả hai tiêu chuẩn này được sử dụng triệu chứng lâm sàng để chẩn đoán bệnh. Ngoài ra, bệnh nhân cũng sẽ được chẩn đoán phân biệt với các rối loạn do stress nhưng không đủ tiêu chuẩn chẩn đoán ASD. Bên cạnh đó, các bác sĩ cũng sẽ chẩn đoán với một số trường hợp giả bệnh để vụ lợi, tranh chấp tài sản,…  \n– Tiêu chuẩn chẩn đoán rối loạn stress cấp tính theo DSM-5:\n\n– Tiêu chuẩn chẩn đoán rối loạn stress cấp tính theo DSM-5:  \n- Bệnh nhân phải phơi nhiễm với sự kiện gây sang chấn (có thể là trải nghiệm hoặc chứng kiến). Sự kiện này phải gây ra phản ứng bất lực, ghê rợn và khiếp sợ.  \n- Có từ 3 hoặc nhiều hơn các triệu chứng có tính chất phân ly (quên phân ly, giải thể nhân cách, tri giác sai thực tại, không có đáp ứng với cảm xúc, bị tách rời với thực tại,…)",
+        "summary": "Rối loạn stress cấp tính (ASD) được chẩn đoán dựa trên các tiêu chuẩn lâm sàng của DSM-5 hoặc ICD-10, đồng thời phân biệt với các rối loạn stress khác và các trường hợp giả bệnh. Theo DSM-5, bệnh nhân phải phơi nhiễm với sự kiện gây sang chấn tạo ra phản ứng bất lực, ghê rợn và khiếp sợ. Ngoài ra, họ cần có từ ba triệu chứng phân ly trở lên, như quên phân ly, giải thể nhân cách, tri giác sai thực tại, hoặc không có đáp ứng cảm xúc.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "chẩn đoán ASD",
+            "DSM-5",
+            "ICD-10",
+            "tiêu chuẩn chẩn đoán",
+            "triệu chứng phân ly",
+            "sang chấn tâm lý",
+            "chẩn đoán phân biệt"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "22a569dc-07ec-4ca3-80fa-4c56b546c2e0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sự kiện sang chấn thường được tái hiện lại thông qua ý nghĩ không chủ ý, ác mộng, giấc mơ, ảo tưởng,…  \n- Có phản ứng né tránh những yếu tố gợi nhắc đến sự kiện đã xảy ra  \n- Có biểu hiện lo âu và tăng kích thích (bất an, bồn chồn, giật mình, khó tập trung, khó ngủ, hay tức giận,…)  \n- Các triệu chứng phải ảnh hưởng đáng kể đến việc học, nghề nghiệp và các hoạt động sinh hoạt  \n- Triệu chứng xuất hiện sau sự kiện khoảng 2 – 4 ngày, kéo dài ít nhất 3 ngày và tối đa trong 1 tháng",
+        "summary": "Nội dung này mô tả các triệu chứng phổ biến sau một sự kiện sang chấn, bao gồm việc tái hiện lại sự kiện qua ý nghĩ và ác mộng, phản ứng né tránh các yếu tố gợi nhắc, cùng với biểu hiện lo âu và tăng kích thích. Các triệu chứng này ảnh hưởng đáng kể đến sinh hoạt và thường xuất hiện sau 2-4 ngày, kéo dài tối đa một tháng.",
+        "keywords": [
+            "sự kiện sang chấn",
+            "tái hiện",
+            "né tránh",
+            "lo âu",
+            "tăng kích thích",
+            "triệu chứng",
+            "rối loạn stress cấp tính",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "fce4ecc7-2f69-4ed6-9f59-3a68983227b5",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các triệu chứng kể trên chỉ được chẩn đoán là rối loạn stress cấp tính khi không liên quan đến thuốc, ma túy và chất gây nghiện. Đồng thời không phải do các bệnh toàn thân gây ra và không có đủ tiêu chuẩn để chẩn đoán rối loạn loạn thần.",
+        "summary": "Đoạn văn này nêu rõ các tiêu chí chẩn đoán rối loạn stress cấp tính, trong đó các triệu chứng chỉ được xác nhận khi không liên quan đến việc sử dụng thuốc, ma túy hay các chất gây nghiện. Ngoài ra, rối loạn này cũng không phải do các bệnh toàn thân gây ra và không đủ tiêu chuẩn để chẩn đoán rối loạn loạn thần.",
+        "keywords": [
+            "chẩn đoán",
+            "rối loạn stress cấp tính",
+            "tiêu chuẩn chẩn đoán",
+            "thuốc",
+            "ma túy",
+            "chất gây nghiện",
+            "bệnh toàn thân",
+            "rối loạn loạn thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f20212d0-9438-4459-8ea4-0ff67cb8c156",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhác với DSM-5, ICD-10 chẩn đoán rối loạn stress cấp tính khi triệu chứng xảy ra sau vài phút đến vài giờ sau sự kiên và biến mất trong khoảng 2 – 3 ngày. Tiêu chuẩn ICD-10 vừa có thể chẩn đoán xác định vừa đánh giá được mức độ nghiêm trọng của rối loạn stress cấp tính (ASD).  \n## Các phương pháp điều trị rối loạn stress cấp tính",
+        "summary": "Nội dung so sánh tiêu chuẩn chẩn đoán rối loạn stress cấp tính (ASD) giữa DSM-5 và ICD-10, chỉ ra rằng ICD-10 chẩn đoán khi triệu chứng xuất hiện nhanh chóng sau sự kiện và biến mất trong 2-3 ngày. Tiêu chuẩn của ICD-10 không chỉ giúp chẩn đoán mà còn đánh giá mức độ nghiêm trọng của ASD. Phần cuối đề cập đến các phương pháp điều trị rối loạn này.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "DSM-5",
+            "ICD-10",
+            "chẩn đoán",
+            "tiêu chuẩn",
+            "mức độ nghiêm trọng",
+            "điều trị"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "7fdfc74d-5344-40c6-b56a-6539ec9dc876",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress cấp tính cần phải được điều trị sớm để tránh tình trạng chuyển sang rối loạn căng thẳng sau chấn thương (PTSD). Nhìn chung, điều trị ASD thường mang lại kết quả tốt. Tuy nhiên, mức độ triệu chứng và thời gian tiến triển của rối loạn này phụ thuộc khá nhiều vào kinh nhiệm sống, tiền sử gia đình, tác động xã hội, nhân cách của bệnh nhân và các rối loạn tâm thần đi kèm.",
+        "summary": "Rối loạn stress cấp tính (ASD) cần được điều trị sớm để ngăn ngừa chuyển biến thành rối loạn căng thẳng sau chấn thương (PTSD). Mặc dù việc điều trị ASD thường mang lại kết quả tích cực, nhưng mức độ triệu chứng và thời gian tiến triển của rối loạn này bị ảnh hưởng bởi nhiều yếu tố như kinh nghiệm sống, tiền sử gia đình, tác động xã hội, nhân cách và các rối loạn tâm thần đi kèm của bệnh nhân.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "PTSD",
+            "điều trị sớm",
+            "tiên lượng",
+            "yếu tố ảnh hưởng",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9b9562e2-0256-4786-ad96-189da93ca878",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTương tự như các rối loạn liên quan đến stress, rối loạn stress cấp tính thường được điều trị bằng thuốc và tâm lý trị liệu:  \n### 1. Sử dụng thuốc  \nTrên thực tế, việc sử dụng thuốc cho bệnh nhân rối loạn stress cấp tính còn hạn chế do khả năng đáp ứng kém. Tuy nhiên, bệnh nhân vẫn sẽ được chỉ định một số thuốc để giảm các phản ứng tiêu cực và hành vi kích động, hung hăng.  \nMột số loại thuốc được sử dụng trong điều trị rối loạn stress cấp tính:\n\nMột số loại thuốc được sử dụng trong điều trị rối loạn stress cấp tính:  \n- Thuốc chống trầm cảm (thường dùng nhất là SSRIs)  \n- Thuốc ức chế adrenergic (Propranolol)  \n- Thuốc an thần benzodiazepin được sử dụng để cải thiện tình trạng kích động, các triệu chứng phân ly, sợ hãi, kinh hoàng, lo âu quá mức,… Thuốc có khả năng gây nghiện nên chỉ được sử dụng khi thực sự cần thiết. Các loại thuốc thông dụng bao gồm Rivotril, Tranxene, Lexomil, Seduxen.",
+        "summary": "Rối loạn stress cấp tính thường được điều trị bằng cả thuốc và tâm lý trị liệu. Mặc dù việc sử dụng thuốc có thể hạn chế do khả năng đáp ứng kém, nhưng một số loại thuốc vẫn được chỉ định để giảm các phản ứng tiêu cực và hành vi kích động. Các loại thuốc phổ biến bao gồm thuốc chống trầm cảm (SSRIs), thuốc ức chế adrenergic (Propranolol) và thuốc an thần benzodiazepin, với benzodiazepin cần thận trọng do nguy cơ gây nghiện.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "điều trị",
+            "thuốc",
+            "tâm lý trị liệu",
+            "thuốc chống trầm cảm",
+            "SSRIs",
+            "Propranolol",
+            "benzodiazepin",
+            "kích động",
+            "lo âu"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "040ad9fe-47eb-4732-a71e-07b7f31146cb",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thuốc an thần kinh (được sử dụng khi benzodiazepin không mang lại hiệu quả)  \nTrong tất cả các loại thuốc được sử dụng, benzodiazepin là loại thuốc mang lại hiệu quả rõ rệt nhất. Tuy nhiên, vì thuốc có thể gây nghiện và tiềm ẩn nhiều rủi ro nên chỉ được sử dụng trong trường hợp cần thiết. Các loại thuốc khác được đánh giá an toàn hơn nhưng về không mang lại cải thiện rõ rệt.  \n### 2. Tâm lý liệu pháp",
+        "summary": "Thuốc an thần kinh, đặc biệt là benzodiazepin, cho thấy hiệu quả rõ rệt nhưng tiềm ẩn nguy cơ gây nghiện và nhiều rủi ro, do đó chỉ được sử dụng khi thật sự cần thiết. Các loại thuốc khác được đánh giá an toàn hơn nhưng lại không mang lại cải thiện đáng kể. Việc cân nhắc kỹ lưỡng là cần thiết khi sử dụng các loại thuốc này trong điều trị tâm lý.",
+        "keywords": [
+            "thuốc an thần kinh",
+            "benzodiazepin",
+            "điều trị tâm lý",
+            "nghiện thuốc",
+            "rủi ro thuốc",
+            "hiệu quả điều trị",
+            "tâm lý liệu pháp"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8116b7a4-51b7-46e9-896d-a83cae8e4319",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 2. Tâm lý liệu pháp  \nTâm lý liệu pháp (trị liệu tâm lý) được xem là phương pháp chính trong điều trị rối loạn stress cấp tính, rối loạn căng thẳng sau chấn thương và các rối loạn do stress khác. Mục tiêu của phương pháp này là giúp bệnh nhân thoát khỏi sự ám ảnh về sự kiện đã xảy ra, từ đó giảm thiểu các hành vi kích động, trở lại trạng thái tâm lý bình thường và dần ổn định cuộc sống.",
+        "summary": "Tâm lý liệu pháp là phương pháp điều trị chủ yếu cho các rối loạn như stress cấp tính, rối loạn căng thẳng sau chấn thương (PTSD) và các rối loạn liên quan đến stress khác. Mục tiêu chính của liệu pháp này là giúp bệnh nhân vượt qua sự ám ảnh từ các sự kiện đã xảy ra. Từ đó, nó giúp giảm thiểu hành vi kích động, đưa bệnh nhân trở lại trạng thái tâm lý bình thường và ổn định cuộc sống.",
+        "keywords": [
+            "tâm lý liệu pháp",
+            "trị liệu tâm lý",
+            "rối loạn stress cấp tính",
+            "rối loạn căng thẳng sau chấn thương",
+            "PTSD",
+            "điều trị stress",
+            "ổn định tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e93a2029-266d-46b8-8497-71f4b3f94cb2",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrước tiên, bệnh nhân sẽ được đưa ra khỏi môi trường gây sang chấn tâm lý để giảm thiểu tối đa sự tái hiện hồi ức có tính chất thâm nhập. Do đó, một số người bệnh sẽ được điều trị nội trú tại các trung tâm và bệnh viện. Tách rời khỏi môi trường gây sang chấn tâm lý sẽ giúp bệnh nhân giảm thiểu nỗi sợ hãi, lo âu, hốt hoảng và ổn định hơn về tâm trạng.",
+        "summary": "Bước đầu trong quá trình điều trị là đưa bệnh nhân ra khỏi môi trường gây sang chấn tâm lý, nhằm giảm thiểu tối đa sự tái hiện của các hồi ức thâm nhập. Điều này có thể bao gồm việc điều trị nội trú tại các trung tâm hoặc bệnh viện chuyên khoa. Mục đích chính là giúp bệnh nhân giảm bớt nỗi sợ hãi, lo âu, hốt hoảng và đạt được sự ổn định về mặt tâm trạng.",
+        "keywords": [
+            "sang chấn tâm lý",
+            "môi trường gây sang chấn",
+            "điều trị nội trú",
+            "hồi ức thâm nhập",
+            "giảm sợ hãi",
+            "lo âu",
+            "ổn định tâm trạng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c9ff7323-4177-4006-93f4-9b1c1c75e130",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nBan đầu, các chuyên gia tâm lý sẽ động viện, an ủi để người bệnh cảm thấy yên tâm và nhận biết rằng các sự kiện gây nguy hiểm đã kết thúc, hoàn toàn không xảy ra trong thực tại. Bên cạnh đó, bệnh nhân cũng sẽ được hướng dẫn kỹ thuật thở và một số bài tập thư giãn để giải tỏa căng thẳng, lo âu và giảm bớt các triệu chứng khó chịu.  \nCác liệu pháp tâm lý trị liệu được áp dụng cho bệnh nhân rối loạn stress cấp tính:",
+        "summary": "Ban đầu, chuyên gia tâm lý sẽ động viên và an ủi bệnh nhân để họ cảm thấy an tâm và nhận ra rằng các sự kiện nguy hiểm đã kết thúc. Đồng thời, bệnh nhân cũng được hướng dẫn các kỹ thuật thở và bài tập thư giãn nhằm giải tỏa căng thẳng, lo âu và làm giảm các triệu chứng khó chịu. Đây là những bước chuẩn bị quan trọng trước khi áp dụng các liệu pháp tâm lý trị liệu chuyên sâu cho rối loạn stress cấp tính.",
+        "keywords": [
+            "động viên tâm lý",
+            "an ủi",
+            "kỹ thuật thở",
+            "bài tập thư giãn",
+            "giải tỏa căng thẳng",
+            "giảm lo âu",
+            "rối loạn stress cấp tính",
+            "liệu pháp tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2b40ee90-a534-4c75-82a1-db9051222531",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Liệu pháp nhận thức – hành vi (CBT): Liệu pháp nhận thức – hành vi là phương pháp hiệu quả trong điều trị rối loạn stress cấp tính (ASD). Tuy nhiên, một số chuyên gia cho rằng, các triệu chứng ASD sẽ tự khỏi sau khoảng 1 tháng nên không nhất thiết phải áp dụng liệu pháp này. Nhưng nhìn chung, CBT vẫn được thực hiện cho người bị rối loạn stress cấp tính để nâng đỡ tinh thần,giảm các hành vi kích động và ngăn ngừa ASD chuyển biến thành PTSD (rối loạn căng thẳng sau chấn thương).",
+        "summary": "Liệu pháp nhận thức – hành vi (CBT) được xem là phương pháp hiệu quả trong điều trị rối loạn stress cấp tính (ASD). Mặc dù một số chuyên gia cho rằng ASD có thể tự khỏi sau khoảng một tháng, CBT vẫn thường được áp dụng. Mục đích của CBT là nâng đỡ tinh thần, giảm các hành vi kích động và quan trọng hơn là ngăn ngừa ASD tiến triển thành rối loạn căng thẳng sau chấn thương (PTSD).",
+        "keywords": [
+            "liệu pháp nhận thức – hành vi",
+            "CBT",
+            "rối loạn stress cấp tính",
+            "ASD",
+            "PTSD",
+            "điều trị tâm lý",
+            "nâng đỡ tinh thần",
+            "ngăn ngừa PTSD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2026312d-ed1d-4b0b-b078-ed4d406fe03b",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Liệu pháp phơi nhiễm: Liệu pháp phơi nhiễm cũng được cân nhắc trong một số trường hợp rối loạn stress cấp tính khi sự kiện gây sang chấn được gợi nhắc thông qua nhiều đối tượng, không gian trong cuộc sống. Chẳng hạn như người bệnh né tránh di chuyển bằng các phương tiện giao thông do gặp phải tai nạn nghiêm trọng. Phản ứng né tránh trong những trường hợp này ảnh hưởng nhiều đến chất lượng cuộc sống. Do đó, bệnh nhân có thể được chỉ định liệu pháp phơi nhiễm. Liệu pháp này cho phép người bệnh\n\nsống. Do đó, bệnh nhân có thể được chỉ định liệu pháp phơi nhiễm. Liệu pháp này cho phép người bệnh tiếp cận với các không gian, địa điểm, đối tượng,… gợi nhắc đến sự kiện gây sang chấn theo tần suất và mức độ tăng dần với mục tiêu giảm phản ứng né tránh và kiểm soát sự sợ hãi kinh hoàng.",
+        "summary": "Liệu pháp phơi nhiễm là một phương pháp điều trị được cân nhắc cho người bệnh rối loạn stress cấp tính, đặc biệt khi họ né tránh các đối tượng hoặc không gian gợi nhắc sự kiện gây sang chấn. Liệu pháp này giúp bệnh nhân dần tiếp cận với các yếu tố gây sợ hãi theo tần suất và mức độ tăng dần. Mục tiêu là giảm phản ứng né tránh và kiểm soát nỗi sợ hãi kinh hoàng, từ đó cải thiện chất lượng cuộc sống.",
+        "keywords": [
+            "liệu pháp phơi nhiễm",
+            "rối loạn stress cấp tính",
+            "ASD",
+            "trị liệu tâm lý",
+            "né tránh",
+            "sợ hãi",
+            "sang chấn",
+            "kiểm soát cảm xúc",
+            "chất lượng cuộc sống"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "7cc1a07c-9761-4c94-8dd8-ea5f0e973d6b",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Liệu pháp thôi miên: Liệu pháp thôi miên thường được áp dụng cho bệnh nhân rối loạn stress cấp tính có biểu hiện trầm cảm và rối loạn lo âu. Liệu pháp này được thực hiện bằng cách đưa bệnh nhân vào trạng thái thư giãn để có thể bộc lộ cảm xúc và suy nghĩ thật. Thông qua liệu pháp này, bệnh nhân có thể giải tỏa các cảm xúc tiêu cực và cải thiện khả năng tập trung khi học tập, làm việc.",
+        "summary": "Liệu pháp thôi miên được áp dụng cho bệnh nhân rối loạn stress cấp tính có biểu hiện trầm cảm và rối loạn lo âu. Phương pháp này đưa bệnh nhân vào trạng thái thư giãn sâu để họ có thể bộc lộ cảm xúc và suy nghĩ thật của mình. Qua đó, liệu pháp giúp giải tỏa các cảm xúc tiêu cực và cải thiện đáng kể khả năng tập trung trong học tập và làm việc.",
+        "keywords": [
+            "liệu pháp thôi miên",
+            "rối loạn stress cấp tính",
+            "trầm cảm",
+            "rối loạn lo âu",
+            "trị liệu tâm lý",
+            "thư giãn",
+            "giải tỏa cảm xúc",
+            "cải thiện tập trung"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "571f9b5c-bc6a-414e-b2eb-7415cf04e301",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nLiệu pháp tâm lý mang lại hiệu quả cao trong điều trị rối loạn stress cấp tính (ASD). Ngoài trị liệu cá nhân, bệnh nhân cũng sẽ được trị liệu theo nhóm và gia đình để đạt hiệu quả cao hơn. Trong trị liệu nhóm, các thành viên tham gia có thể thoải mái chia sẻ để được xoa dịu tâm trạng và cảm nhận rõ sự gắn kết giữa bản thân và những người xung quanh.  \n### 3. Các biện pháp hỗ trợ",
+        "summary": "Liệu pháp tâm lý đóng vai trò quan trọng và mang lại hiệu quả cao trong điều trị rối loạn stress cấp tính (ASD). Bên cạnh trị liệu cá nhân, bệnh nhân còn được khuyến khích tham gia trị liệu theo nhóm và gia đình để tăng cường hiệu quả điều trị. Trị liệu nhóm tạo cơ hội cho các thành viên chia sẻ, giúp xoa dịu tâm trạng và củng cố sự gắn kết giữa họ.",
+        "keywords": [
+            "liệu pháp tâm lý",
+            "rối loạn stress cấp tính",
+            "ASD",
+            "trị liệu cá nhân",
+            "trị liệu nhóm",
+            "trị liệu gia đình",
+            "xoa dịu tâm trạng",
+            "gắn kết xã hội"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "bf585d29-946a-4de7-9fce-b3b4b0a6d1f0",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 3. Các biện pháp hỗ trợ  \nRối loạn stress cấp tính khiến bệnh nhân rơi vào trạng thái căng thẳng, bi quan, vô vọng, nóng nảy và dễ nổi giận. Để cải thiện các triệu chứng này, bệnh nhân có thể áp dụng một số biện pháp hỗ trợ như:  \n- Thực hành thiền và các bài tập thư giãn hằng ngày để giải tỏa căng thẳng và kiểm soát các cảm xúc tiêu cực. Ngoài ra, các bài tập này còn giúp giảm mất ngủ, đau nhức cơ thể, mệt mỏi và khắc phục một số triệu chứng cơ thể do ASD gây ra.",
+        "summary": "Rối loạn stress cấp tính (ASD) thường gây ra các triệu chứng như căng thẳng, bi quan, vô vọng và dễ nổi giận. Để hỗ trợ cải thiện các triệu chứng này, bệnh nhân có thể thực hành thiền và các bài tập thư giãn hàng ngày. Những hoạt động này giúp giải tỏa căng thẳng, kiểm soát cảm xúc tiêu cực, đồng thời giảm mất ngủ, đau nhức cơ thể và mệt mỏi do ASD gây ra.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "căng thẳng",
+            "bi quan",
+            "nóng giận",
+            "thiền",
+            "bài tập thư giãn",
+            "kiểm soát cảm xúc",
+            "mất ngủ",
+            "triệu chứng cơ thể"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9ba78674-2117-4eb2-ac13-3db5ac949ecc",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Học kỹ thuật hít thở sâu cũng là cách giải tỏa căng thẳng và phiền muộn tốt. Với kỹ thuật này, bệnh nhân có thể thực hành ngay trong các tình huống để kiểm soát sự nóng giận và những hành vi quá khích của bản thân.  \n- Nên chia sẻ vấn đề đang gặp phải với người thân và bạn bè. Cách này sẽ giúp cho người bệnh giải tỏa những cảm xúc dồn nén và cảm thấy thoải mái, dễ chịu hơn.",
+        "summary": "Để giải tỏa căng thẳng và phiền muộn, kỹ thuật hít thở sâu là một phương pháp hiệu quả, giúp bệnh nhân kiểm soát sự nóng giận và hành vi quá khích ngay lập tức. Ngoài ra, việc chia sẻ vấn đề với người thân và bạn bè cũng rất quan trọng. Điều này giúp người bệnh giải tỏa những cảm xúc dồn nén, từ đó cảm thấy thoải mái và dễ chịu hơn về mặt tinh thần.",
+        "keywords": [
+            "hít thở sâu",
+            "giải tỏa căng thẳng",
+            "phiền muộn",
+            "kiểm soát nóng giận",
+            "hành vi quá khích",
+            "chia sẻ",
+            "hỗ trợ xã hội",
+            "cảm xúc dồn nén",
+            "sức khỏe tinh thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ce9b690b-5d35-4ff2-8c08-a6c977af7580",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Người bị rối loạn stress cấp tính luôn tách biệt, lạc lõng và đôi khi cảm thấy mọi thứ xung quanh gần như không tồn tại. Để cải thiện các triệu chứng này, bệnh nhân nên viết nhật ký hằng ngày. Thói quen viết nhật ký góp phần giải tỏa các cảm xúc dồn nén và giúp bản thân nhìn nhận khách quan hơn về tâm trạng, suy nghĩ và nhận thức của chính mình.",
+        "summary": "Người bị rối loạn stress cấp tính thường trải qua cảm giác tách biệt và lạc lõng, đôi khi cảm thấy mọi thứ xung quanh không tồn tại. Để cải thiện các triệu chứng này, việc viết nhật ký hằng ngày được khuyến nghị. Thói quen này giúp giải tỏa cảm xúc dồn nén và hỗ trợ bệnh nhân nhìn nhận khách quan hơn về tâm trạng, suy nghĩ của bản thân.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "tách biệt",
+            "lạc lõng",
+            "viết nhật ký",
+            "giải tỏa cảm xúc",
+            "tâm trạng",
+            "suy nghĩ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "edf3463f-5d94-46e7-a259-70cb373fb127",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Sự suy sụp về tinh thần thường dẫn đến ăn uống kém, mất ngủ và suy nhược. Do đó, người bệnh cũng cần xây dựng chế độ ăn uống hợp lý và tăng cường tập thể dục thể thao để nâng đỡ thể trạng.  \n## Phòng ngừa rối loạn stress cấp tính (ASD)",
+        "summary": "Sự suy sụp về tinh thần có thể gây ra các vấn đề về thể chất như ăn uống kém, mất ngủ và suy nhược. Để cải thiện tình trạng này, người bệnh cần xây dựng chế độ ăn uống hợp lý và tăng cường tập thể dục thể thao. Điều này giúp nâng đỡ thể trạng, góp phần vào quá trình hồi phục và chuẩn bị cho việc phòng ngừa rối loạn stress cấp tính.",
+        "keywords": [
+            "suy sụp tinh thần",
+            "ăn uống kém",
+            "mất ngủ",
+            "suy nhược",
+            "chế độ ăn uống",
+            "tập thể dục",
+            "nâng đỡ thể trạng",
+            "phòng ngừa ASD"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "60833ebf-4f62-4f51-b1fb-97929eef61ab",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Phòng ngừa rối loạn stress cấp tính (ASD)  \nVề cơ bản, rối loạn stress cấp tính (ASD) không thể phòng ngừa bởi những sự kiện sang chấn tâm lý có thể xảy ra không theo dự định hay mong muốn của con người. Tuy nhiên, chủ động thực hiện một số biện pháp sau có thể giảm nguy cơ phát triển rối loạn này đáng kể:\n\n- Tiếp nhận tham vấn và trị liệu tâm lý ngay sau khi trải qua sự kiện gây sang chấn tâm lý nghiêm trọng. Biện pháp này có thể giảm nguy cơ bị rối loạn stress cấp tính và rối loạn stress sau sang chấn đáng kể.  \n- Người bị rối loạn lo âu và trầm cảm có nguy cơ bị ASD cao hơn. Do đó, thăm khám và điều trị các rối loạn tâm thần sẵn có cũng là cách phòng ngừa bệnh lý này hiệu quả.",
+        "summary": "Rối loạn stress cấp tính (ASD) khó có thể phòng ngừa hoàn toàn do các sự kiện sang chấn tâm lý không lường trước được. Tuy nhiên, có những biện pháp giúp giảm đáng kể nguy cơ phát triển rối loạn này. Các biện pháp bao gồm tiếp nhận tham vấn và trị liệu tâm lý ngay sau sang chấn, cũng như thăm khám và điều trị các rối loạn tâm thần sẵn có như lo âu và trầm cảm.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "phòng ngừa",
+            "sang chấn tâm lý",
+            "tham vấn tâm lý",
+            "trị liệu tâm lý",
+            "rối loạn lo âu",
+            "trầm cảm",
+            "giảm nguy cơ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5cf81b2c-fca9-46b9-8bdd-90b01309d7f1",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Ngưỡng chịu đựng sang chấn tâm lý thấp thường do kinh nghiệm và kỹ năng sống nghèo nàn. Vì vậy, nên trau dồi kỹ năng sống, rèn giũa bản thân để hạn chế các vấn đề tâm lý khi phải đối mặt với biến cố.  \n- Chăm sóc cả tinh thần và thể chất để bản thân vững vàng hơn trước những biến cố và khó khăn xảy ra trong cuộc sống.",
+        "summary": "Ngưỡng chịu đựng sang chấn tâm lý thấp thường xuất phát từ kinh nghiệm và kỹ năng sống hạn chế. Để đối phó hiệu quả hơn với các biến cố và khó khăn trong cuộc sống, việc trau dồi kỹ năng sống và rèn giũa bản thân là rất quan trọng. Đồng thời, chăm sóc toàn diện cả tinh thần và thể chất sẽ giúp mỗi người trở nên vững vàng hơn.",
+        "keywords": [
+            "sang chấn tâm lý",
+            "kỹ năng sống",
+            "rèn giũa bản thân",
+            "vấn đề tâm lý",
+            "biến cố",
+            "chăm sóc tinh thần",
+            "chăm sóc thể chất"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "70741fe9-9893-4898-b4d8-bbe5b7197916",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress cấp tính (ASD) là một dạng rối loạn tâm lý khá phổ biến chỉ xảy ra trong khoảng 3 – 30 ngày. Tuy nhiên nếu không được điều trị và chăm sóc đúng cách, rối loạn này có thể phát triển thành rối loạn stress sau sang chấn và nhiều vấn đề tâm thần khác.  \nTham khảo thêm:  \n- Stress là gì ? Nguyên nhân, dấu hiệu nhận biết và điều trị  \n- 17 Cách giảm stress , căng thẳng nhanh chóng hiệu quả  \nTrở thành người đầu tiên bình luận cho bài viết này!",
+        "summary": "Rối loạn stress cấp tính (ASD) là một dạng rối loạn tâm lý phổ biến, thường kéo dài từ 3 đến 30 ngày. Nếu không được điều trị và chăm sóc kịp thời, ASD có nguy cơ phát triển thành rối loạn stress sau sang chấn hoặc các vấn đề tâm thần nghiêm trọng khác.",
+        "keywords": [
+            "rối loạn stress cấp tính",
+            "ASD",
+            "rối loạn tâm lý",
+            "thời gian mắc bệnh",
+            "điều trị",
+            "chăm sóc",
+            "rối loạn stress sau sang chấn",
+            "vấn đề tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "fce7655a-c582-47e8-af3d-04c2d552d855",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý",
+        "summary": "Đoạn văn này giới thiệu về chủ đề Khoa Học Tâm Lý. Đây có thể là tiêu đề mở đầu cho một bài viết hoặc chuyên mục liên quan đến các kiến thức tâm lý.",
+        "keywords": [
+            "Khoa Học Tâm Lý",
+            "Tâm lý học",
+            "Kiến thức tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "6687c553-a101-4453-b1a2-0113d5591f51",
+        "headers": [
+            "Khoa Hoc Tam Ly_2967"
+        ],
+        "content": "# Khoa Học Tâm Lý",
+        "summary": "Đoạn văn này giới thiệu về chủ đề Khoa Học Tâm Lý. Nó liệt kê các tiêu đề bài viết liên quan đến việc vượt qua áp lực, triệu chứng stress ở nữ giới, stress khi mang thai, căng thẳng gây trễ kinh và các kỹ thuật hít thở giảm stress.",
+        "keywords": [
+            "Khoa Học Tâm Lý",
+            "Áp lực cuộc sống",
+            "Stress",
+            "Triệu chứng stress",
+            "Stress khi mang thai",
+            "Trễ kinh do stress",
+            "Kỹ thuật hít thở",
+            "Giảm stress",
+            "Sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    }
+]

@@ -1,0 +1,769 @@
+[
+    {
+        "uuid": "4f581f04-a712-4272-a64b-71832458d9ef",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "Là một trong các rối loạn tâm thần vô cùng phổ biến, nếu không thể kịp thời phát hiện và điều trị đúng cách thì trầm cảm có thể khiến cho người bệnh hình thành những suy nghĩ tiêu cực, thậm chí là thực hiện hành vi tự sát để kết liễu cuộc đời. Vì thế, việc nắm được thông tin và hiểu được bệnh trầm cảm có nguy hiểm không sẽ giúp bản thân người bệnh và người thân của họ tìm được giải pháp khắc phục hiệu quả.",
+        "summary": "Trầm cảm là một rối loạn tâm thần phổ biến, có thể dẫn đến suy nghĩ tiêu cực và hành vi tự sát nếu không được phát hiện và điều trị kịp thời. Việc hiểu rõ mức độ nguy hiểm của bệnh là rất quan trọng để người bệnh và người thân có thể tìm kiếm giải pháp khắc phục hiệu quả.",
+        "keywords": [
+            "trầm cảm",
+            "rối loạn tâm thần",
+            "suy nghĩ tiêu cực",
+            "tự sát",
+            "điều trị trầm cảm",
+            "nguy hiểm của trầm cảm",
+            "phát hiện sớm",
+            "khắc phục"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "78554a9f-c0e8-4329-a246-c1c11e6aecc2",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Đôi nét về bệnh trầm cảm  \nTrầm cảm được đánh giá là một trong các chứng rối loạn tâm thần phức tạp và phổ biến nhất hiện nay. Ở các nước đang phát triển, tỉ lệ người mắc bệnh trầm cảm đang gia tăng đáng kể và có xu hướng trẻ hóa rất cao. Thực tế, căn bệnh này có thể khởi phát ở bất kì đối tượng nào, không phân biệt độ tuổi hay giới tính. Tuy nhiên, theo số liệu thống kê nhận thấy thì tỉ lệ phụ nữ mắc bệnh cao gấp 2 lần so với đàn ông.",
+        "summary": "Trầm cảm là một rối loạn tâm thần phức tạp và phổ biến, đặc biệt có xu hướng gia tăng và trẻ hóa ở các nước đang phát triển. Bệnh có thể khởi phát ở mọi đối tượng không phân biệt tuổi tác hay giới tính. Tuy nhiên, thống kê cho thấy tỷ lệ phụ nữ mắc bệnh cao gấp đôi nam giới.",
+        "keywords": [
+            "trầm cảm",
+            "rối loạn tâm thần",
+            "tỉ lệ mắc bệnh",
+            "trẻ hóa",
+            "phụ nữ",
+            "nam giới",
+            "đối tượng mắc bệnh"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e37c8148-813b-42ae-800c-4725990dcc73",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCăn bệnh này có thể khởi phát từ rất nhiều nguyên nhân khác nhau như thay đổi nồng độ hormone, gặp biến cố, áp lực từ công việc, học tập, sự biến đổi các chất dẫn truyền thần kinh, chấn thương não,…Những tình trạng này đều gây ra sự căng thẳng, mệt mỏi kéo dài khiến cho con người dần bị suy kiệt về sức khỏe thể chất lẫn tinh thần. Nếu không thể kịp thời giải quyết và khắc phục đúng cách sẽ làm cho họ mất dần niềm tin vào cuộc sống, trở nên bi quan và khởi phát chứng bệnh trầm cảm.",
+        "summary": "Trầm cảm có thể khởi phát từ nhiều nguyên nhân như thay đổi hormone, biến cố cuộc sống, áp lực công việc/học tập, biến đổi chất dẫn truyền thần kinh hoặc chấn thương não. Những yếu tố này gây căng thẳng, mệt mỏi kéo dài, dẫn đến suy kiệt thể chất và tinh thần. Nếu không được khắc phục, người bệnh có thể mất niềm tin, bi quan và phát triển chứng trầm cảm.",
+        "keywords": [
+            "nguyên nhân trầm cảm",
+            "hormone",
+            "biến cố",
+            "áp lực công việc",
+            "áp lực học tập",
+            "chất dẫn truyền thần kinh",
+            "chấn thương não",
+            "căng thẳng",
+            "suy kiệt tinh thần",
+            "bi quan"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "1d1c0f13-ccce-496b-bbde-a8c4c85a0f25",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTùy vào mức độ bệnh, nguyên nhân khởi phát và nhiều yếu tố khác mà các triệu chứng của mỗi người bệnh cũng có phần riêng biệt. Thông thường, dựa vào tần suất xuất hiện, mức độ biểu hiện và số lượng triệu chứng của từng người bệnh mà các chuyên gia sẽ chẩn đoán về cấp độ bệnh cụ thể. Các nhà khoa học đã chia trầm cảm thành 3 cấp độ khác nhau, đó là trầm cảm nhẹ, vừa và nặng",
+        "summary": "Các triệu chứng của bệnh trầm cảm khác nhau tùy thuộc vào mức độ bệnh, nguyên nhân khởi phát và nhiều yếu tố khác. Các chuyên gia chẩn đoán cấp độ bệnh dựa trên tần suất, mức độ biểu hiện và số lượng triệu chứng. Trầm cảm được chia thành ba cấp độ chính: nhẹ, vừa và nặng.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "mức độ bệnh",
+            "chẩn đoán trầm cảm",
+            "trầm cảm nhẹ",
+            "trầm cảm vừa",
+            "trầm cảm nặng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "95ff18db-1007-4e72-a304-9f892576a275",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nĐối với những trường hợp phát hiện bệnh sớm, các triệu chứng bệnh chưa quá nghiêm trọng thì có thể dễ dàng khắc phục bằng cách thay đổi chế độ sinh hoạt, nghỉ ngơi và tập luyện thể dục thường xuyên. Tuy nhiên, hầu hết các đối tượng trầm cảm sau khi phát hiện bệnh và tiến hành điều trị đều ở trong giai đoạn vừa hoặc nặng. Lúc này thời gian điều trị sẽ kéo dài lâu hơn, đồng thời người bệnh phải kết hợp nhiều biện pháp cùng lúc mới có thể khống chế và cải thiện sức khỏe tốt nhất.",
+        "summary": "Trầm cảm ở giai đoạn sớm, với triệu chứng chưa nghiêm trọng, có thể được khắc phục bằng cách thay đổi chế độ sinh hoạt, nghỉ ngơi và tập luyện thể dục. Tuy nhiên, phần lớn các trường hợp được chẩn đoán và điều trị đều ở giai đoạn vừa hoặc nặng, đòi hỏi thời gian điều trị kéo dài và kết hợp nhiều biện pháp để khống chế và cải thiện sức khỏe.",
+        "keywords": [
+            "trầm cảm",
+            "điều trị trầm cảm",
+            "phát hiện sớm",
+            "khắc phục trầm cảm",
+            "chế độ sinh hoạt",
+            "tập luyện thể dục",
+            "giai đoạn trầm cảm",
+            "kết hợp biện pháp điều trị"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d9f3a427-6abe-42da-a226-8071669f78df",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nVì thế, việc có thể sớm nhận biết được các triệu chứng của bệnh ở những giai đoạn đầu tiên sẽ góp phần quan trọng trong việc điều trị bệnh. Sau đây là một số dấu hiệu giúp bạn nhận biết được chứng trầm cảm.  \n- Khí sắc trầm buồn, chán nản, luôn cảm thấy buồn bã, u sầu.  \n- Không có sức sống, động lực làm bất cứ điều gì và không còn hứng thú với những sự việc, hoạt động xảy ra xung quanh, ngay cả những điều mà bản thân đã từng yêu thích.",
+        "summary": "Việc nhận biết sớm các triệu chứng trầm cảm đóng vai trò quan trọng trong điều trị hiệu quả. Các dấu hiệu ban đầu bao gồm khí sắc trầm buồn, chán nản kéo dài và mất hứng thú với mọi hoạt động, kể cả những điều từng yêu thích. Đây là những biểu hiện rõ ràng của bệnh trầm cảm cần được chú ý.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "dấu hiệu trầm cảm",
+            "nhận biết sớm",
+            "khí sắc trầm buồn",
+            "chán nản",
+            "mất hứng thú",
+            "u sầu"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "31a248d6-e1d1-4698-982b-02075cb949ec",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Lười vận động, di chuyển chậm chạp, hầu như không muốn bước chân ra ngoài và dễ kích động.  \n- Rối loạn giấc ngủ, có thể mất ngủ liên tục, ngủ không ngon giấc, hay mơ gặp ác mộng hoặc buồn ngủ không thể kiểm soát.  \n- Thay đổi khẩu vị ăn uống hàng ngày, có thể trở nên chán ăn, ăn không ngon miệng hoặc thèm ăn quá nhiều.  \n- Cảm thấy cô đơn, tội lỗi và cho rằng bản thân vô dụng, không có ích cho xã hội.",
+        "summary": "Các triệu chứng trầm cảm tiếp theo bao gồm lười vận động, di chuyển chậm chạp và dễ kích động. Người bệnh cũng thường gặp rối loạn giấc ngủ như mất ngủ, ác mộng hoặc buồn ngủ quá mức, cùng với sự thay đổi khẩu vị ăn uống. Ngoài ra, cảm giác cô đơn, tội lỗi và tự ti về bản thân cũng là những dấu hiệu phổ biến.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "lười vận động",
+            "rối loạn giấc ngủ",
+            "mất ngủ",
+            "thay đổi khẩu vị",
+            "chán ăn",
+            "cảm giác tội lỗi",
+            "cô đơn",
+            "vô dụng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c93c93e0-65e3-4af9-8569-8cdc7d69ea82",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Cảm thấy cô đơn, tội lỗi và cho rằng bản thân vô dụng, không có ích cho xã hội.  \n- Mất tập trung, giảm chú ý, không thể lựa chọn hoặc đưa ra quyết định, đồng thời người bệnh còn bị suy giảm trí nhớ.  \n- Suy nghĩ nhiều về cái chết và có ý định muốn tự sát.",
+        "summary": "Các dấu hiệu trầm cảm nghiêm trọng bao gồm cảm giác cô đơn, tội lỗi và tự ti về bản thân. Người bệnh thường gặp khó khăn trong việc tập trung, chú ý, đưa ra quyết định và có thể bị suy giảm trí nhớ. Đặc biệt, những suy nghĩ về cái chết và ý định tự sát là những triệu chứng nguy hiểm cần được can thiệp khẩn cấp.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "cảm giác tội lỗi",
+            "mất tập trung",
+            "suy giảm trí nhớ",
+            "ý định tự sát",
+            "suy nghĩ về cái chết",
+            "nguy hiểm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c255c701-bc6a-4fad-a095-d28c4a480235",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgay khi nhận thấy các triệu chứng của bệnh kéo dài liên tục trong tối thiểu 2 tuần thì người bệnh hoặc những người thân bên cạnh nên chủ động đưa đối tượng đến thăm khám và điều trị tại các cơ sở chuyên khoa. Sau khi chẩn đoán chính xác về tình trạng bệnh của mỗi bệnh nhân, các bác sĩ sức khỏe tâm thần sẽ cân nhắc đưa ra phác đồ điều trị phù hợp nhất.  \n## Bệnh trầm cảm có nguy hiểm không?",
+        "summary": "Khi các triệu chứng trầm cảm kéo dài liên tục trong ít nhất 2 tuần, người bệnh hoặc người thân nên chủ động tìm đến các cơ sở chuyên khoa để được thăm khám. Sau khi chẩn đoán chính xác, các bác sĩ sức khỏe tâm thần sẽ đưa ra phác đồ điều trị phù hợp. Việc này giúp đảm bảo bệnh nhân nhận được sự hỗ trợ cần thiết.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "điều trị trầm cảm",
+            "thăm khám chuyên khoa",
+            "bác sĩ tâm thần",
+            "phác đồ điều trị",
+            "chẩn đoán bệnh"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "51828b5f-3e31-4d6d-ae7a-aed0bd1a9ccc",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Bệnh trầm cảm có nguy hiểm không?  \nBệnh trầm cảm có nguy hiểm không còn tùy thuộc vào mức độ bệnh của mỗi bệnh nhân. Đối với những tình trạng bệnh nhẹ thì trầm cảm vẫn chưa gây ảnh hưởng quá nhiều đến sức khỏe hay đời sống hàng ngày của người bệnh và có thể nhanh chóng cải thiện bằng các biện pháp an toàn, chưa cần sử dụng đến thuốc.",
+        "summary": "Mức độ nguy hiểm của bệnh trầm cảm phụ thuộc vào tình trạng bệnh của từng cá nhân. Đối với những trường hợp nhẹ, trầm cảm thường chưa ảnh hưởng nhiều đến sức khỏe và đời sống, có thể cải thiện nhanh chóng bằng các biện pháp an toàn mà không cần dùng thuốc. Tuy nhiên, việc đánh giá chính xác mức độ bệnh là rất quan trọng.",
+        "keywords": [
+            "trầm cảm",
+            "nguy hiểm",
+            "mức độ bệnh",
+            "điều trị trầm cảm",
+            "bệnh nhẹ",
+            "cải thiện",
+            "biện pháp an toàn",
+            "không dùng thuốc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4850db73-4aba-4edc-a3d9-8315b95909a3",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTuy nhiên khi bệnh tình chuyển biến nghiêm trọng hơn, các triệu chứng xuất hiện liên tục thì mức độ nguy hiểm cũng tăng cao. Lúc này người bệnh sẽ bị ảnh hưởng trực tiếp đến sức khỏe, sinh hoạt hàng ngày hoặc thậm chí là đe dọa đến cả tính mạng.",
+        "summary": "Khi bệnh tình chuyển biến nghiêm trọng, các triệu chứng xuất hiện liên tục sẽ làm tăng mức độ nguy hiểm. Điều này ảnh hưởng trực tiếp đến sức khỏe, sinh hoạt hàng ngày và thậm chí đe dọa tính mạng người bệnh.",
+        "keywords": [
+            "bệnh tình nghiêm trọng",
+            "triệu chứng liên tục",
+            "mức độ nguy hiểm",
+            "sức khỏe",
+            "sinh hoạt hàng ngày",
+            "đe dọa tính mạng",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9f28e175-fd45-4e2d-8b33-6217343a8a92",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTheo thống kê từ WHO nhận thấy, hiện nay có đến khoảng 800.000 người tử vong do căn bệnh quái ác này, đây cũng được xem là một trong các nguyên nhân hàng đầu gây ra các vụ tự sát. Đặc biệt hơn, trong đó chỉ có khoảng 25% các trường hợp được phát hiện và điều trị kịp thời bằng những phương pháp chuyên khoa.",
+        "summary": "Thống kê của WHO cho thấy khoảng 800.000 người tử vong do căn bệnh này, là nguyên nhân hàng đầu gây tự sát. Đáng lo ngại là chỉ có khoảng 25% các trường hợp được phát hiện và điều trị kịp thời.",
+        "keywords": [
+            "WHO",
+            "thống kê",
+            "tử vong",
+            "tự sát",
+            "bệnh quái ác",
+            "phát hiện",
+            "điều trị kịp thời",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "605eb4d2-ef16-427e-8045-93bf9a36e406",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTrầm cảm được đánh giá là một trong các bệnh lý nguy hiểm bậc nhất hiện nay. Cũng bởi các triệu chứng của bệnh diễn ra một cách lặng lẽ và âm thần, nếu người bệnh hoặc những người thân bên cạnh không quan tâm, chú ý sẽ rất khó nhận biết được những sự thay đổi trong cảm xúc, suy nghĩ, lời nói, hành vi. Vì thế, theo số liệu thống kê cho biết hầu hết các trường hợp trầm cảm tìm đến sự giúp đỡ của y khoa đều đã chuyển biến sang các giai đoạn nghiêm trọng và gây ảnh hưởng lớn đối với sức khỏe của",
+        "summary": "Trầm cảm là một bệnh lý nguy hiểm hàng đầu, với các triệu chứng diễn ra âm thầm, khó nhận biết nếu không được quan tâm. Hầu hết các trường hợp trầm cảm chỉ tìm đến y khoa khi bệnh đã chuyển biến nghiêm trọng và ảnh hưởng lớn đến sức khỏe.",
+        "keywords": [
+            "trầm cảm",
+            "bệnh lý nguy hiểm",
+            "triệu chứng âm thầm",
+            "khó nhận biết",
+            "giai đoạn nghiêm trọng",
+            "sức khỏe",
+            "y khoa",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "593710dd-6270-42c4-b61f-eea28b38db0b",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\ny khoa đều đã chuyển biến sang các giai đoạn nghiêm trọng và gây ảnh hưởng lớn đối với sức khỏe của người bệnh.",
+        "summary": "Các trường hợp tìm đến y khoa thường đã ở giai đoạn nghiêm trọng, gây ảnh hưởng lớn đến sức khỏe của người bệnh.",
+        "keywords": [
+            "y khoa",
+            "giai đoạn nghiêm trọng",
+            "sức khỏe",
+            "người bệnh",
+            "ảnh hưởng",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "162552c2-7238-4caa-8039-7c8f34ef1a7b",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nHơn thế, khi tình trạng trầm cảm cứ kéo dài dai dẳng và không được can thiệp đúng cách sẽ khiến cho cơ thể của người bệnh dần bị suy kiệt cả về thể chất lẫn tinh thần. Những đối tượng bị trầm cảm thường sẽ gặp phải rất nhiều các triệu chứng gây khó chịu như mất ngủ, chán ăn, đau nhức cơ thể, vận động kém. Từ đó khiến cho hệ miễn dịch dần suy giảm, cơ thể không có nhiều khả năng chống chọi lại các tác nhân gây hại từ bên ngoài. Vì thế sẽ rất dễ thấy các bệnh nhân trầm cảm hay bị cảm cúm, cảm lạnh",
+        "summary": "Tình trạng trầm cảm kéo dài không được can thiệp đúng cách sẽ gây suy kiệt cả về thể chất và tinh thần. Người bệnh thường gặp các triệu chứng như mất ngủ, chán ăn, đau nhức cơ thể, vận động kém, dẫn đến hệ miễn dịch suy giảm. Do đó, bệnh nhân trầm cảm dễ mắc các bệnh thông thường như cảm cúm, cảm lạnh.",
+        "keywords": [
+            "trầm cảm kéo dài",
+            "suy kiệt thể chất",
+            "suy kiệt tinh thần",
+            "mất ngủ",
+            "chán ăn",
+            "đau nhức cơ thể",
+            "hệ miễn dịch suy giảm",
+            "cảm cúm",
+            "cảm lạnh",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "fe2f0b42-14ce-4bc6-8834-165d6a297806",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nnhân gây hại từ bên ngoài. Vì thế sẽ rất dễ thấy các bệnh nhân trầm cảm hay bị cảm cúm, cảm lạnh và khó cải thiện.",
+        "summary": "Bệnh nhân trầm cảm thường dễ bị ảnh hưởng bởi các tác nhân gây hại từ bên ngoài, dẫn đến việc dễ mắc các bệnh như cảm cúm, cảm lạnh. Tình trạng này cũng khó cải thiện, cho thấy mối liên hệ giữa trầm cảm và suy giảm sức khỏe thể chất, đặc biệt là hệ miễn dịch.",
+        "keywords": [
+            "trầm cảm",
+            "sức khỏe thể chất",
+            "cảm cúm",
+            "cảm lạnh",
+            "hệ miễn dịch",
+            "bệnh lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8d80a8e5-a3fa-4bb0-802b-911d0119ad8",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác chuyên gia cho biết rằng, hầu hết những người bị trầm cảm luôn cảm thấy buồn chán, suy nghĩ và nhìn nhận cuộc sống theo chiều hướng tiêu cực, họ luôn nghĩ về cái chết và cho rằng đó là con đường duy nhất để giải thoát bản thân. Những tình huống tự sát có thể được chuẩn bị trước hoặc diễn ra đột ngột, điều này sẽ luôn tiềm ẩn trong suy nghĩ và thôi thúc người bệnh hành động. Thông thường, đối với những bệnh nhân trầm cảm là nam giới sẽ có nguy cơ tự sát cao hơn. Bởi họ sẽ có xu hướng giải quyết và đưa ra lựa chọn quyết liệt và mạnh mẽ hơn nữ giới.",
+        "summary": "Người bị trầm cảm thường có cảm giác buồn chán sâu sắc, suy nghĩ tiêu cực và xem cái chết là lối thoát duy nhất. Nguy cơ tự sát luôn tiềm ẩn và có thể xảy ra đột ngột hoặc được chuẩn bị trước. Đặc biệt, nam giới mắc trầm cảm có xu hướng tự sát cao hơn do có những lựa chọn quyết liệt và mạnh mẽ hơn so với nữ giới.",
+        "keywords": [
+            "trầm cảm",
+            "tự sát",
+            "suy nghĩ tiêu cực",
+            "nguy cơ tự sát",
+            "sức khỏe tâm thần",
+            "nam giới",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "695f1bb6-b485-4489-9e15-59aa2d9bd82c",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNhư vậy, trầm cảm là một căn bệnh có mức độ nguy hiểm nghiêm trọng ở những giai đoạn nặng. Vì thế, để hạn chế được các hệ lụy trầm trọng và giúp bệnh tình mau chóng cải thiện tốt hơn thì bạn nên chú ý quan sát để kịp thời nhận biết được những hành vi, suy nghĩ, cảm xúc bất thường của bản thân hoặc những người bên cạnh.  \n## Những hậu quả nghiêm trọng mà bệnh trầm cảm gây ra  \nNhư đã chia sẻ ở trên, trầm cảm được giới chuyên môn đánh giá là một trong các căn bệnh tâm thần nguy hiểm, đặc biệt là ở giai đoạn nặng. Đồng thời, trầm cảm cũng được xem là một loại bệnh lý đứng đầu trong việc gây nên những gánh nặng cho xã hội. Nếu không thể phát hiện và điều trị bệnh đúng phương pháp sẽ làm gia tăng nguy cơ gây ra rất nhiều hậu quả nghiêm trọng ảnh hưởng đến sức khỏe tinh thần và thể chất của người bệnh.",
+        "summary": "Trầm cảm là một căn bệnh tâm thần nguy hiểm, đặc biệt ở giai đoạn nặng, gây ra nhiều gánh nặng cho xã hội. Việc phát hiện sớm và điều trị đúng phương pháp là rất quan trọng để hạn chế các hậu quả nghiêm trọng. Nếu không được can thiệp kịp thời, bệnh có thể ảnh hưởng nặng nề đến cả sức khỏe tinh thần và thể chất của người bệnh.",
+        "keywords": [
+            "trầm cảm",
+            "nguy hiểm",
+            "hậu quả",
+            "phát hiện sớm",
+            "điều trị",
+            "sức khỏe tinh thần",
+            "sức khỏe thể chất"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4188868d-98f0-4b5f-92b8-c1c671d33494",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 1. Những hậu quả về mặt thể chất",
+        "summary": "Phần này của tài liệu giới thiệu về các hậu quả mà bệnh trầm cảm có thể gây ra đối với sức khỏe thể chất của người bệnh. Đây là một khía cạnh quan trọng cần được xem xét khi đánh giá tác động của trầm cảm.",
+        "keywords": [
+            "trầm cảm",
+            "hậu quả",
+            "sức khỏe thể chất",
+            "tác động",
+            "bệnh lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "31451c47-bef6-4b8f-85a2-a9e44ee89b13",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thay đổi cân nặng  \nĐối với những người mắc bệnh trầm cảm thì việc rối loạn ăn uống là một trong các triệu chứng đặc trưng của bệnh. Hầu hết các đối tượng bị trầm cảm đều rơi vào trạng thái thay đổi khẩu vị đột ngột. Một số trường hợp sẽ cảm thấy chán ăn, ăn không ngon miệng và thường xuyên bỏ bữa. Một vài bệnh nhân khác sẽ cảm thấy thèm ăn và ăn uống không kiểm soát.",
+        "summary": "Thay đổi cân nặng là một trong những triệu chứng đặc trưng của bệnh trầm cảm, thường xuất phát từ rối loạn ăn uống. Người bệnh có thể trải qua sự thay đổi khẩu vị đột ngột, dẫn đến chán ăn, bỏ bữa hoặc ngược lại, thèm ăn và ăn uống mất kiểm soát.",
+        "keywords": [
+            "trầm cảm",
+            "thay đổi cân nặng",
+            "rối loạn ăn uống",
+            "chán ăn",
+            "thèm ăn",
+            "triệu chứng trầm cảm",
+            "sức khỏe thể chất"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "aeef5c35-864f-4080-9cd2-7ffc76afea17",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nĐiều này gây ảnh hưởng nghiêm trọng đến việc cung cấp nguồn dinh dưỡng cần thiết cho cơ thể. Khi chế độ ăn uống không được đảm bảo sẽ làm ảnh hưởng đến hệ tiêu hóa, khả năng hấp thu và đặc biệt là làm thay đổi cân nặng, vóc dáng của người bệnh. Trong thực tế có rất nhiều các trường hợp bệnh nhân trầm cảm phải tiến hành giảm cân song song với quá trình điều trị bệnh.  \n- Mất ngủ kéo dài",
+        "summary": "Chế độ ăn uống không đảm bảo có thể gây ảnh hưởng nghiêm trọng đến việc cung cấp dinh dưỡng, hệ tiêu hóa và khả năng hấp thu của cơ thể. Điều này dẫn đến sự thay đổi về cân nặng và vóc dáng, đặc biệt ở bệnh nhân trầm cảm, những người thường phải quản lý cân nặng trong quá trình điều trị. Việc này cũng có thể liên quan đến tình trạng mất ngủ kéo dài.",
+        "keywords": [
+            "trầm cảm",
+            "dinh dưỡng",
+            "chế độ ăn uống",
+            "hệ tiêu hóa",
+            "hấp thu",
+            "cân nặng",
+            "vóc dáng",
+            "sức khỏe thể chất",
+            "mất ngủ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "69f1dfe3-c048-4b5c-bb49-f8a982fa785",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Mất ngủ kéo dài  \nTriệu chứng nổi bật nhất của những người bị trầm cảm là trạng thái buồn bã, chán nản, suy sụp, lo lắng, bi quan về mọi thứ. Điều này cũng là lý do chính khiến cho giấc ngủ bị ảnh hưởng nghiêm trọng. Bên cạnh đó, một số trường hợp bị trầm cảm lại có xu hướng tìm đến các chất kích thích, chất gây nghiện làm cho não bộ bị hưng phấn, kích động quá mức dẫn đến tình trạng mất ngủ triền miên.",
+        "summary": "Mất ngủ kéo dài là một triệu chứng phổ biến ở người trầm cảm, xuất phát từ trạng thái buồn bã, chán nản và lo lắng. Những cảm xúc tiêu cực này ảnh hưởng nghiêm trọng đến chất lượng giấc ngủ. Ngoài ra, việc lạm dụng các chất kích thích hoặc gây nghiện cũng có thể làm não bộ bị hưng phấn quá mức, dẫn đến tình trạng mất ngủ triền miên ở những người mắc bệnh.",
+        "keywords": [
+            "trầm cảm",
+            "mất ngủ",
+            "rối loạn giấc ngủ",
+            "buồn bã",
+            "chán nản",
+            "lo lắng",
+            "chất kích thích",
+            "sức khỏe tâm thần",
+            "triệu chứng trầm cảm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c2edda43-8cc0-4029-b871-b8ed675a57b7",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTheo thống kê nhận thấy có đến hơn 80% các trường hợp người bệnh thường xuyên cảm thấy khó ngủ, giấc ngủ bị gián đoạn, gặp ác mộng, dễ tỉnh giấc nhiều lần trong đêm. Tình trạng này nếu không được khắc phục sớm sẽ khiến cho cơ thể người bệnh bị suy kiệt nghiêm trọng, họ sẽ không còn minh mẫn, tỉnh táo để thực hiện bất kì công việc gì.  \n- Suy giảm sức đề kháng",
+        "summary": "Thống kê cho thấy hơn 80% bệnh nhân gặp phải các vấn đề về giấc ngủ như khó ngủ, giấc ngủ gián đoạn, ác mộng và thức giấc nhiều lần. Nếu không được điều trị kịp thời, tình trạng này sẽ dẫn đến suy kiệt nghiêm trọng về thể chất, làm giảm sự minh mẫn và khả năng làm việc của người bệnh. Điều này cũng góp phần vào việc suy giảm sức đề kháng của cơ thể.",
+        "keywords": [
+            "rối loạn giấc ngủ",
+            "mất ngủ",
+            "ác mộng",
+            "giấc ngủ gián đoạn",
+            "suy kiệt cơ thể",
+            "sức khỏe tâm thần",
+            "hậu quả mất ngủ",
+            "suy giảm sức đề kháng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0527a68b-eaaf-408c-bc1a-90560d5617f0",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Suy giảm sức đề kháng  \nNhững người bệnh trầm cảm thường có xu hướng lười vận động, chỉ muốn ở yên một chỗ. Bên cạnh đó, họ còn gặp phải hàng loạt các triệu chứng như mất ngủ, chán ăn, suy nghĩ tiêu cực,…Điều này làm cho cơ thể dần bị suy giảm về hệ miễn dịch, sức đề kháng cũng yếu đi đáng kể, bệnh nhân cũng mất dần khả năng chống chọi lại các yếu tố xấu tác động từ bên ngoài. Do đó, những đối tượng này sẽ rất dễ gặp phải các căn bệnh thông thường như cảm cúm, cảm lạnh kéo dài liên tục.",
+        "summary": "Bệnh nhân trầm cảm thường có xu hướng lười vận động và trải qua nhiều triệu chứng như mất ngủ, chán ăn, và suy nghĩ tiêu cực. Tổng hợp các yếu tố này dẫn đến suy giảm hệ miễn dịch và sức đề kháng của cơ thể. Kết quả là, người bệnh dễ mắc các bệnh thông thường như cảm cúm, cảm lạnh kéo dài, do khả năng chống chọi với tác nhân bên ngoài bị suy yếu.",
+        "keywords": [
+            "trầm cảm",
+            "suy giảm sức đề kháng",
+            "hệ miễn dịch",
+            "lười vận động",
+            "mất ngủ",
+            "chán ăn",
+            "suy nghĩ tiêu cực",
+            "sức khỏe thể chất",
+            "bệnh thông thường"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a569f0fb-e02b-48b3-880d-4c615ac889d6",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Cơ thể mệt mỏi, suy kiệt  \nNhững triệu chứng về cơ thể và tinh thần cứ liên tục xuất hiện và kéo dài không được khắc phục sẽ khiến cho cơ thể người bệnh dần trở nên kiệt quệ. Người bệnh sẽ luôn cảm thấy mệt mỏi, không có năng lượng để thực hiện bất cứ việc gì. Khi tình trạng bệnh trở nên thậm chí bệnh nhân còn không có khả năng tự thực hiện các công việc đơn giản như vệ sinh cá nhân.  \n- Giảm ham muốn tình dục",
+        "summary": "Các triệu chứng thể chất và tinh thần kéo dài mà không được điều trị sẽ dẫn đến tình trạng cơ thể mệt mỏi và suy kiệt nghiêm trọng. Người bệnh sẽ thiếu năng lượng để thực hiện các hoạt động hàng ngày, thậm chí không thể tự chăm sóc vệ sinh cá nhân. Tình trạng suy kiệt này cũng có thể gây ra việc giảm ham muốn tình dục.",
+        "keywords": [
+            "mệt mỏi",
+            "suy kiệt cơ thể",
+            "trầm cảm",
+            "triệu chứng trầm cảm",
+            "thiếu năng lượng",
+            "sức khỏe thể chất",
+            "giảm ham muốn tình dục",
+            "chăm sóc cá nhân"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "ccc7ad1a-180e-42dc-b756-7de1ff6b59f6",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi mắc phải chứng bệnh trầm cảm, hầu hết các bệnh nhân đều không còn hứng thú với bất kì hoạt động nào xung quanh, ngay cả ham muốn tình dục. Người bệnh sẽ bị suy giảm chức năng sinh lý, không muốn gần gũi với bạn tình và luôn tìm mọi cách để tránh né. Đối với nam giới thường sẽ gặp phải các tình trạng như rối loạn cương dương, không xuất tinh, xuất tinh sớm, liệt dương,…Còn đối với nữ giới có thể bị khô âm đạo, không đạt được khoái cảm, thăng hoa. Tình trạng này cũng có gây ra một số ảnh",
+        "summary": "Trầm cảm có thể gây suy giảm ham muốn và chức năng tình dục ở cả nam và nữ giới. Người bệnh thường mất hứng thú với các hoạt động, bao gồm cả quan hệ tình dục, và có thể tránh né bạn tình. Các vấn đề cụ thể bao gồm rối loạn cương dương, xuất tinh sớm ở nam giới và khô âm đạo, khó đạt khoái cảm ở nữ giới.",
+        "keywords": [
+            "trầm cảm",
+            "ham muốn tình dục",
+            "suy giảm chức năng sinh lý",
+            "rối loạn cương dương",
+            "xuất tinh sớm",
+            "khô âm đạo",
+            "khoái cảm",
+            "sức khỏe tình dục",
+            "ảnh hưởng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8ea2bb26-8121-41b9-9adc-9137eb11e9ab",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\ncó thể bị khô âm đạo, không đạt được khoái cảm, thăng hoa. Tình trạng này cũng có gây ra một số ảnh hưởng đến khả năng sinh sản và làm gia tăng nguy cơ bị vô sinh.",
+        "summary": "Trầm cảm có thể dẫn đến khô âm đạo và khó đạt khoái cảm ở nữ giới. Ngoài ra, tình trạng này còn có thể ảnh hưởng tiêu cực đến khả năng sinh sản, làm tăng nguy cơ vô sinh.",
+        "keywords": [
+            "trầm cảm",
+            "khô âm đạo",
+            "khoái cảm",
+            "thăng hoa",
+            "khả năng sinh sản",
+            "vô sinh",
+            "sức khỏe sinh sản",
+            "ảnh hưởng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d79c529a-f3ae-4347-a225-9121bbbc3deb",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Hay nhức đầu, đau lưng  \nBên cạnh những triệu chứng, hậu quả mà trầm cảm gây ảnh hưởng đến sức khỏe tinh thần thì người bệnh còn phải đối diện với những cơn đau nhức cơ thể, đau đầu, đau lưng dữ dội. Điều này không chỉ gây ảnh hưởng đơn thuần đến sức khỏe mà còn làm cản trở nghiêm trọng đến chất lượng công việc, các sinh hoạt hàng ngày của bệnh nhân.  \n- Tác động xấu đến huyết áp",
+        "summary": "Ngoài các ảnh hưởng đến sức khỏe tinh thần, trầm cảm còn gây ra các triệu chứng thể chất như nhức đầu và đau lưng dữ dội. Những cơn đau này không chỉ tác động xấu đến sức khỏe mà còn cản trở nghiêm trọng chất lượng công việc và sinh hoạt hàng ngày của người bệnh. Trầm cảm cũng có thể tác động tiêu cực đến huyết áp.",
+        "keywords": [
+            "trầm cảm",
+            "triệu chứng thể chất",
+            "nhức đầu",
+            "đau lưng",
+            "sức khỏe tinh thần",
+            "chất lượng cuộc sống",
+            "huyết áp",
+            "tác động sức khỏe"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "3000f5cc-197a-45a4-a167-23361d844e36",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Tác động xấu đến huyết áp  \nTheo một số nghiên cứu khoa học nhận thấy rằng, khi con người rơi vào trạng thái buồn bã, chán nản, tuyệt vọng thì cơ thể sẽ sản sinh ra nhiều cortisol và epinephrin. Hai loại hormone này khiến cho con người trở nên căng thẳng hơn, đồng thời gây nên áp lực đến nhịp tim và huyết áp của người bệnh. Khi ấy quá trình lưu thông máu của cơ thể sẽ gặp nhiều khó khăn, các mảng bám sẽ dần xuất hiện trên các thành động mạch và làm gia tăng nguy cơ đột quỵ.",
+        "summary": "Trầm cảm có thể tác động xấu đến huyết áp do cơ thể sản sinh nhiều cortisol và epinephrin khi căng thẳng. Các hormone này gây áp lực lên nhịp tim và huyết áp, làm khó khăn cho quá trình lưu thông máu. Điều này dẫn đến sự xuất hiện mảng bám trên thành động mạch, gia tăng nguy cơ đột quỵ.",
+        "keywords": [
+            "trầm cảm",
+            "huyết áp",
+            "cortisol",
+            "epinephrin",
+            "căng thẳng",
+            "nhịp tim",
+            "lưu thông máu",
+            "động mạch",
+            "đột quỵ",
+            "sức khỏe tim mạch"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "7de10a35-d93c-4db1-af64-0310f24e4992",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Nguy cơ gặp các vấn đề về tim mạch",
+        "summary": "Trầm cảm có thể làm tăng nguy cơ gặp phải các vấn đề nghiêm trọng về tim mạch.",
+        "keywords": [
+            "trầm cảm",
+            "tim mạch",
+            "nguy cơ",
+            "sức khỏe"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "259a2169-db0e-426d-ac3c-95eb3f974816",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi các triệu chứng căng thẳng, áp lực, mệt mỏi kéo dài liên tục sẽ gây tổn thương cho tim mạch và dẫn đến tình trạng viêm nhiễm do thiếu oxi. Các chuyên gia cũng nhận thấy rằng, tim là một trong các cơ quan bị ảnh hưởng nặng nề nhất khi bạn rơi vào trạng thái trầm cảm. Bệnh nhân có thể phải đối mặt với những cơn đau tim bất chợt hoặc biến chuyển nặng hơn thành nhồi máu cơ tim.  \n- Khả năng bị ung thư cao",
+        "summary": "Căng thẳng, áp lực và mệt mỏi kéo dài có thể gây tổn thương nghiêm trọng cho tim mạch, dẫn đến viêm nhiễm và thiếu oxy. Đặc biệt, trầm cảm được xem là yếu tố ảnh hưởng nặng nề nhất đến tim, có thể gây ra các cơn đau tim hoặc nhồi máu cơ tim. Ngoài ra, tình trạng này còn làm tăng nguy cơ mắc bệnh ung thư.",
+        "keywords": [
+            "căng thẳng",
+            "áp lực",
+            "mệt mỏi",
+            "trầm cảm",
+            "tim mạch",
+            "tổn thương tim",
+            "viêm nhiễm",
+            "đau tim",
+            "nhồi máu cơ tim",
+            "ung thư"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "c0ef9479-0784-4ee8-b6ad-3372240fe73c",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nDựa vào số liệu thống kê nhận thấy, có khoảng 25% các đối tượng mắc bệnh ung thư đều có dấu hiệu khởi phát các triệu chứng của bệnh trầm cảm. Hơn thế, trầm cảm cũng là một trong các yếu tố làm cản trở và gây khó khăn cho quá trình điều trị bệnh ung thư. Nếu không thể áp dụng được các phương pháp chữa bệnh phù hợp sẽ khiến cho cả 2 tình trạng bệnh chuyển biến nặng nề hơn. Các chuyên gia còn cho biết thêm, tỉ lệ tái phát và tử vong ở những đối tượng bị ung thư có kèm trầm cảm sẽ tăng cao.",
+        "summary": "Khoảng 25% bệnh nhân ung thư có dấu hiệu trầm cảm, cho thấy mối liên hệ chặt chẽ giữa hai bệnh này. Trầm cảm không chỉ cản trở quá trình điều trị ung thư mà còn làm cho cả hai tình trạng bệnh trở nên nghiêm trọng hơn. Các chuyên gia cũng chỉ ra rằng, tỷ lệ tái phát và tử vong ở những bệnh nhân ung thư kèm trầm cảm sẽ tăng cao đáng kể.",
+        "keywords": [
+            "ung thư",
+            "trầm cảm",
+            "mối liên hệ",
+            "triệu chứng",
+            "điều trị ung thư",
+            "tái phát",
+            "tử vong",
+            "yếu tố cản trở",
+            "thống kê"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d6c1a994-90e7-4a4d-ae2b-6d6ad80b8286",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Bệnh tiểu đường  \nĐối với những trường người bệnh trầm cảm bị thay đổi khẩu vị, thường xuyên thèm ăn và ăn uống không kiểm soát sẽ dễ có nguy cơ rơi vào trạng thái béo phì, thừa cân. Đặc biệt là những đối tượng bệnh có tiền sử bị tiểu đường đang trong giai đoạn trầm cảm thì sẽ có nguy cơ phát triển tiểu đường thành loại 2 cao hơn so với bình thường.  \n### 2. Những hậu quả về mặt tinh thần  \n- Mất dần các mối quan hệ",
+        "summary": "Người bệnh trầm cảm thường có sự thay đổi khẩu vị, thèm ăn và ăn uống không kiểm soát, dẫn đến nguy cơ béo phì và thừa cân. Đặc biệt, những người có tiền sử tiểu đường khi mắc trầm cảm sẽ có nguy cơ cao phát triển thành tiểu đường loại 2. Bên cạnh đó, trầm cảm còn gây ra những hậu quả tinh thần như mất dần các mối quan hệ.",
+        "keywords": [
+            "trầm cảm",
+            "tiểu đường",
+            "thay đổi khẩu vị",
+            "béo phì",
+            "thừa cân",
+            "tiểu đường loại 2",
+            "hậu quả tinh thần",
+            "mất mối quan hệ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f3d35867-216e-4d4f-b962-0a854d0f5e79",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 2. Những hậu quả về mặt tinh thần  \n- Mất dần các mối quan hệ  \nThông thường người bệnh trầm cảm sẽ có xu hướng muốn tự cô lập bản thân, họ ngại giao tiếp và không muốn trò chuyện với bất kì ai, kể cả những người thân thiết. Đồng thời đôi lúc người bệnh sẽ trở nên nhạy cảm và dễ cáu gắt với những người xung quanh. Điều này sẽ khiến cho các mối quan hệ dần bị rạn nứt, người bệnh sẽ cảm thấy cô đơn và bi quan hơn.  \n- Mất tập trung, suy giảm trí nhớ",
+        "summary": "Trầm cảm gây ra những hậu quả nghiêm trọng về mặt tinh thần, đặc biệt là việc mất dần các mối quan hệ xã hội. Người bệnh có xu hướng tự cô lập, ngại giao tiếp và dễ cáu gắt, dẫn đến rạn nứt các mối quan hệ và cảm giác cô đơn, bi quan. Ngoài ra, trầm cảm còn gây mất tập trung và suy giảm trí nhớ.",
+        "keywords": [
+            "trầm cảm",
+            "hậu quả tinh thần",
+            "mất mối quan hệ",
+            "cô lập",
+            "ngại giao tiếp",
+            "cáu gắt",
+            "cô đơn",
+            "bi quan",
+            "mất tập trung",
+            "suy giảm trí nhớ"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "571260ca-8207-45fd-a36a-73fb2f80940d",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nKhi bị trầm cảm, các chất dẫn truyền thần kinh sẽ bị thay đổi, đồng thời trí não cũng bị ảnh hưởng rất nhiều. Do đó, bệnh nhân sẽ dễ rơi vào trạng thái mất tập trung, không thể chú ý vào bất kì vấn đề nào. Tình trạng này cũng khiến cho hiệu suất công việc, học tập bị suy giảm nhanh chóng.",
+        "summary": "Trầm cảm gây ra sự thay đổi các chất dẫn truyền thần kinh và ảnh hưởng nặng nề đến trí não. Điều này khiến bệnh nhân dễ bị mất tập trung và không thể chú ý vào công việc hay học tập. Hậu quả là hiệu suất làm việc và học tập bị suy giảm đáng kể.",
+        "keywords": [
+            "trầm cảm",
+            "chất dẫn truyền thần kinh",
+            "trí não",
+            "mất tập trung",
+            "suy giảm trí nhớ",
+            "hiệu suất công việc",
+            "hiệu suất học tập"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "39d4a49a-725f-4a47-9397-150873c25125",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgoài ra, trầm cảm và mất trí nhớ còn có mối quan hệ mật thiết với nhau. Hầu hết các người bệnh trầm cảm đều rơi vào tình trạng suy giảm trí nhớ, đặc biệt là những người cao tuổi. Họ có thể quên ngay những nhiệm vụ vừa được giao hoặc câu chuyện vừa được nghe. Đặc biệt hơn, người mắc bệnh trầm cảm sẽ có nhiều khả năng bị bệnh Alzheimer.  \n- Lạm dụng nhiều các chất kích thích, chất gây nghiện",
+        "summary": "Trầm cảm và mất trí nhớ có mối quan hệ mật thiết, đặc biệt ở người cao tuổi, khi người bệnh thường gặp tình trạng suy giảm trí nhớ. Người mắc bệnh trầm cảm có nguy cơ cao hơn mắc bệnh Alzheimer. Điều này nhấn mạnh tầm quan trọng của việc nhận biết và điều trị trầm cảm để bảo vệ chức năng nhận thức.",
+        "keywords": [
+            "trầm cảm",
+            "mất trí nhớ",
+            "suy giảm trí nhớ",
+            "người cao tuổi",
+            "Alzheimer",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9c5d34e4-c17e-411e-adfc-7231333c36f8",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nCác chuyên gia cho biết rằng, các chất kích thích như rượu bia, thuốc lá, ma túy, thuốc lắc,…cũng là một trong các lý do có thể làm khởi phát các triệu chứng của bệnh trầm cảm. Ngược lại, những đối tượng mắc bệnh trầm cảm sẽ có xu hướng muốn tìm đến những chất này để giải tỏa tâm trạng, tìm kiếm cảm giác hưng phấn, thoải mái. Tuy nhiên, nếu người bệnh trầm cảm rơi vào tình trạng nghiện chất sẽ khiến cho quá trình điều trị bệnh gặp nhiều trở ngại, đồng thời bệnh tình cũng sẽ chuyển biến nguy",
+        "summary": "Các chất kích thích như rượu bia, thuốc lá và ma túy có thể là nguyên nhân khởi phát các triệu chứng trầm cảm. Ngược lại, người mắc trầm cảm thường có xu hướng lạm dụng các chất này để giải tỏa tâm trạng. Tình trạng nghiện chất ở người bệnh trầm cảm sẽ gây trở ngại lớn cho quá trình điều trị và khiến bệnh tình chuyển biến nguy hiểm hơn.",
+        "keywords": [
+            "trầm cảm",
+            "chất kích thích",
+            "rượu bia",
+            "ma túy",
+            "nghiện chất",
+            "điều trị trầm cảm",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "91b3b466-5213-4730-ad40-5d5db47ddcda",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nkhiến cho quá trình điều trị bệnh gặp nhiều trở ngại, đồng thời bệnh tình cũng sẽ chuyển biến nguy hiểm hơn.",
+        "summary": "Nội dung này nhấn mạnh rằng một số yếu tố có thể gây trở ngại cho quá trình điều trị bệnh và làm cho tình trạng bệnh chuyển biến nguy hiểm hơn. Điều này ám chỉ tầm quan trọng của việc kiểm soát các yếu tố tiêu cực để đảm bảo hiệu quả điều trị.",
+        "keywords": [
+            "điều trị bệnh",
+            "trở ngại",
+            "bệnh tình nguy hiểm",
+            "quá trình điều trị"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "533d97ac-5797-47ec-9cf8-bd57fb873af5",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Suy nghĩ về cái chết và tự sát  \nĐây được xem là một trong các hậu quả nghiêm trọng có thể cướp lấy tính mạng của người bệnh bất cứ lúc nào. Khi những suy nghĩ tiêu cực, buồn chán, bế tắc cứ lẩn quẩn và không có cách thoát ra, người bệnh thường suy nghĩ về cái chết và muốn thực hiện hành vi tự sát để thoát khỏi những tổn thương. Theo số liệu thống kê thì trầm cảm là nguyên nhân phổ biến thứ 2 trên thế giới gây ra các vụ tử vong, cụ thế nó chỉ đứng sau các vụ tai nạn giao thông.",
+        "summary": "Suy nghĩ về cái chết và tự sát là một trong những hậu quả nghiêm trọng nhất của bệnh trầm cảm. Khi đối mặt với sự bế tắc và tổn thương không lối thoát, người bệnh có thể tìm đến hành vi tự sát. Trầm cảm hiện là nguyên nhân gây tử vong phổ biến thứ hai trên thế giới, chỉ sau tai nạn giao thông, cho thấy mức độ nguy hiểm và cần được quan tâm kịp thời.",
+        "keywords": [
+            "trầm cảm",
+            "tự sát",
+            "suy nghĩ tiêu cực",
+            "hậu quả trầm cảm",
+            "tử vong",
+            "sức khỏe tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "7debe3bd-045d-47c0-8058-de89c7843895",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTóm lại, bệnh trầm cảm có nguy hiểm không còn phải phụ thuộc vào mức độ biểu hiện và giai đoạn bệnh của mỗi người. Nếu không thể kịp thời phát hiện và điều trị bệnh đúng cách sẽ gây ra rất nhiều các hậu quả vô cùng nghiêm trọng ảnh hưởng đến sức khỏe, đời sống hoặc thậm chí là cướp đi tính mạng của người bệnh.",
+        "summary": "Mức độ nguy hiểm của bệnh trầm cảm phụ thuộc vào biểu hiện và giai đoạn bệnh của từng cá nhân. Việc không phát hiện và điều trị kịp thời có thể dẫn đến nhiều hậu quả nghiêm trọng, ảnh hưởng tiêu cực đến sức khỏe, đời sống và thậm chí đe dọa tính mạng người bệnh. Do đó, việc can thiệp sớm và đúng cách là vô cùng quan trọng.",
+        "keywords": [
+            "trầm cảm",
+            "nguy hiểm trầm cảm",
+            "điều trị trầm cảm",
+            "hậu quả trầm cảm",
+            "sức khỏe tâm thần",
+            "phát hiện sớm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "68d56b0c-d2fe-49f1-8174-9f4ffbc0d32e",
+        "headers": [
+            "Khoa Hoc Tam Ly_1940"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTham khảo thêm:  \n- Bị trầm cảm lâu năm nên điều trị như thế nào?  \n- Hậu quả của bệnh trầm cảm ở học sinh cha mẹ nên cảnh giác  \n- Nguy cơ tự sát do trầm cảm bạn nên cảnh giác  \nTrở thành người đầu tiên bình luận cho bài viết này!  \nEmail của bạn sẽ không được hiển thị công khai. Các trường bắt buộc được đánh dấu *  \nLưu tên của tôi, email, và trang web trong trình duyệt này cho lần bình luận kế tiếp của tôi.  \nΔ  \nTin liên quan  \n#### Thang đánh giá trầm cảm hamilton (Bộ câu hỏi chuẩn xác)  \n#### Trầm cảm làm tê liệt ý chí của bạn như thế nào?  \n#### Người trầm cảm nên làm gì khi không nhận được sự hỗ trợ từ gia...  \n#### Bệnh trầm cảm có di truyền không? Vai trò của Gen  \n#### 10 hậu quả của trầm cảm với bản thân, gia đình và xã hội  \n#### Trầm cảm ở trẻ em: Dấu hiệu nhận biết và cách chữa trị  \nChuyên gia tư vấn",
+        "summary": "Tài liệu này là một tổng hợp các chủ đề trong lĩnh vực Khoa học Tâm lý, đặc biệt nhấn mạnh vào bệnh trầm cảm. Nó giới thiệu các vấn đề như cách điều trị trầm cảm mãn tính, những hậu quả của bệnh ở học sinh và nguy cơ tự sát. Ngoài ra, tài liệu còn đề cập đến các khía cạnh khác của trầm cảm như thang đánh giá Hamilton, tác động lên ý chí, vai trò của gen và trầm cảm ở trẻ em.",
+        "keywords": [
+            "Khoa học tâm lý",
+            "Trầm cảm",
+            "Điều trị trầm cảm",
+            "Hậu quả trầm cảm",
+            "Nguy cơ tự sát",
+            "Thang đánh giá trầm cảm Hamilton",
+            "Trầm cảm di truyền",
+            "Trầm cảm trẻ em",
+            "Hỗ trợ tâm lý"
+        ],
+        "type": "kiến thức"
+    }
+]

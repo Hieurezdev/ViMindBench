@@ -1,0 +1,805 @@
+[
+    {
+        "uuid": "bf2ab3c1-8703-4b40-903d-7b09ce434fbd",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "Phản ứng với stress trầm trọng và rối loạn sự thích ứng là một trong các rối loạn chức năng tâm lý và hoạt động tâm thần do những chấn thương tâm lý khác nhau tạo ra. Chứng rối loạn này đã được xếp vào nhóm F43 trong bảng phân loại lần thứ 10 của quốc tế. Phản ứng với stress trầm trọng và rối loạn sự thích ứng chính là hiện tượng rối loạn được phát sinh từ những sang chấn tâm lý hay các hậu quả trực tiếp mà tình trạng stress trầm trọng cấp diễn tạo ra. Trước đây chứng rối loạn này còn được gọi với tên là rối loạn tâm thần căn nguyên tâm lý và được xếp vào nhóm rối loạn F43 dựa vào bảng phân loại bệnh của quốc tế lần thứ 10.",
+        "summary": "Phản ứng với stress trầm trọng và rối loạn sự thích ứng là một dạng rối loạn chức năng tâm lý, phát sinh từ các chấn thương hoặc sang chấn tâm lý cấp tính. Chứng rối loạn này thuộc nhóm F43 theo bảng phân loại quốc tế lần thứ 10 (ICD-10). Đây là một hiện tượng rối loạn tâm thần căn nguyên tâm lý, biểu hiện qua các hậu quả trực tiếp của stress trầm trọng.",
+        "keywords": [
+            "stress trầm trọng",
+            "rối loạn sự thích ứng",
+            "rối loạn chức năng tâm lý",
+            "chấn thương tâm lý",
+            "sang chấn tâm lý",
+            "F43",
+            "ICD-10",
+            "rối loạn tâm thần"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "dab655c4-70ea-48e4-9374-9e9197248fc2",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "Tổ chức Y tế Thế giới cũng đã từng tiến hành thống kê và tìm hiểu vào cụ thể về nguy cơ mắc phải các phản ứng stress trầm trọng và rối loạn sự kích thích. Thống kê được thực hiện vào năm 2002 và nhận thấy có khoảng 0,2% dân số có khả năng mắc phải tình trạng này. Bệnh có thể xuất hiện ở bất kì lứa tuổi nào, không phân biệt giới tính. Tuy nhiên các chuyên gia cho biết rằng tỉ lệ nữ giới mắc bệnh sẽ cao hơn so với nam giới và tình trạng này ngày càng gia tăng đáng kể.",
+        "summary": "Tổ chức Y tế Thế giới (WHO) đã thống kê về nguy cơ mắc phản ứng stress trầm trọng và rối loạn sự thích ứng, với khoảng 0,2% dân số có khả năng mắc phải vào năm 2002. Bệnh có thể xảy ra ở mọi lứa tuổi và không phân biệt giới tính, nhưng tỉ lệ nữ giới mắc bệnh cao hơn nam giới. Tình trạng này được nhận định là đang có xu hướng gia tăng đáng kể.",
+        "keywords": [
+            "stress trầm trọng",
+            "rối loạn sự thích ứng",
+            "thống kê",
+            "WHO",
+            "tỉ lệ mắc bệnh",
+            "dân số",
+            "giới tính",
+            "xu hướng gia tăng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "83266137-e92e-449c-91b2-ca22cb50833e",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "Phản ứng stress sẽ trở thành bệnh lý khi các tình huống gây stress thật sự nghiêm trọng, quá dữ dội và mang tính chất bất ngờ. Chẳng hạn như sự ra đi đột ngột của người thân, bị đe dọa đến tính mạng, bệnh tật nghiêm trọng, xâm phạm tình dục, bị bắt cóc, mất tài sản lớn, thiên tai, khủng bố,….",
+        "summary": "Phản ứng stress chuyển thành bệnh lý khi đối mặt với các tình huống gây stress cực kỳ nghiêm trọng, dữ dội và bất ngờ. Các ví dụ điển hình bao gồm mất người thân đột ngột, bị đe dọa tính mạng, bệnh tật nghiêm trọng, xâm phạm tình dục, bắt cóc, mất tài sản lớn, hoặc các sự kiện thiên tai, khủng bố. Những tình huống này vượt quá khả năng chịu đựng và thích nghi thông thường của cá nhân.",
+        "keywords": [
+            "stress bệnh lý",
+            "tình huống gây stress",
+            "chấn thương tâm lý",
+            "sang chấn",
+            "mất người thân",
+            "đe dọa tính mạng",
+            "khủng bố",
+            "thiên tai"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "21021b45-d15b-4630-9c08-55e24237db80",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "Tuy nhiên cũng có một số trường hợp ngược lại, các sự kiện stress rất quen thuộc, thường xuyên lặp đi lặp lại nhiều lần và vượt quá khả năng dàn xếp thích ứng của mỗi người. Mặc dù các sự việc không ở mức độ quá nghiêm trọng nhưng khi liên tục xuất hiện cũng khiến cho tâm lý của con người bị tác động xấu. Ví dụ cụ thể như gia đình thường xuyên có mâu thuẫn, liên tục bị thất bại trong tình yêu, học tập, công việc, chịu nhiều căng thẳng trong cuộc sống, hoàn cảnh thiếu thốn, gò bó,…",
+        "summary": "Stress cũng có thể trở thành bệnh lý khi các sự kiện gây stress, dù không quá nghiêm trọng, nhưng lặp đi lặp lại nhiều lần và vượt quá khả năng thích ứng của cá nhân. Những tình huống như mâu thuẫn gia đình kéo dài, thất bại liên tiếp trong các mối quan hệ, học tập hay công việc, hoặc cuộc sống căng thẳng, thiếu thốn có thể gây tác động tiêu cực đáng kể đến tâm lý con người.",
+        "keywords": [
+            "stress mãn tính",
+            "sự kiện stress lặp lại",
+            "khả năng thích ứng",
+            "tâm lý bị tác động",
+            "mâu thuẫn gia đình",
+            "thất bại",
+            "căng thẳng cuộc sống",
+            "hoàn cảnh khó khăn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "6fbbe595-e19f-4430-b513-343046954979",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "Ngoài các sự kiện gây stress ra thì một số yếu tố khác cũng khiến cho căn bệnh này thuận lợi khởi phát. Cụ thể như chấn thương sọ não, cơ thể bị suy kiệt, yếu ớt, nhiễm trùng, nhiễm độc, liên tục bị mất ngủ trong khoảng thời gian kéo dài hoặc do tính cách nhạy cảm, dễ bị tổn thương.",
+        "summary": "Ngoài các sự kiện gây stress trực tiếp, nhiều yếu tố khác cũng có thể góp phần vào sự khởi phát của các phản ứng stress trầm trọng và rối loạn sự thích ứng. Các yếu tố này bao gồm chấn thương sọ não, tình trạng suy kiệt cơ thể, nhiễm trùng, nhiễm độc, mất ngủ kéo dài. Ngoài ra, những người có tính cách nhạy cảm hoặc dễ bị tổn thương cũng có nguy cơ cao hơn.",
+        "keywords": [
+            "yếu tố khởi phát",
+            "stress trầm trọng",
+            "rối loạn sự thích ứng",
+            "chấn thương sọ não",
+            "suy kiệt cơ thể",
+            "nhiễm trùng",
+            "mất ngủ",
+            "tính cách nhạy cảm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "a60848b0-7502-4b5a-9dcc-533f625f62c6",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n## Các phản ứng với stress trầm trọng và rối loạn sự thích ứng  \nVề phản ứng với stress trầm trọng và rối loạn sự thích ứng thì vào năm 1992 Tổ chức Y tế Thế giới đã phân chứng bệnh này thành các loại cụ thể như sau:  \n- Phản ứng stress cấp (F43.0).  \n- Rối loạn stress sau sang chấn (F43.1).  \n- Rối loạn sự thích ứng (F43.2).  \n- Các phản ứng với stress trầm trọng khác (F43.8).  \n- Phản ứng với stress trầm trọng không biệt định (F43.9).  \n### 1. Phản ứng stress cấp  \n#### 1.1 Định nghĩa",
+        "summary": "Tổ chức Y tế Thế giới (WHO) đã phân loại các phản ứng với stress trầm trọng và rối loạn sự thích ứng thành nhiều loại vào năm 1992. Các loại này bao gồm phản ứng stress cấp, rối loạn stress sau sang chấn và rối loạn sự thích ứng. Phần tiếp theo của bài viết bắt đầu đi sâu vào định nghĩa của phản ứng stress cấp.",
+        "keywords": [
+            "stress trầm trọng",
+            "rối loạn sự thích ứng",
+            "phân loại stress",
+            "WHO",
+            "phản ứng stress cấp",
+            "rối loạn stress sau sang chấn",
+            "rối loạn sự thích ứng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "e1ff0132-c037-4edb-8e6b-3de867eb71a5",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 1. Phản ứng stress cấp  \n#### 1.1 Định nghĩa  \nPhản ứng stress cấp là một trong các rối loạn tâm thần mang tính chất tạm thời, thường chỉ kéo dài khoảng vài tiếng hoặc vài ngày tính từ thời điểm xảy ra các sự kiện, hiện tượng gây sang chấn tâm lý cấp độ nặng. Các triệu chứng stress cấp thường sẽ khởi phát sau vài ngày xảy ra sang chấn và khá giống với sang chấn tâm lý nhưng thời gian tiến triển sẽ ngắn hơn.",
+        "summary": "Phản ứng stress cấp được định nghĩa là một rối loạn tâm thần tạm thời, thường kéo dài từ vài giờ đến vài ngày sau khi trải qua các sự kiện sang chấn tâm lý nặng. Các triệu chứng của nó thường khởi phát nhanh chóng và có nét tương đồng với sang chấn tâm lý, nhưng thời gian tiến triển ngắn hơn đáng kể.",
+        "keywords": [
+            "phản ứng stress cấp",
+            "định nghĩa stress cấp",
+            "rối loạn tâm thần tạm thời",
+            "sang chấn tâm lý",
+            "triệu chứng stress cấp"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8bdbe0a9-02cc-4782-85f1-660761c6e843",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTùy vào từng giai đoạn khác nhau mà các biểu hiên của bệnh cũng sẽ thay đổi. Lúc đầu có thể sửng sốt, hoảng loạn nhưng sau đó dần sẽ thoát khỏi và rơi vào trạng thái bất động hay kích động quá mức. Khi các sự kiện được giải quyết và khắc phục tốt thì tình trạng này cũng sẽ dần biến mất.  \n#### 1.2 Nguyên nhân và các yếu tố phụ trợ  \nStress cấp diễn và đủ lớn:",
+        "summary": "Các biểu hiện của phản ứng stress cấp thay đổi theo từng giai đoạn, từ sửng sốt, hoảng loạn ban đầu đến trạng thái bất động hoặc kích động quá mức. Tình trạng này có xu hướng biến mất khi các sự kiện gây stress được giải quyết và khắc phục. Phần tiếp theo sẽ đi sâu vào nguyên nhân và các yếu tố phụ trợ gây ra stress cấp diễn.",
+        "keywords": [
+            "phản ứng stress cấp",
+            "biểu hiện stress",
+            "giai đoạn stress",
+            "nguyên nhân stress",
+            "yếu tố phụ trợ",
+            "stress cấp diễn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5c341462-9eb5-4faa-ac13-af9e204b7b4f",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thảm họa, thiên tai như núi lửa, động đất, sóng thần, sạt lở, lốc xoáy,…  \n- Mất người thân.  \n- Sinh mạng chính trị bị đe dọa.  \n- Đời sống tình cảm bị đảo lộn nghiêm trọng.  \n- Bản thân bị đe dọa tính mạng.  \nStress kéo dài:  \nTình trạng này không quá phổ biến và có thể khởi phát do các yếu tố nguy cơ như:  \n- Công việc thường xuyên bị căng thẳng, áp lực, quá tải.  \n- Các mâu thuẫn gia đình, bạn bè, đồng nghiệp,…liên tục kéo dài dai dẳng.",
+        "summary": "Nội dung này liệt kê các nguyên nhân chính gây ra stress cấp diễn và đủ lớn, bao gồm các thảm họa thiên tai, mất người thân, đe dọa sinh mạng hoặc đời sống tình cảm. Ngoài ra, bài viết cũng đề cập đến các yếu tố nguy cơ gây stress kéo dài, như áp lực công việc và các mâu thuẫn dai dẳng trong các mối quan hệ cá nhân.",
+        "keywords": [
+            "nguyên nhân stress",
+            "stress cấp diễn",
+            "stress kéo dài",
+            "thảm họa",
+            "mất người thân",
+            "đe dọa tính mạng",
+            "áp lực công việc",
+            "mâu thuẫn gia đình"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b6ef4bf9-38f7-4545-b69b-953930b22395",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các mâu thuẫn gia đình, bạn bè, đồng nghiệp,…liên tục kéo dài dai dẳng.  \n- Bị bắt giữ, bao vây trong chiến tranh hoặc bị cầm tù.  \nCác yếu tố phụ trợ:  \n- Cơ thể bị suy kiệt, sức khỏe yếu kém  \n- Nhân cách dễ phản ứng, dễ bị tác động bởi bên ngoài.  \n- Hệ thần kinh đã bị tổn thương hoặc suy yếu trước khi bị stress.  \n- Khả năng đề kháng của sức khỏe tinh tâm thần không được đảm bảo.  \n- Gặp phải khủng hoảng tâm lý, nhất là trong giai đoạn tuổi dậy thì hoặc tiền mãn kinh, mãn kinh.",
+        "summary": "Bài viết tiếp tục liệt kê các nguyên nhân gây stress kéo dài như mâu thuẫn dai dẳng và bị giam cầm. Ngoài ra, nó còn chỉ ra các yếu tố phụ trợ làm tăng nguy cơ mắc stress, bao gồm sức khỏe thể chất và tinh thần suy yếu, nhân cách dễ bị tác động, hệ thần kinh tổn thương, và các khủng hoảng tâm lý đặc trưng theo độ tuổi như tuổi dậy thì hoặc tiền mãn kinh.",
+        "keywords": [
+            "stress kéo dài",
+            "mâu thuẫn",
+            "bị giam cầm",
+            "yếu tố phụ trợ stress",
+            "sức khỏe yếu kém",
+            "nhân cách dễ phản ứng",
+            "hệ thần kinh suy yếu",
+            "khủng hoảng tâm lý",
+            "tuổi dậy thì",
+            "tiền mãn kinh"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9bacca82-c30b-400e-95ec-6ef67b75186e",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Gặp phải khủng hoảng tâm lý, nhất là trong giai đoạn tuổi dậy thì hoặc tiền mãn kinh, mãn kinh.  \n#### 1.3 Lâm sàng  \nPhản ứng stress cấp sẽ diễn ra ngay khi xuất hiện các cú sốc tâm thần, nó có thể bắt đầu từ trạng thái bất động và dần chuyển sang kích động trong một khoảng thời gian rất ngắn. Lúc nào cũng sẽ có kèm theo các triệu chứng của rối loạn thần kinh thực vật. Thông thường thời gian kéo dài chỉ từ khoảng vài phút và tối đa là vài ngày.  \nThể bất động:",
+        "summary": "Phản ứng stress cấp là một tình trạng tâm lý xảy ra ngay sau các cú sốc tâm thần, có thể kéo dài từ vài phút đến vài ngày. Nó đặc trưng bởi sự chuyển trạng thái nhanh chóng từ bất động sang kích động, kèm theo các triệu chứng rối loạn thần kinh thực vật. Tình trạng này thường gặp ở những người trải qua khủng hoảng tâm lý, đặc biệt là trong giai đoạn dậy thì hoặc tiền mãn kinh.",
+        "keywords": [
+            "khủng hoảng tâm lý",
+            "tuổi dậy thì",
+            "tiền mãn kinh",
+            "mãn kinh",
+            "phản ứng stress cấp",
+            "cú sốc tâm thần",
+            "rối loạn thần kinh thực vật",
+            "lâm sàng",
+            "bất động",
+            "kích động"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2a0b661c-dec6-477b-a407-ffb53c12b98b",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nThể bất động:  \n- Người bệnh sẽ không cử động, giữ nguyên một tư thế, không nói, không hành động cho dù nguy hiểm đang dần tiến lại gần.  \n- Không còn khả năng phản ứng cảm xúc, mất dần khả năng phản ứng lại với ngoại cảnh, bị thu hẹp về mặt ý thức, rối loạn định hướng và chú ý.  \n- Tình trạng này có thể duy trì kéo dài trong khoảng từ 2 đến 3 ngày, tiếp đến sẽ là thời gian hồi phục, suy nhược cơ thể và bị suy giảm hoặc mất trí nhớ.  \nThể kích động:",
+        "summary": "Thể bất động trong phản ứng stress cấp biểu hiện qua việc người bệnh không cử động, không nói, không hành động, và mất khả năng phản ứng cảm xúc với ngoại cảnh. Ý thức bị thu hẹp, kèm theo rối loạn định hướng và chú ý. Tình trạng này có thể kéo dài 2-3 ngày, sau đó là giai đoạn hồi phục với suy nhược cơ thể và suy giảm trí nhớ.",
+        "keywords": [
+            "thể bất động",
+            "phản ứng stress cấp",
+            "không cử động",
+            "mất phản ứng cảm xúc",
+            "thu hẹp ý thức",
+            "rối loạn định hướng",
+            "mất trí nhớ",
+            "suy nhược cơ thể"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9958b183-9287-4dc1-b234-222bb5d0ac9",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nThể kích động:  \n- Người bệnh sẽ cảm thấy hưng phấn, kích động về cả ngôn ngữ và vận động, chẳng hạn như thực hiện các hành vi không có ý nghĩa, bất ngờ la hét, bỏ chạy,…  \n- Bị rối loạn chú ý và định hướng, ý thức dần bị thu hẹp đi.",
+        "summary": "Thể kích động trong phản ứng stress cấp đặc trưng bởi sự hưng phấn, kích động về ngôn ngữ và vận động. Người bệnh có thể thực hiện các hành vi vô nghĩa, la hét hoặc bỏ chạy. Kèm theo đó là rối loạn chú ý, định hướng và ý thức bị thu hẹp.",
+        "keywords": [
+            "thể kích động",
+            "phản ứng stress cấp",
+            "hưng phấn",
+            "kích động",
+            "rối loạn chú ý",
+            "rối loạn định hướng",
+            "hành vi vô nghĩa",
+            "la hét"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "8583e72f-dbaf-4880-9e6d-7186f620e18d",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Thông thường các cơn kích động sẽ xảy ra một cách nhanh chóng, kéo dài từ khoảng vài phút cho đến tối đa 20 phút.  \n- Sau các cơn kích động thì người bệnh sẽ rơi vào trạng thái suy sụp và hay quên.  \nRối loạn thần kinh thực vật: Tình trạng này bao giờ cũng sẽ xuất hiện, người bệnh sẽ có kèm theo các trạng thái bất động hay kích động. Ví dụ như mạch nhanh, vã mồ hôi, đái dầm, co cứng cơ,….  \n#### 1.4 Chẩn đoán",
+        "summary": "Các cơn kích động trong phản ứng stress cấp thường diễn ra nhanh chóng, kéo dài từ vài phút đến tối đa 20 phút, sau đó người bệnh thường rơi vào trạng thái suy sụp và hay quên. Rối loạn thần kinh thực vật là triệu chứng luôn đi kèm với cả thể bất động và kích động, biểu hiện qua các dấu hiệu như mạch nhanh, vã mồ hôi, đái dầm, hoặc co cứng cơ.",
+        "keywords": [
+            "cơn kích động",
+            "thời gian kích động",
+            "suy sụp",
+            "hay quên",
+            "rối loạn thần kinh thực vật",
+            "mạch nhanh",
+            "vã mồ hôi",
+            "đái dầm",
+            "co cứng cơ",
+            "phản ứng stress cấp"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d81a22b2-ae3a-4ef4-99a3-053666506b89",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n#### 1.4 Chẩn đoán  \nThông thường, để có thể chẩn đoán chính xác về tình trạng phản ứng stress cấp thì các chuyên gia, bác sĩ sẽ dựa vào những đặc điểm nhận dạng như:  \n- Các triệu chứng của bệnh sẽ khởi phát ngay sau khi xảy ra sự kiện gây stress hoặc sau đó một khoảng thời gian rất ngắn (vài ngày).  \n- Nội dung của các biểu hiện loạn thần sẽ có mối liên quan trực tiếp và phản ảnh chân thực, sâu sắc nhất về nội dung của stress.",
+        "summary": "Để chẩn đoán chính xác phản ứng stress cấp, các chuyên gia y tế thường dựa vào hai đặc điểm chính. Thứ nhất, các triệu chứng bệnh phải khởi phát ngay sau sự kiện gây stress hoặc trong vài ngày sau đó. Thứ hai, các biểu hiện loạn thần phải có mối liên hệ trực tiếp và phản ánh sâu sắc nội dung của yếu tố gây stress.",
+        "keywords": [
+            "chẩn đoán",
+            "phản ứng stress cấp",
+            "triệu chứng khởi phát",
+            "sự kiện gây stress",
+            "biểu hiện loạn thần",
+            "mối liên quan stress",
+            "yếu tố gây stress"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b9e547dd-e33b-459c-850a-b1b622302123",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các yếu tố stress sẽ ở mức độ nghiêm trọng, vượt quá sức chịu đựng của một người, xảy ra một cách đột ngột hoặc tình trạng stress quen thuộc nhưng kéo dài dai dẳng, bệnh nhân không có khả năng giải quyết và chống đỡ.  \n- Tiền sử đã có lần phản ứng nhẹ đối với stress hoặc sở hữu các yếu tố thuận lợi làm gia tăng nguy cơ phát bệnh như cơ thể suy kiệt, yếu ớt, cao tuổi,…  \n#### 1.5 Điều trị",
+        "summary": "Nội dung này mô tả các yếu tố khiến stress trở nên nghiêm trọng, vượt quá khả năng chịu đựng của một người, bao gồm các sự kiện đột ngột hoặc stress kéo dài. Các yếu tố thuận lợi như tiền sử phản ứng nhẹ với stress, cơ thể suy kiệt hoặc cao tuổi cũng làm tăng nguy cơ phát bệnh. Đây là phần giới thiệu về các nguyên nhân và yếu tố nguy cơ của tình trạng stress.",
+        "keywords": [
+            "stress nghiêm trọng",
+            "yếu tố stress",
+            "sức chịu đựng",
+            "phản ứng stress",
+            "nguy cơ phát bệnh",
+            "suy kiệt",
+            "cao tuổi",
+            "tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "84a1b4d8-f516-4529-b92e-04459f05d4d6",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n#### 1.5 Điều trị  \nNếu có thể phát hiện được các triệu chứng bệnh và áp dụng các biện pháp điều trị phù hợp thì tình trạng phản ứng stress cấp sẽ nhanh chóng được kiểm soát và khắc phục hoàn toàn. Những cách bạn nên thực hiện khi xuất hiện các biểu hiện bệnh như:  \n- Cách li hoặc tìm cách thoát khỏi những sự kiện, hoạt động gây stress.  \n- Hỗ trợ và động viên tâm lý cho người bệnh.  \n- Loại bỏ các yếu tố làm thúc đẩy rối loạn stress, gia tăng sức đề kháng cho người bệnh.",
+        "summary": "Để kiểm soát và khắc phục phản ứng stress cấp, việc phát hiện sớm triệu chứng và áp dụng biện pháp điều trị phù hợp là rất quan trọng. Các phương pháp điều trị bao gồm cách ly hoặc tránh xa các yếu tố gây stress, hỗ trợ và động viên tâm lý cho người bệnh. Đồng thời, cần loại bỏ các yếu tố thúc đẩy rối loạn stress và tăng cường sức đề kháng cho người bệnh.",
+        "keywords": [
+            "điều trị stress cấp",
+            "phản ứng stress cấp",
+            "kiểm soát stress",
+            "thoát khỏi stress",
+            "hỗ trợ tâm lý",
+            "rối loạn stress",
+            "sức đề kháng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "98e8a79f-073f-4111-ae36-224366381a97",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Loại bỏ các yếu tố làm thúc đẩy rối loạn stress, gia tăng sức đề kháng cho người bệnh.  \n- Nếu cần thiết có thể sử dụng thêm các loại thuốc bình thần trong khoảng thời gian ngắn.  \n### 2. Rối loạn stress sau sang chấn  \n#### 2.1 Định nghĩa",
+        "summary": "Để điều trị rối loạn stress, cần loại bỏ các yếu tố thúc đẩy và tăng cường sức đề kháng cho người bệnh. Trong một số trường hợp, có thể sử dụng thuốc bình thần trong thời gian ngắn để hỗ trợ. Nội dung cũng bắt đầu giới thiệu về rối loạn stress sau sang chấn (PTSD) và định nghĩa của nó.",
+        "keywords": [
+            "rối loạn stress",
+            "điều trị stress",
+            "thuốc bình thần",
+            "sức đề kháng",
+            "rối loạn stress sau sang chấn",
+            "PTSD",
+            "định nghĩa"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "4f08a58c-1d3f-4f03-a321-3a7f84fd2965",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nRối loạn stress sau sang chấn là những rối loạn phát sinh như một đáp ứng trì hoãn, kéo dài sau sự kiện chấn thương tâm lý mang tính chất thảm họa hoặc đe dọa với mức độ nghiêm trọng. Chẳng hạn như bị lạm dụng tình dục, hiếp dâm, thiên tai, chiến tranh, khủng bố,….Nó có thể để lại rất nhiều sự tổn thương, đau khổ đối với bất kì đối tượng nào và sẽ khởi phát trong khoảng vài tuần hoặc có thể là vài tháng, tuy nhiên không kéo dài hơn 6 tháng tính từ thời điểm xảy ra stress.",
+        "summary": "Rối loạn stress sau sang chấn (PTSD) là một dạng rối loạn tâm lý phát sinh muộn và kéo dài sau khi trải qua các sự kiện chấn thương nghiêm trọng như lạm dụng, thiên tai, hoặc chiến tranh. Tình trạng này gây ra nhiều tổn thương và đau khổ, thường khởi phát trong vài tuần đến vài tháng sau sự kiện nhưng không kéo dài quá 6 tháng.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "PTSD",
+            "chấn thương tâm lý",
+            "thảm họa",
+            "lạm dụng",
+            "thiên tai",
+            "chiến tranh",
+            "khủng bố",
+            "tổn thương tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "338fe8e3-fef0-46a2-9b5b-bc11c9781d01",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nHầu hết các tình trạng rối loạn stress sau sang chấn có thể tiến triển bệnh một cách thuận lợi, khỏi bệnh hoàn toàn. Tuy nhiên cũng có một số ít dao động, gia tăng tình trạng tái phát và tiến triển bệnh theo hướng mãn tính, lâu ngày sẽ khiến cho nhân cách người bệnh bị biến đổi nghiêm trọng. Một số khác có thể biến chuyển bệnh thành các chứng rối loạn trầm cảm . Xét trong các yếu tố phù trợ thì đặc điểm nhân cách sẽ được chú ý nhiều hơn và có vai trò quan trọng đối với việc tiến triển và phát",
+        "summary": "Phần lớn các trường hợp rối loạn stress sau sang chấn (PTSD) có thể hồi phục hoàn toàn. Tuy nhiên, một số ít có thể tái phát hoặc trở thành mãn tính, dẫn đến biến đổi nhân cách nghiêm trọng hoặc phát triển thành các rối loạn trầm cảm. Đặc điểm nhân cách được xem là yếu tố quan trọng ảnh hưởng đến quá trình tiến triển của bệnh.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "PTSD",
+            "tiến triển bệnh",
+            "khỏi bệnh",
+            "tái phát",
+            "mãn tính",
+            "biến đổi nhân cách",
+            "rối loạn trầm cảm",
+            "đặc điểm nhân cách"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "030db33c-0454-4b07-82d5-abf0f0920363",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nđặc điểm nhân cách sẽ được chú ý nhiều hơn và có vai trò quan trọng đối với việc tiến triển và phát sinh bệnh.",
+        "summary": "Đặc điểm nhân cách đóng vai trò quan trọng trong quá trình tiến triển và phát sinh bệnh. Việc chú ý đến những đặc điểm này giúp hiểu rõ hơn về mối liên hệ giữa tâm lý và sức khỏe thể chất, từ đó có thể có những can thiệp phù hợp.",
+        "keywords": [
+            "đặc điểm nhân cách",
+            "tiến triển bệnh",
+            "phát sinh bệnh",
+            "tâm lý",
+            "sức khỏe"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5858b395-48bd-45f9-9ff0-50511dde4ed7",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n#### 2.2. Lâm sàng  \nCác biểu hiện, triệu chứng lâm sàng của tình trạng rối loạn stress phát triển sẽ có sự liên quan lớn đối với những yếu tố gây chấn thương tâm lý nặng nề, nó sẽ tác động trực tiếp đến bệnh nhân, cụ thể như:  \n- Gây thương tích hoặc đe dọa nghiêm trọng đến tính mạng của bệnh nhân.  \n- Đe dọa làm tổn thương hoặc cướp đi tính mạng của các thành viên trong gia đình hoặc của một người thân thiết nào đó.  \n- Bạo lực gây tổn thương nặng nề hoặc xảy ra án mạng.\n\n- Bạo lực gây tổn thương nặng nề hoặc xảy ra án mạng.  \n- Chứng kiến các sự kiện gây chết người hoặc đe dọa làm tổn thương đến sự sống của con người.  \n- Đối với người bệnh là trẻ em, các sự kiện lạm dụng tình dục, gây hoảng sự dữ dội, không còn sự giúp đỡ, hỗ trợ,…  \nRối loạn stress sau sang chấn sẽ có những triệu chứng vô cùng đa dạng, tùy thuộc vào từng đối tượng bệnh khác nhau mà các biểu hiện cũng sẽ có phần khác nhau. Cụ thể như:",
+        "summary": "Các triệu chứng lâm sàng của rối loạn stress phát triển có mối liên hệ chặt chẽ với các yếu tố gây chấn thương tâm lý nặng nề. Những yếu tố này bao gồm các sự kiện đe dọa tính mạng, bạo lực nghiêm trọng, chứng kiến cái chết, hoặc lạm dụng tình dục ở trẻ em. Rối loạn stress sau sang chấn (PTSD) biểu hiện đa dạng, tùy thuộc vào từng đối tượng bệnh nhân.",
+        "keywords": [
+            "rối loạn stress",
+            "chấn thương tâm lý",
+            "triệu chứng lâm sàng",
+            "PTSD",
+            "bạo lực",
+            "lạm dụng tình dục",
+            "đe dọa tính mạng",
+            "sang chấn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "205c56ae-f4f3-4416-aef8-6351238bbc7",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- “Mảnh hồi tưởng” chính là tình trạng liên tưởng, nhớ lại một cách miễn cưỡng, ép buộc về hoàn cảnh đã từng gây sang chấn, tình trạng này sẽ thường xuyên xuất hiện và lặp đi lặp lại rất nhiều lần, các cơn ác mộng, khủng hoảng sẽ dần sống lại trên nền tảng “tê cóng”. Bệnh nhân sẽ bị mất dần cảm xúc, không còn sự hứng thú và cố gắng tránh né, xa lánh với mọi người xung quanh cũng như các hoàn cảnh, hình ảnh gợi nhớ lại sự kiện chấn thương. Người bệnh dường như hoàn toàn không đáp ứng lại được với",
+        "summary": "“Mảnh hồi tưởng” là một triệu chứng đặc trưng của rối loạn stress, thể hiện qua việc nhớ lại miễn cưỡng các hoàn cảnh gây sang chấn, thường kèm theo ác mộng và khủng hoảng. Bệnh nhân có thể trải qua tình trạng tê cóng cảm xúc, mất hứng thú và có xu hướng tránh né các yếu tố gợi nhớ sự kiện chấn thương. Điều này ảnh hưởng nghiêm trọng đến khả năng tương tác của người bệnh với môi trường xung quanh.",
+        "keywords": [
+            "mảnh hồi tưởng",
+            "flashback",
+            "sang chấn tâm lý",
+            "ác mộng",
+            "tê cóng cảm xúc",
+            "tránh né",
+            "rối loạn stress"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d6d8e442-65aa-4d0f-ac57-0747deb4b94a",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nhình ảnh gợi nhớ lại sự kiện chấn thương. Người bệnh dường như hoàn toàn không đáp ứng lại được với môi trường bên ngoài, đây cũng được xem là triệu chứng đặc trưng và điển hình nhất của tình trạng rối loạn stress sau sang chấn.",
+        "summary": "Người bệnh rối loạn stress sau sang chấn thường không đáp ứng được với môi trường bên ngoài, đặc biệt khi đối diện với các hình ảnh gợi nhớ lại sự kiện chấn thương. Đây được xem là một trong những triệu chứng đặc trưng và điển hình nhất của tình trạng này, phản ánh sự suy giảm khả năng tương tác và thích nghi của bệnh nhân.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "triệu chứng đặc trưng",
+            "không đáp ứng với môi trường",
+            "hình ảnh gợi nhớ",
+            "sang chấn tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "be604c71-10de-43e4-a9a9-ea57e8a65f9f",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Cảm giác đa cảm, buồn bã, ủ rũ, không còn sự hứng thú với thế giới xung quanh, hình thành các triệu chứng của rối loạn trầm cảm, rối loạn lo âu kết hợp cùng với nhau.  \n- Tư duy bị ứ đọng hoặc chậm lại, luôn tập trung vào các tình huống gây chấn thương, đôi lúc xuất hiện các hành vi gây hại, ý tưởng tự đổ lỗi, muốn tự sát.  \n- Có thể xuất hiện các cơn hoảng sợ hoặc đột ngột tấn công người khác khi nhớ lại các hình ảnh, hoàn cảnh gây sang chấn.",
+        "summary": "Người bệnh có thể trải qua cảm giác buồn bã, ủ rũ và mất hứng thú với thế giới xung quanh, dẫn đến các triệu chứng của rối loạn trầm cảm và lo âu. Tư duy thường bị chậm lại, tập trung vào các tình huống gây chấn thương, đôi khi xuất hiện hành vi gây hại hoặc ý tưởng tự sát. Ngoài ra, bệnh nhân có thể có các cơn hoảng sợ hoặc hành vi tấn công khi nhớ lại các sự kiện sang chấn.",
+        "keywords": [
+            "đa cảm",
+            "buồn bã",
+            "mất hứng thú",
+            "rối loạn trầm cảm",
+            "rối loạn lo âu",
+            "tư duy chậm",
+            "ý tưởng tự sát",
+            "cơn hoảng sợ",
+            "sang chấn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "195cd0e3-31d9-4474-8211-c42d96f9b8a5",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Hệ thần kinh thực vật bị mất cân bằng, ví dụ như bị mất ngủ liên tục, có cảm giác hay bị giật mình.  \n- Có xu hướng lạm dụng các chất gây nghiện, chất kích thích như rượu bia, thuốc lá, ma túy, thuốc lắc,…để giải tỏa căng thẳng, lo lắng.  \n#### 2.3 Chẩn đoán  \nKhi tiến hành chẩn đoán tình trạng rối loạn stress sau sang chấn, các bác sĩ hoặc chuyên gia sẽ dựa vào những đặc điểm chủ yếu như:  \n- Các yếu tố stress xuất hiện trong khoảng 6 tháng gần đây.",
+        "summary": "Nội dung mô tả các dấu hiệu của tình trạng rối loạn stress sau sang chấn, bao gồm mất cân bằng hệ thần kinh thực vật, mất ngủ, giật mình và lạm dụng chất kích thích để giải tỏa căng thẳng. Phần này cũng bắt đầu đề cập đến quá trình chẩn đoán, nhấn mạnh việc xem xét các yếu tố stress xuất hiện trong 6 tháng gần đây để đưa ra nhận định. Đây là những triệu chứng và tiêu chí quan trọng trong việc xác định bệnh.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "hệ thần kinh thực vật",
+            "mất ngủ",
+            "giật mình",
+            "lạm dụng chất gây nghiện",
+            "căng thẳng",
+            "lo lắng",
+            "chẩn đoán",
+            "yếu tố stress",
+            "triệu chứng tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "22052249-1678-4c85-bf83-87b357fa49ed",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các yếu tố stress xuất hiện trong khoảng 6 tháng gần đây.  \n- Người bệnh có tồn tại triệu chứng điển hình “mảnh hồi tưởng” về stress.  \n- Cảm xúc trở nên tê liệt, thờ ơ, vô cảm và có xu hướng muốn trốn tránh các kích thích liên quan đến sự hồi tưởng về sự việc gây sang chấn.  \n- Có sự góp mặt của các triệu chứng của rối loạn hành vi, rối loạn thần kinh thực vật, rối loạn khí sắc,…nhưng không phải là yếu tố quan trọng nhất.  \n#### 2.4 Điều trị",
+        "summary": "Đoạn văn tiếp tục mô tả các tiêu chí chẩn đoán rối loạn stress sau sang chấn, bao gồm sự xuất hiện của các yếu tố stress trong 6 tháng gần đây và triệu chứng \"mảnh hồi tưởng\" điển hình. Người bệnh cũng có thể trải qua cảm xúc tê liệt, thờ ơ, vô cảm và xu hướng trốn tránh các kích thích liên quan đến sang chấn. Ngoài ra, các triệu chứng rối loạn hành vi, thần kinh thực vật và khí sắc cũng có thể xuất hiện, mặc dù không phải là yếu tố quan trọng nhất để chẩn đoán. Cuối cùng, nội dung chuyển sang phần điều trị.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "chẩn đoán",
+            "yếu tố stress",
+            "mảnh hồi tưởng",
+            "cảm xúc tê liệt",
+            "thờ ơ",
+            "vô cảm",
+            "trốn tránh",
+            "rối loạn hành vi",
+            "rối loạn thần kinh thực vật"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "9d64c1c7-d307-4ad5-965c-94757ae9d498",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTình trạng rối loạn stress sau sang chấn nếu không được điều trị kịp thời sẽ có nguy cơ tiến triển thành dạng mãn tính quá nhiều năm và dần làm thay đổi nhân cách của người bệnh. Tuy nhiên nếu có thể phát hiện bệnh sớm và áp dụng các biện pháp điều trị phù hợp thì triệu chứng bệnh sẽ dần phục hồi tốt hơn.  \nLiệu pháp tâm lý – biện pháp điều trị rất quan trọng:  \n- Giúp ngăn chặn các cơn hoảng loạn, hồi tưởng.  \n- Cô lập các tình trạng gây sang chấn.",
+        "summary": "Rối loạn stress sau sang chấn nếu không được điều trị kịp thời có thể tiến triển thành dạng mãn tính, kéo dài nhiều năm và dần làm thay đổi nhân cách người bệnh. Tuy nhiên, việc phát hiện sớm và áp dụng các biện pháp điều trị phù hợp sẽ giúp triệu chứng bệnh phục hồi tốt hơn. Liệu pháp tâm lý được nhấn mạnh là một biện pháp điều trị rất quan trọng, giúp ngăn chặn các cơn hoảng loạn, hồi tưởng và cô lập các tình trạng gây sang chấn, từ đó hỗ trợ quá trình hồi phục.",
+        "keywords": [
+            "rối loạn stress sau sang chấn",
+            "PTSD",
+            "điều trị",
+            "mãn tính",
+            "thay đổi nhân cách",
+            "phục hồi",
+            "liệu pháp tâm lý",
+            "hoảng loạn",
+            "hồi tưởng",
+            "sang chấn"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "b58c75f8-8300-4db1-a737-f64bcdacc52d",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Giúp ngăn chặn các cơn hoảng loạn, hồi tưởng.  \n- Cô lập các tình trạng gây sang chấn.  \n- Giúp người bệnh dần tái tạo lại niềm tin của bản thân.  \n- Học cách đối diện và chấp nhận sự thật  \n- Biết cách kiểm soát cảm xúc.  \nSử dụng thuốc:",
+        "summary": "Nội dung này tiếp tục liệt kê các lợi ích của liệu pháp tâm lý trong điều trị rối loạn stress sau sang chấn. Các biện pháp này giúp ngăn chặn các cơn hoảng loạn, hồi tưởng và cô lập các tình trạng gây sang chấn. Đồng thời, liệu pháp còn hỗ trợ người bệnh tái tạo niềm tin vào bản thân, học cách đối diện và chấp nhận sự thật, cũng như biết cách kiểm soát cảm xúc. Phần cuối đề cập đến việc sử dụng thuốc như một phương pháp bổ trợ.",
+        "keywords": [
+            "liệu pháp tâm lý",
+            "rối loạn stress sau sang chấn",
+            "hoảng loạn",
+            "hồi tưởng",
+            "sang chấn",
+            "tái tạo niềm tin",
+            "đối diện sự thật",
+            "kiểm soát cảm xúc",
+            "điều trị",
+            "sử dụng thuốc"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0e98f9f6-9e79-4375-9298-d94414f586a7",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Học cách đối diện và chấp nhận sự thật  \n- Biết cách kiểm soát cảm xúc.  \nSử dụng thuốc:  \nĐối với một số trường hợp cần thiết, người bệnh thường xuyên mất ngủ, lo lắng quá mức thì các chuyên gia sẽ cân nhắc để áp dụng một số loại thuốc điều trị rối loạn lo âu, rối loạn giấc ngủ trong thời gian ngắn. Các loại thuốc thường được sử dụng như diazepam, alprazolam, nitrazepam, clonazepam,….",
+        "summary": "Nội dung nhấn mạnh tầm quan trọng của việc học cách đối diện và chấp nhận sự thật, cùng với việc kiểm soát cảm xúc trong quá trình điều trị. Đối với những trường hợp cần thiết, đặc biệt là khi người bệnh thường xuyên mất ngủ hoặc lo lắng quá mức, các chuyên gia có thể cân nhắc sử dụng một số loại thuốc điều trị rối loạn lo âu và rối loạn giấc ngủ trong thời gian ngắn. Các loại thuốc thường được kê đơn bao gồm diazepam, alprazolam, nitrazepam và clonazepam.",
+        "keywords": [
+            "đối diện sự thật",
+            "chấp nhận sự thật",
+            "kiểm soát cảm xúc",
+            "sử dụng thuốc",
+            "mất ngủ",
+            "lo lắng quá mức",
+            "rối loạn lo âu",
+            "rối loạn giấc ngủ",
+            "diazepam",
+            "alprazolam"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "0cd76f6b-ae67-45b5-b3c2-8915315ef972",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgoài ra, một vài trường hợp đặc biệt còn có thể sử dụng những loại thuốc tăng cường thể trạng nhằm giúp cho người bệnh gia tăng được sức đề kháng. Một số đối tượng khác có xuất hiện các triệu chứng buồn bã, chán nản, suy sụp cũng có thể được chỉ định dùng các loại thuốc chống trầm cảm.  \n### 3. Các rối loạn sự thích ứng  \n#### 3.1 Định nghĩa",
+        "summary": "Đoạn văn này thảo luận về việc sử dụng thuốc tăng cường thể trạng và thuốc chống trầm cảm để điều trị các triệu chứng như buồn bã, chán nản trong một số trường hợp đặc biệt. Nội dung cũng giới thiệu về chủ đề \"Các rối loạn sự thích ứng\" và định nghĩa của chúng, một phần quan trọng trong khoa học tâm lý.",
+        "keywords": [
+            "thuốc tăng cường thể trạng",
+            "thuốc chống trầm cảm",
+            "buồn bã",
+            "chán nản",
+            "suy sụp",
+            "rối loạn sự thích ứng",
+            "điều trị tâm lý",
+            "khoa học tâm lý",
+            "triệu chứng trầm cảm"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "66f333a3-af08-4ac5-861c-4ee8e7753b2",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n### 3. Các rối loạn sự thích ứng  \n#### 3.1 Định nghĩa  \nCác rối loạn sự thích ứng là những trạng thái đau khổ, tổn thương chủ quan của người bệnh cùng với các rối loạn cảm xúc. Tình trạng này sẽ gây ra nhiều trở ngại cho cuộc sống, sinh hoạt hàng ngày, hiệu suất công việc, lao động cũng sẽ bị suy giảm. Những rối loạn này sẽ xuất hiện trong thời gian kích ứng với sự biến đổi đáng kể xảy ra trong cuộc sống hay các hệ quả đến từ những sự kiện gây stress.",
+        "summary": "Rối loạn sự thích ứng được định nghĩa là những trạng thái đau khổ chủ quan và rối loạn cảm xúc, gây cản trở đáng kể đến cuộc sống, sinh hoạt và hiệu suất công việc của người bệnh. Tình trạng này thường xuất hiện khi cá nhân phải đối mặt với những biến đổi lớn trong cuộc sống hoặc các sự kiện gây stress.",
+        "keywords": [
+            "rối loạn sự thích ứng",
+            "định nghĩa",
+            "đau khổ chủ quan",
+            "rối loạn cảm xúc",
+            "stress",
+            "biến đổi cuộc sống",
+            "suy giảm hiệu suất",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "2b9f6986-1895-4b2b-8743-70fd220ad12e",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNhững yếu tố gây stress có thể tác động tiêu cực đến sự toàn vẹn của những mối quan hệ đời sống xã hội của bệnh nhân hoặc ảnh hưởng đến hệ thống quy mô lớn hơn, ví dụ như những phúc lợi của xã hội. Những tác nhân gây stress không chỉ gây ảnh hưởng đến cá nhân người bệnh mà còn có khả năng lan rộng trong cộng đồng. Tố bẩm cá thể hoặc tính cách dễ tổn thương sẽ đóng vai trò nhất định đối với nguy cơ mắc chứng bệnh này.  \n#### 3.2 Lâm sàng",
+        "summary": "Các yếu tố gây stress có thể ảnh hưởng tiêu cực đến các mối quan hệ xã hội và phúc lợi cộng đồng, không chỉ tác động đến cá nhân mà còn có khả năng lan rộng. Tố bẩm cá thể và tính cách dễ tổn thương đóng vai trò quan trọng trong nguy cơ mắc chứng bệnh này, trước khi chuyển sang phần lâm sàng của rối loạn.",
+        "keywords": [
+            "yếu tố stress",
+            "ảnh hưởng xã hội",
+            "mối quan hệ",
+            "phúc lợi xã hội",
+            "tố bẩm cá thể",
+            "tính cách dễ tổn thương",
+            "rủi ro bệnh lý",
+            "tâm lý cộng đồng",
+            "lâm sàng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "53346a95-02b6-45bf-b734-d3bf5993c382",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n#### 3.2 Lâm sàng  \nRối loạn khí sắc là một trong các đặc điểm lâm sàng đặc trưng của các rối loạn sự thích ứng. Chúng sẽ thường xuyên xuất hiện và kéo dài trong khoảng vài ngày cho đến vài tháng sau khi xảy ra các sự kiện gây stress và duy trì tối đa trong khoảng 6 tháng.",
+        "summary": "Rối loạn khí sắc là một đặc điểm lâm sàng nổi bật của các rối loạn sự thích ứng. Các triệu chứng này thường xuất hiện trong vài ngày đến vài tháng sau các sự kiện gây stress và có thể kéo dài tối đa sáu tháng.",
+        "keywords": [
+            "rối loạn khí sắc",
+            "lâm sàng",
+            "rối loạn sự thích ứng",
+            "triệu chứng",
+            "stress",
+            "thời gian kéo dài",
+            "tâm lý học"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "fefb18d8-40e8-4263-9995-b87a19d950ba",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nBệnh nhân sẽ thường xuyên cảm thấy buồn chán, bất an, lo lắng, cảm thấy bản thân không còn đủ năng lực, khả năng để đối phó tốt với những hoàn cảnh của thực tại. Bên cạnh đó, tình trạng này còn ảnh hưởng rất nhiều đến năng suất làm việc, lao động của người bệnh, làm cho họ gặp nhiều trở ngại trong việc thực hiện các hoạt động hàng ngày. Người bệnh có thể thay đổi cảm xúc hoặc bùng nổ tâm trạng bất kì thời điểm nào trong ngày. Đối với người bệnh là trẻ em thì thường sẽ có những hành vi chống",
+        "summary": "Người bệnh thường trải qua cảm giác buồn chán, bất an, lo lắng và thiếu năng lực đối phó với thực tại. Tình trạng này ảnh hưởng tiêu cực đến năng suất làm việc và các hoạt động hàng ngày, gây ra nhiều trở ngại. Họ cũng có thể trải qua sự thay đổi cảm xúc hoặc bùng nổ tâm trạng bất ngờ, đặc biệt ở trẻ em có thể biểu hiện qua hành vi chống đối.",
+        "keywords": [
+            "buồn chán",
+            "bất an",
+            "lo lắng",
+            "thiếu năng lực",
+            "năng suất làm việc",
+            "thay đổi cảm xúc",
+            "bùng nổ tâm trạng",
+            "hành vi chống đối",
+            "rối loạn tâm lý",
+            "triệu chứng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "d108a687-bf65-4a0a-a333-4656f8470000",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nbất kì thời điểm nào trong ngày. Đối với người bệnh là trẻ em thì thường sẽ có những hành vi chống đối, phản kháng nhưng không mang tính đặc hiệu.",
+        "summary": "Đoạn văn mô tả các hành vi chống đối, phản kháng không đặc hiệu thường gặp ở trẻ em mắc bệnh lý tâm lý. Những hành vi này có thể xuất hiện bất kỳ lúc nào trong ngày.",
+        "keywords": [
+            "hành vi chống đối",
+            "trẻ em",
+            "phản kháng",
+            "rối loạn tâm lý",
+            "triệu chứng"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "5f7415fa-e35f-4857-8dd9-f23151be1afc",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nNgười bệnh bị rối loạn sự thích ứng có thể tồn tại một số triệu chứng trầm cảm, lo âu như:  \n- Phản ứng trầm cảm ngắn hạn: Thường sẽ xuất hiện và duy trì tối đa 30 ngày.  \n- Phản ứng trầm cảm kéo dài dai dẳng: Các triệu chứng trầm cảm sẽ khởi phát và kéo dài trong khoảng 2 năm trở lại.  \n- Phản ứng hỗn hợp giữa trầm cảm và lo âu.  \n- Phản ứng với những rối loạn cảm xúc khác chiếm ưu thế  \n- Phản ứng với những rối loạn hành vi chiếm ưu thế.",
+        "summary": "Người bệnh rối loạn sự thích ứng có thể biểu hiện các triệu chứng trầm cảm và lo âu. Các phản ứng này bao gồm trầm cảm ngắn hạn (dưới 30 ngày), trầm cảm kéo dài (tối đa 2 năm), hoặc phản ứng hỗn hợp giữa trầm cảm và lo âu. Ngoài ra, còn có các phản ứng với rối loạn cảm xúc hoặc hành vi chiếm ưu thế.",
+        "keywords": [
+            "rối loạn sự thích ứng",
+            "triệu chứng trầm cảm",
+            "triệu chứng lo âu",
+            "phản ứng trầm cảm ngắn hạn",
+            "phản ứng trầm cảm kéo dài",
+            "rối loạn cảm xúc",
+            "rối loạn hành vi"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "eea5dd0b-50d0-4e2f-b7be-bfdfc3c03e55",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Phản ứng với những rối loạn hành vi chiếm ưu thế.  \n- Phản ứng với những triệu chứng ưu thế biệt định khác.  \n#### 3.3 Chẩn đoán  \nCác bác sĩ chuyên khoa sẽ tiến hành chẩn đoán rối loạn sự kích thích dựa vào những yếu tố sau:  \n- Nhân cách và tiền sử bệnh lý của mỗi người.  \n- Các yếu tố gây sang chấn trong khoảng 3 tháng trước đó.",
+        "summary": "Nội dung tiếp tục liệt kê các phản ứng với rối loạn hành vi và triệu chứng ưu thế biệt định khác. Phần quan trọng là quy trình chẩn đoán rối loạn sự thích ứng, dựa trên nhân cách, tiền sử bệnh lý của người bệnh và các yếu tố gây sang chấn trong vòng ba tháng trước đó.",
+        "keywords": [
+            "chẩn đoán",
+            "rối loạn sự thích ứng",
+            "yếu tố sang chấn",
+            "tiền sử bệnh lý",
+            "nhân cách",
+            "triệu chứng biệt định"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f33e498e-ccd2-4f6b-84da-7729de27cab5",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\n- Các rối loạn cảm xúc và hành vi có liên quan đến tình huống gây stress.  \n#### 3.4 Điều trị  \nĐối với với tình trạng này thường sẽ được điều trị bằng các loại thuốc như:  \n- Thuốc chống trầm cảm, chống lo âu.  \n- Thuốc giúp bình thần, hỗ trợ điều trị tình trạng rối loạn giấc ngủ, điển hình như các loại thuốc của nhóm benzodiazepin.  \n- Thuốc tăng cường thể trạng, giúp gia tăng sức đề kháng cho người bệnh, ví dụ như các loại vitamin.",
+        "summary": "Nội dung đề cập đến các rối loạn cảm xúc và hành vi liên quan đến tình huống gây stress. Về phương pháp điều trị, bệnh nhân thường được chỉ định các loại thuốc như thuốc chống trầm cảm, chống lo âu, thuốc bình thần hỗ trợ giấc ngủ (ví dụ benzodiazepin) và các loại vitamin để tăng cường thể trạng.",
+        "keywords": [
+            "điều trị",
+            "rối loạn cảm xúc",
+            "rối loạn hành vi",
+            "stress",
+            "thuốc chống trầm cảm",
+            "thuốc chống lo âu",
+            "thuốc bình thần",
+            "rối loạn giấc ngủ",
+            "benzodiazepin",
+            "vitamin"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "f0fb6efb-8133-4490-8df5-f35270f5faea",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nSong song với đó người bệnh cũng sẽ được hướng dẫn cách ly với các môi trường gây stress và tiến hành áp dụng các liệu pháp tâm lý cá nhân, nhóm hoặc gia đình.  \nThông tin bài viết trên đây đã giúp cho bạn đọc hiểu thêm về các phản ứng với stress và rối loạn sự thích ứng. Các triệu chứng của bệnh có thể được kiểm soát tốt nếu người bệnh kịp thời phát hiện và áp dụng các biện pháp điều trị phù hợp.  \nTham khảo thêm:  \n- Rối loạn Stress cấp tính (ASD) là gì? Chẩn đoán và điều trị",
+        "summary": "Bên cạnh việc dùng thuốc, người bệnh còn được khuyến nghị cách ly khỏi môi trường gây stress và áp dụng các liệu pháp tâm lý cá nhân, nhóm hoặc gia đình. Bài viết tổng kết rằng các triệu chứng của rối loạn sự thích ứng và phản ứng với stress có thể được kiểm soát hiệu quả nếu được phát hiện và điều trị kịp thời.",
+        "keywords": [
+            "liệu pháp tâm lý",
+            "cách ly môi trường stress",
+            "điều trị rối loạn sự thích ứng",
+            "phản ứng với stress",
+            "kiểm soát triệu chứng",
+            "phát hiện sớm",
+            "rối loạn stress cấp tính"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "788bd872-ffaf-4608-a256-45062235052c",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nTham khảo thêm:  \n- Rối loạn Stress cấp tính (ASD) là gì? Chẩn đoán và điều trị  \n- Các rối loạn liên quan đến Stress bạn cần cảnh giác  \n- Căng thẳng mệt mỏi kéo dài có nguy hiểm không? Khắc phục thế nào?  \nTrở thành người đầu tiên bình luận cho bài viết này!  \nEmail của bạn sẽ không được hiển thị công khai. Các trường bắt buộc được đánh dấu *  \nLưu tên của tôi, email, và trang web trong trình duyệt này cho lần bình luận kế tiếp của tôi.  \nΔ  \nTin liên quan",
+        "summary": "Đoạn nội dung này giới thiệu về chủ đề Khoa Học Tâm Lý và cung cấp các liên kết tham khảo về stress. Các chủ đề được đề cập bao gồm rối loạn stress cấp tính (ASD), các rối loạn liên quan đến stress khác, và cách khắc phục tình trạng căng thẳng mệt mỏi kéo dài. Đây là những kiến thức quan trọng trong lĩnh vực tâm lý học.",
+        "keywords": [
+            "Khoa học tâm lý",
+            "stress",
+            "rối loạn stress cấp tính",
+            "ASD",
+            "chẩn đoán stress",
+            "điều trị stress",
+            "căng thẳng",
+            "mệt mỏi",
+            "khắc phục stress",
+            "rối loạn tâm lý"
+        ],
+        "type": "kiến thức"
+    },
+    {
+        "uuid": "aeec145c-0151-4bd6-aca5-d96892c04433",
+        "headers": [
+            "Khoa Hoc Tam Ly_3155"
+        ],
+        "content": "# Khoa Học Tâm Lý\n\nΔ  \nTin liên quan  \n#### Stress là gì? Nguyên nhân, dấu hiệu và cách thoát khỏi  \n#### 15 cách vượt qua áp lực trong cuộc sống, giải toả cảm xúc  \n#### 7 triệu chứng stress ở nữ giới thường gặp và điều cần biết  \n#### Stress khi mang thai: Dấu hiệu và điều mẹ bầu cần biết  \n#### Căng thẳng Stress có làm trễ kinh không? Làm sao có lại?  \n#### 9 kỹ thuật hít thở giảm stress hiệu quả, dễ thực hiện  \nChuyên gia tư vấn",
+        "summary": "Đoạn nội dung này thuộc chủ đề Khoa Học Tâm Lý và liệt kê nhiều bài viết liên quan đến stress. Các bài viết tập trung vào định nghĩa, nguyên nhân, dấu hiệu của stress, các phương pháp vượt qua áp lực, triệu chứng stress ở nữ giới, stress khi mang thai, ảnh hưởng của stress đến chu kỳ kinh nguyệt và các kỹ thuật hít thở để giảm stress hiệu quả.",
+        "keywords": [
+            "Khoa học tâm lý",
+            "stress",
+            "nguyên nhân stress",
+            "dấu hiệu stress",
+            "giải tỏa cảm xúc",
+            "triệu chứng stress nữ",
+            "stress khi mang thai",
+            "stress trễ kinh",
+            "kỹ thuật hít thở",
+            "giảm stress"
+        ],
+        "type": "kiến thức"
+    }
+]
