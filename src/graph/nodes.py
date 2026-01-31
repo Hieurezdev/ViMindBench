@@ -12,7 +12,7 @@ load_dotenv()
 
 # Initialize OpenAI client with custom endpoint support
 openai_client = OpenAI(
-    base_url=os.getenv("OPENAI_BASE_URL", "https://fluffy-sites-pick.loca.lt/v1"),
+    base_url=os.getenv("OPENAI_BASE_URL"),
     api_key=os.getenv("OPENAI_API_KEY", "EMPTY")
 )
 
@@ -45,7 +45,7 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     
     if not is_reasoning:
         # Simple QA: Sequential selection based on global index range
-        start_index = int(os.getenv("START_INDEX", "5157"))
+        start_index = int(os.getenv("START_INDEX", "6598"))
         end_index = int(os.getenv("END_INDEX", "0")) # 0 means no limit/all
         
         # Calculate which document to fetch: Start + current_iteration
