@@ -33,6 +33,7 @@ class AgentState(TypedDict):
     # Logs and Flags
     verification_passed: bool   # Overall verification flag
     reasoning_logs: List[str]   # Logs of verification/refinement
+    format_check_passed: bool   # Flag for output format validation
     final_output_ready: bool    # Ready to output
     
     # Output Collection

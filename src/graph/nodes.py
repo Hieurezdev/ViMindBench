@@ -208,7 +208,7 @@ Ngữ cảnh:
 Chủ đề: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
-1. Tạo một câu hỏi phức tạp cần suy luận về tâm lý học
+1. Tạo một câu hỏi phức tạp, khó hiểu hoặc các câu hỏi có sự so sánh cần suy luận về tâm lý học
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
    - Bạn có thể suy nghĩ theo cách tự nhiên nhất của mình
    - Không cần theo format cứng nhắc, hãy viết như cách bạn thực sự suy nghĩ
@@ -234,7 +234,7 @@ LƯU Ý QUAN TRỌNG:
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
-        max_tokens=7000,
+        max_tokens=9000,
         timeout=300
     )
     
@@ -293,7 +293,7 @@ Nếu SAI, giải thích ngắn gọn lỗi.
         model=MODEL_NAME,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
-        max_tokens=7000,
+        max_tokens=9000,
         timeout=120
     )
     
@@ -373,8 +373,8 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
         
         if state['current_step_index'] == len(state['reasoning_steps']) - 1:
              # Construct final reasoning QA
-            question_match = re.search(r'Question:\s*(.*?)(?=<think>|$)', state['reasoning_raw_output'], re.DOTALL)
-            answer_match = re.search(r'<answer>(.*?)</answer>', state['reasoning_raw_output'], re.DOTALL)
+            question_match = re.search(r'Question:\s*(.*?)(?=<think>|<step>|<tool_call>|$)', state['reasoning_raw_output'], re.DOTALL)
+            answer_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', state['reasoning_raw_output'], re.DOTALL | re.IGNORECASE)
             
             # If thinking failed to parse correctly (i.e. it contains the question), try to clean it
             raw_thinking = "\n".join(state['reasoning_steps'])
@@ -390,9 +390,13 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
                 "thinking": raw_thinking,
                 "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer - Model failed to output <answer> tag"
             }
-                
-            state['all_outputs'] = state.get('all_outputs', []) + [qa_entry]
-            state['iteration_count'] += 1
+            
+            # Only save if format check passed (or if check skipped/legacy)
+            if state.get('format_check_passed', True):
+                 state['all_outputs'] = state.get('all_outputs', []) + [qa_entry]
+                 state['iteration_count'] += 1
+            else:
+                 print("Skipping invalid entry (Format Check Failed)")
             
             # Continue to save check logic below
         else:
@@ -409,12 +413,12 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
     import json
     
     current_iter = state['iteration_count']
-    if current_iter > 0 and current_iter % 50 == 0:
+    if current_iter > 0 and current_iter % 5 == 0:
         last_saved = state.get('last_saved_count', 0)
         new_items = state.get('all_outputs', [])[last_saved:]
         
         if new_items:
-            output_path = "data/output/generated_simple_qa.jsonl"
+            output_path = "data/output/generated_reasoning_qa.jsonl"
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             print(f"Saving batch of {len(new_items)} items to {output_path}...")
             
@@ -439,3 +443,75 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
          
     # Default for SimpleQA (iteration already incremented) or just passing through
     return {"last_saved_count": state.get('last_saved_count', 0)}
+
+
+def check_format_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Validates and auto-fixes the format of the reasoning output.
+    Strictly requires <answer>...</answer> but will attempt to convert:
+    Strictly requires <answer>...</answer> but will attempt to convert:
+    - (answer) ...
+    - (answer> ...
+    - Answer: ...
+    to <answer>...</answer> if found.
+    """
+    if not state.get('is_reasoning_flow'):
+        return {"format_check_passed": True}
+
+    raw_output = state.get('reasoning_raw_output', "")
+    
+    # 1. Check for basic "Question:" presence
+    if "Question:" not in raw_output:
+        msg = "Format Check Failed: Missing 'Question:'"
+        print(f"X {msg}")
+        return {
+            "format_check_passed": False, 
+            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+        }
+
+    # 2. Check for strictly valid <answer> tag
+    # We want to ensure there is an <answer>... content ...</answer> block.
+    strict_answer_pattern = r'<answer>.*?</answer>'
+    if re.search(strict_answer_pattern, raw_output, re.DOTALL | re.IGNORECASE):
+        # Already perfect
+        return {"format_check_passed": True}
+
+    # 3. Attempt Auto-Fix
+    # Look for convertible patterns
+    # Note: re.DOTALL means . matches newlines
+    convertible_pattern = r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)'
+    match = re.search(convertible_pattern, raw_output, re.DOTALL | re.IGNORECASE)
+    
+    if match:
+        answer_content = match.group(1).strip()
+        # If the content is empty, that's also a failure of sorts, but let's assume valid content if matched.
+        if not answer_content:
+             msg = "Format Check Failed: Empty answer content"
+             print(f"X {msg}")
+             return {
+                "format_check_passed": False, 
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+
+        start_idx = match.start()
+        end_idx = match.end()
+        
+        # Construct new output: Prefix + <answer>Content</answer> + Suffix
+        # Note: raw_output[end_idx:] preserves anything after the answer block
+        fixed_output = raw_output[:start_idx] + f"<answer>{answer_content}</answer>" + raw_output[end_idx:]
+        
+        log_msg = "Format Auto-Fixed: Converted answer format to <answer>...</answer>"
+        print(f"✓ {log_msg}")
+        return {
+            "format_check_passed": True,
+            "reasoning_raw_output": fixed_output,
+            "reasoning_logs": state.get('reasoning_logs', []) + [log_msg]
+        }
+
+    # 4. Fail if no answer found
+    msg = "Format Check Failed: No valid answer tag found"
+    print(f"X {msg}")
+    return {
+        "format_check_passed": False, 
+        "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+    }

@@ -11,7 +11,9 @@ from .nodes import (
     verify_single_step_node,
     refine_single_step_node,
     check_more_questions_node,
-    increment_step_node
+    check_more_questions_node,
+    increment_step_node,
+    check_format_node
 )
 
 def create_graph():
@@ -27,6 +29,7 @@ def create_graph():
     workflow.add_node("verify_step", verify_single_step_node)
     workflow.add_node("refine_step", refine_single_step_node)
     workflow.add_node("check_more", check_more_questions_node)
+    workflow.add_node("check_format", check_format_node)
     
     # Define Flow
     workflow.set_entry_point("first_filter")
@@ -94,7 +97,7 @@ def create_graph():
         if current_idx + 1 < len(state['reasoning_steps']):
             return "increment_step"  # Go to next step (via increment node)
         else:
-            return "check_more"  # All steps verified, done
+            return "check_format"  # All steps verified, format check
     
     workflow.add_conditional_edges(
         "verify_step",
@@ -102,7 +105,7 @@ def create_graph():
         {
             "refine_step": "refine_step",
             "increment_step": "increment_step",
-            "check_more": "check_more"
+            "check_format": "check_format"
         }
     )
     
@@ -112,6 +115,9 @@ def create_graph():
     # After incrementing step, verify the new step
     workflow.add_node("increment_step", increment_step_node)
     workflow.add_edge("increment_step", "verify_step")
+    
+    # After step verification loop, run format check
+    workflow.add_edge("check_format", "check_more")
     
     # Check if more questions need to be generated
     def route_after_check_more(state: AgentState):

@@ -27,7 +27,7 @@ def main():
     app = create_graph()
     
     # 5. Run Pipeline with iterations
-    num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "1000"))
+    num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
     
     print(f"Running pipeline to generate {num_qa_pairs} QA pairs...")
     
@@ -35,7 +35,7 @@ def main():
         # "all_chunks": [], # Removed
         "iteration_count": 0,
         "max_iterations": num_qa_pairs,
-        "is_reasoning_flow": False,
+        "is_reasoning_flow": True,
         "anchor": None,
         "query": "",
         "context_docs": [],
@@ -62,7 +62,7 @@ def main():
     
     # 6. Save Output
     os.makedirs("data/output", exist_ok=True)
-    output_path = "data/output/generated_simple_qa.jsonl"
+    output_path = "data/output/generated_reasoning_qa.jsonl"
     with open(output_path, 'w', encoding='utf-8') as f:
         for entry in final_state['all_outputs']:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
