@@ -3,14 +3,17 @@ from typing import Dict, Any, List
 import random
 import re
 import os
+import sys
+import json
+import builtins
 from .state import AgentState
 from openai import OpenAI
-import json
+from langchain_core.documents import Document
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize OpenAI client with custom endpoint support
+# Initialize OpenAI client
 openai_client = OpenAI(
     base_url=os.getenv("OPENAI_BASE_URL"),
     api_key=os.getenv("OPENAI_API_KEY", "EMPTY")
@@ -18,42 +21,71 @@ openai_client = OpenAI(
 
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507")
 
+
+# ==========================================
+# Helpers
+# ==========================================
+
+def check_and_raise_503(e):
+    """
+    Check if the exception is a 503 Service Unavailable error.
+    If so, print a critical error message and exit the script.
+    """
+    error_msg = str(e)
+    if "503" in error_msg:
+        print("\n" + "="*50)
+        print("CRITICAL ERROR: 503 Service Unavailable detected.")
+        print("The server is overloaded or down. Stopping pipeline immediately.")
+        print("="*50 + "\n")
+        sys.exit(1)
+
+
+# ==========================================
+# Nodes
+# ==========================================
+
 def first_filter_node(state: AgentState) -> Dict[str, Any]:
     """
-    First Filter: Randomly decide if this iteration generates Simple QA or Reasoning QA.
+    First Filter: Pass through the current is_reasoning_flow setting.
     """
-    # 50/50 split or custom logic
     is_reasoning = state['is_reasoning_flow']
     return {"is_reasoning_flow": is_reasoning}
+
 
 def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     """
     Randomly select an anchor directly from MongoDB, excluding used IDs.
     """
     from pymongo import MongoClient
-    
-    # Connect to MongoDB (quick connection, lightweight)
+
     mongo_uri = os.getenv("MONGO_URI")
     db_name = os.getenv("MONGO_DB_NAME", "Data")
     collection_name = os.getenv("MONGO_COLLECTION_NAME", "mental")
-    
-    client = MongoClient(mongo_uri)
-    collection = client[db_name][collection_name]
-    
+
+    if not mongo_uri:
+        print("Error: MONGO_URI not set for anchor selection.")
+        return {"anchor": None}
+
+    try:
+        client = MongoClient(mongo_uri)
+        collection = client[db_name][collection_name]
+    except Exception as e:
+        print(f"Error connecting to MongoDB in select_anchor: {e}")
+        return {"anchor": None}
+
     used_ids = state.get('used_anchor_ids', [])
     is_reasoning = state.get('is_reasoning_flow', False)
-    
+
     if not is_reasoning:
         # Simple QA: Sequential selection based on global index range
-        start_index = int(os.getenv("START_INDEX", "6598"))
-        end_index = int(os.getenv("END_INDEX", "0")) # 0 means no limit/all
-        
-        # Calculate which document to fetch: Start + current_iteration
-        # Note: input 'iteration_count' starts at 0
+        start_index = int(os.getenv("START_INDEX", "0"))
+        end_index = int(os.getenv("END_INDEX", "0"))  # 0 means no limit
+
         target_offset = start_index + state.get('iteration_count', 0)
-        
+
         if end_index > 0 and target_offset >= end_index:
             print(f"Reached END_INDEX ({end_index}). Stop selection.")
+            client.close()
             return {"anchor": None}
 
         print(f"Selecting Anchor (Sequential for SimpleQA) - Offset {target_offset}...")
@@ -69,74 +101,71 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
             {"$match": {"uuid": {"$nin": used_ids}}},
             {"$sample": {"size": 1}}
         ]
-    
+
     results = list(collection.aggregate(pipeline))
     client.close()
-    
+
     if not results:
-        # Fallback: if all used, clear used list and try again (or stop)
-        # For infinite loop support, we reset used_ids effectively by querying without exclusion
         print("Warning: All anchors used. Resetting cycle.")
-        
-        # Fallback logic also respects flow type
         if not is_reasoning:
-             # Retry the same offset if missed? Or just fail. 
-             # If empty at offset, it means we ran out of data.
-             pipeline_fallback = [
+            pipeline_fallback = [
                 {"$sort": {"_id": 1}},
                 {"$skip": target_offset},
                 {"$limit": 1}
             ]
         else:
-             pipeline_fallback = [{"$sample": {"size": 1}}]
-             
+            pipeline_fallback = [{"$sample": {"size": 1}}]
+
         client = MongoClient(mongo_uri)
         collection = client[db_name][collection_name]
         results = list(collection.aggregate(pipeline_fallback))
         client.close()
-        
+
         if not results:
             print("Error: No data in MongoDB.")
             return {"anchor": None}
 
     anchor_doc = results[0]
     new_id = anchor_doc.get('uuid')
-    
-    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected ({'Simple' if not is_reasoning else 'Reasoning'}): {anchor_doc.get('summary')[:100]}...")
 
-    # Map to metadata format expected by pipeline
-    # Note: Chunker mapping logic simulated here
+    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected "
+          f"({'Simple' if not is_reasoning else 'Reasoning'}): "
+          f"{anchor_doc.get('title', '')[:100]}...")
+
+    title = anchor_doc.get('title', '')
+    summary = anchor_doc.get('summary', '')
+
     metadata = {
         'uuid': anchor_doc.get('uuid'),
-        'headers': anchor_doc.get('headers'),
-        'summary': anchor_doc.get('summary'),
-        'keywords': anchor_doc.get('keywords', []),
-        'type': anchor_doc.get('type')
+        'title': title,
+        'summary': summary,
+        'type': anchor_doc.get('type'),
+        'tags': anchor_doc.get('tags', []),
+        'keywords': anchor_doc.get('keywords', [])
     }
-    
+
     updates = {
         "anchor": metadata,
-        "query": f"{metadata['summary']} {' '.join(metadata.get('keywords', []))}",
+        "query": f"{title} {summary}",
         "used_anchor_ids": list(set(used_ids) | {new_id})
     }
-    
-    # If Simple QA, we skip retrieval, so we must provide the anchor content as context
+
+    # If Simple QA, skip retrieval — provide anchor content as context
     if not is_reasoning:
-        from langchain_core.documents import Document
         content = anchor_doc.get('content', '')
-        # Create a Document object for the anchor
-        anchor_as_doc = Document(page_content=content, metadata=metadata)
+        page_content = f"Tiêu đề: {title}\nTóm tắt: {summary}\nNội dung:\n{content}"
+        anchor_as_doc = Document(page_content=page_content, metadata=metadata)
         updates["context_docs"] = [anchor_as_doc]
-        
+
     return updates
+
 
 def retrieve_node(state: AgentState) -> Dict[str, Any]:
     """
-    Retrieves 3-5 related/opposing documents using BM25 + Vector Search.
+    Retrieves 3-5 similar/related documents using Vector Search.
     """
-    import builtins
     retriever = getattr(builtins, 'RETRIEVER', None)
-    
+
     if not retriever:
         print("Warning: Retriever not found.")
         return {"context_docs": []}
@@ -147,23 +176,98 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
     print(f"Found {len(docs)} documents.")
     return {"context_docs": docs}
 
+
+def retrieve_negative_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Retrieves 2-3 documents that are OPPOSING / contrasting with the anchor.
+    (retrieve_node already handles similar docs; this node covers the opposing side.)
+    """
+    retriever = getattr(builtins, 'RETRIEVER', None)
+    if not retriever:
+        print("Warning: Retriever not found. Skipping negative retrieval.")
+        return {"negative_docs": []}
+
+    anchor = state.get('anchor', {})
+    title       = anchor.get('title', '') if anchor else ''
+    summary     = anchor.get('summary', '') if anchor else ''
+    anchor_uuid = anchor.get('uuid', '') if anchor else ''
+
+    # ── Step 1: Ask LLM to generate an opposing query ─────────────────────
+    llm_prompt = f"""Bạn là chuyên gia tâm lý học.
+
+Tài liệu gốc (anchor):
+- Tiêu đề: {title}
+- Tóm tắt: {summary}
+
+Hãy viết MỘT câu truy vấn ngắn (10-20 từ) để tìm tài liệu tâm lý học
+mang quan điểm ĐỐI LẬP, TƯƠNG PHẢN hoặc PHÊ PHÁN với chủ đề trên.
+Chỉ trả về câu truy vấn, không giải thích thêm."""
+
+    generated_query = f"{title} {summary}"  # fallback
+    try:
+        resp = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": llm_prompt}],
+            temperature=0.7,
+            max_tokens=64,
+            timeout=60
+        )
+        generated = resp.choices[0].message.content.strip()
+        if generated:
+            generated_query = generated
+            print(f"[retrieve_negative] Opposing query: {generated_query}")
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"[retrieve_negative] LLM query generation failed, using fallback: {e}")
+
+    # ── Step 2: Search ─────────────────────────────────────────────────────
+    k = random.randint(2, 3)
+    candidates = retriever.search(generated_query, k=k + 5)
+
+    # ── Step 3: Filter out anchor and existing context docs ────────────────
+    existing_uuids = {anchor_uuid}
+    for doc in state.get('context_docs', []):
+        existing_uuids.add(doc.metadata.get('uuid', ''))
+
+    negative_docs = [
+        doc for doc in candidates
+        if doc.metadata.get('uuid', '') not in existing_uuids
+    ][:k]
+
+    print(f"[retrieve_negative] Found {len(negative_docs)} opposing doc(s).")
+    return {"negative_docs": negative_docs}
+
+
 def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     """
-    Generates Normal QA without reasoning.
+    Generates Normal Psychology QA without reasoning (multiple choice, 4-5 options).
     """
     print("Generating Simple QA...")
     context_text = "\n\n".join([d.page_content for d in state['context_docs']])
-    
-    prompt = f"""Bạn là chuyên gia tâm lý học. Dựa vào ngữ cảnh sau, tạo một cặp Câu hỏi - Câu trả lời về tâm lý.
+
+    num_options = random.choice([4, 5])
+    if num_options == 4:
+        options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]"
+        answer_format = "[Đáp án đúng: A, B, C hoặc D]"
+        req_text = "4 đáp án (A, B, C, D)"
+    else:
+        options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]\\nE. [Đáp án E]"
+        answer_format = "[Đáp án đúng: A, B, C, D hoặc E]"
+        req_text = "5 đáp án (A, B, C, D, E)"
+
+    prompt = f"""Bạn là chuyên gia tâm lý học. Dựa vào ngữ cảnh sau, tạo một câu hỏi trắc nghiệm và câu trả lời về tâm lý. Câu hỏi phải gồm {req_text} và chỉ có 1 đáp án đúng.
     
 Ngữ cảnh:
-{context_text[:2000]}
+{context_text[:6000]}
 
-Chủ đề: {state['anchor'].get('summary', '')}
+Chủ đề: {state['anchor'].get('title', '')}
+Tóm tắt: {state['anchor'].get('summary', '')}
 
-Format JSON: {{"question": "...", "answer": "..."}}
+**Format JSON:** {{"question": "[Câu hỏi]\\n{options_format}", "answer": "{answer_format} - [Giải thích]"}}
+
+**tuyệt đối: Không được lặp lại đáp án nhiều lần trong câu hỏi**
 """
-    
+
     try:
         response = openai_client.chat.completions.create(
             model=MODEL_NAME,
@@ -172,103 +276,274 @@ Format JSON: {{"question": "...", "answer": "..."}}
             max_tokens=7000,
             timeout=120
         )
-        
+
         result = response.choices[0].message.content
         qa = json.loads(result.replace("```json", "").replace("```", "").strip())
-        
-        # Save to output collection
+
         output_entry = {
             "type": "simple_qa",
             "anchor_id": state['anchor']['uuid'],
             "question": qa.get('question'),
             "answer": qa.get('answer')
         }
-        
+
         return {
             "simple_qa": qa,
             "all_outputs": state.get('all_outputs', []) + [output_entry],
             "iteration_count": state['iteration_count'] + 1
         }
     except Exception as e:
+        check_and_raise_503(e)
         print(f"Error in simple_qa: {e}")
         return {"iteration_count": state['iteration_count'] + 1}
 
+
 def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
     """
-    Generates Reasoning QA with <think> and <step> tags.
+    Generates Reasoning Psychology QA with <think> and <step> tags.
     """
+    if not state.get('anchor'):
+        print("Error: No anchor found in state. Skipping generation.")
+        return {
+            "reasoning_raw_output": "",
+            "current_step_index": 0,
+            "step_retry_count": 0,
+            "step_verification_results": []
+        }
+
     print("Generating Reasoning QA (this may take a while)...")
-    context_text = "\n\n".join([d.page_content for d in state['context_docs']])
-    
+    context_text = "\n\n".join([d.page_content for d in state.get('context_docs', [])])
+
+    num_options = random.choice([4, 5])
+    if num_options == 4:
+        options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]"
+        answer_format = "[Chỉ ghi đáp án đúng: A, B, C hoặc D]"
+        req_text = "4 đáp án (A, B, C, D)"
+    else:
+        options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]\nE. [Đáp án E]"
+        answer_format = "[Chỉ ghi đáp án đúng: A, B, C, D hoặc E]"
+        req_text = "5 đáp án (A, B, C, D, E)"
+
+    question_types = [
+        "so sánh hai lý thuyết/trường phái tâm lý học trái chiều hoặc tương đồng nhau",
+        "tình huống lâm sàng: chẩn đoán hoặc lựa chọn can thiệp phù hợp",
+        "phân tích nguyên nhân – hậu quả của một hiện tượng tâm lý",
+        "nhận diện sai lầm nhận thức (cognitive bias) trong một mô tả",
+        "ứng dụng lý thuyết tâm lý vào cuộc sống / công việc thực tế",
+    ]
+    question_type = random.choice(question_types)
+
     prompt = f"""Bạn là chuyên gia tâm lý với khả năng suy luận sâu sắc.
 
-Ngữ cảnh:
+Ngữ cảnh (Các tài liệu tâm lý liên quan):
 {context_text}
 
-Chủ đề: {state['anchor'].get('summary', '')}
+Chủ đề: {state['anchor'].get('title', '')}
+Tóm tắt: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
-1. Tạo một câu hỏi phức tạp, khó hiểu hoặc các câu hỏi có sự so sánh cần suy luận về tâm lý học
+1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
-   - Bạn có thể suy nghĩ theo cách tự nhiên nhất của mình
-   - Không cần theo format cứng nhắc, hãy viết như cách bạn thực sự suy nghĩ
-   - Mỗi <step> có thể là phân tích, đặt câu hỏi, so sánh, kết nối ý tưởng, etc.
-3. Đưa ra câu trả lời cuối cùng trong <answer>
+   - Bạn có thể suy nghĩ súc tích, ngắn gọn theo cách tự nhiên nhất của mình
+   - Hãy phân tích câu hỏi, phân tích từng đáp án, loại trừ đáp án sai và chứng minh đáp án đúng
+   - Không cần cứng nhắc các step như ví dụ, hãy linh hoạt 
+   - Mỗi <step> có thể là phân tích, so sánh, kết nối ý tưởng, etc.
+3. Đưa ra đáp án cuối cùng trong <answer>
 
-Ví dụ format bắt buộc (bạn PHẢI tuân thủ cấu trúc này):
-Question: [Câu hỏi của bạn]
+**format bắt buộc (bạn PHẢI tuân thủ cấu trúc này):**
+Question: [Câu hỏi trắc nghiệm tâm lý?]
+{options_format}
+
 <think>
-<step> Phân tích...</step>
-<step> Suy luận...</step>
-<step> Tổng hợp...</step>
+<step>[Ý nghĩ đầu tiên khi suy nghĩ chi tiết về kiến thức tâm lý liên quan đến chủ đề này...]</step>
+<step>[Dòng suy nghĩ tiếp theo, lật lại vấn đề, so sánh các ý tưởng, đánh giá độ khó...]</step>
+... (tùy ý thêm số lượng step. Hãy viết dòng suy nghĩ một cách liền mạch, chân thật và lộn xộn như não người đang tư duy thực sự, tự phản biện. KHÔNG dùng các tiêu đề mẫu cứng nhắc như "Phân tích:", "Xem xét:")
 </think>
-<answer>Câu trả lời hoàn chỉnh</answer>
+
+<answer>{answer_format}</answer>
 
 LƯU Ý QUAN TRỌNG:
 - BẮT BUỘC dùng thẻ <think>, <step>, <answer>.
+- TUYỆT ĐỐI KHÔNG nhắc đến các từ như "ngữ cảnh", "tài liệu đã cho", "đoạn văn". Hãy hành xử như thể toàn bộ nội dung kiến thức là do BẠN TỰ BIẾT và đang nhớ lại từ kho tàng tâm lý học của chính mình.
+- CÁC THẺ <step> LÀ NƠI TƯ DUY TỰ DO nội bộ. Đừng biến nó thành một cái dàn ý hay bài văn báo cáo (như "Bước 1: Phân tích"). Hãy viết như đang độc thoại nội tâm.
+- Câu hỏi PHẢI có đúng {req_text} và chỉ 1 đáp án đúng. KHÔNG THÊM HAY BỚT ĐÁP ÁN.
 - KHÔNG được bỏ qua bất kỳ thẻ nào.
-- Nội dung trong <step> phải là suy nghĩ chi tiết.
 """
-    
-    response = openai_client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-        max_tokens=9000,
-        timeout=300
-    )
-    
-    result = response.choices[0].message.content
-    print(f"RAW OUTPUT:\n{result}\n-------------------")
-    
-    return {
-        "reasoning_raw_output": result,
-        "current_step_index": 0,
-        "step_retry_count": 0,
-        "step_verification_results": []
-    }
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=8196,
+            timeout=300
+        )
+
+        result = response.choices[0].message.content
+        print(f"RAW OUTPUT:\n{result}\n-------------------")
+
+        return {
+            "reasoning_raw_output": result,
+            "current_step_index": 0,
+            "step_retry_count": 0,
+            "step_verification_results": []
+        }
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"Error in generate_reasoning_node: {e}")
+        return {
+            "reasoning_raw_output": "",
+            "current_step_index": 0,
+            "step_retry_count": 0,
+            "step_verification_results": []
+        }
+
+
+def validate_qa_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Kiểm tra câu hỏi trắc nghiệm sinh ra trước khi đi vào step verification.
+    Gồm 2 tầng:
+    1. Rule-based: kiểm tra số đáp án, đáp án trùng lặp.
+    2. LLM-based: kiểm tra câu hỏi hợp lí, chỉ 1 đáp án đúng, đáp án phân biệt rõ.
+    """
+    is_reasoning = state.get('is_reasoning_flow', False)
+
+    if is_reasoning:
+        raw = state.get('reasoning_raw_output', '')
+        question_block_match = re.search(
+            r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL
+        )
+        question_block = question_block_match.group(1).strip() if question_block_match else raw
+    else:
+        qa = state.get('simple_qa', {})
+        question_block = qa.get('question', '') if qa else ''
+
+    print("[validate_qa] Bắt đầu kiểm tra câu hỏi...")
+
+    # ── TẦNG 1: Rule-based ────────────────────────────────────────────────
+    option_pattern = r'^([A-E])[\.\)]\s*(.+)$'
+    options = re.findall(option_pattern, question_block, re.MULTILINE)
+    option_texts = [text.strip().lower() for _, text in options]
+
+    num_opts = len(options)
+    if num_opts not in (4, 5):
+        msg = f"[validate_qa] ✗ FAIL (Rule): Số đáp án không hợp lệ: {num_opts} (cần 4 hoặc 5)"
+        print(msg)
+        return {
+            "qa_validation_passed": False,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+        }
+
+    def _normalize(text: str) -> str:
+        return re.sub(r'[\s\.,;:!?()\'"]+', ' ', text.lower()).strip()
+
+    normalized = [_normalize(t) for t in option_texts]
+    duplicates_found = False
+    for i in range(len(normalized)):
+        for j in range(i + 1, len(normalized)):
+            a, b = normalized[i], normalized[j]
+            shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+            if shorter and shorter in longer:
+                duplicates_found = True
+                break
+            set_a, set_b = set(a.split()), set(b.split())
+            if set_a and set_b:
+                intersection = len(set_a & set_b)
+                union = len(set_a | set_b)
+                if union > 0 and intersection / union > 0.8:
+                    duplicates_found = True
+                    break
+        if duplicates_found:
+            break
+
+    if duplicates_found:
+        msg = "[validate_qa] ✗ FAIL (Rule): Phát hiện đáp án trùng lặp hoặc quá giống nhau"
+        print(msg)
+        return {
+            "qa_validation_passed": False,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+        }
+
+    print(f"[validate_qa] ✓ Rule-based: OK ({num_opts} đáp án, không trùng lặp)")
+
+    # ── TẦNG 2: LLM-based ────────────────────────────────────────────────
+    print("[validate_qa] Kiểm tra LLM...")
+
+    options_display = "\n".join([f"{label}. {text}" for label, text in options])
+    question_line_match = re.search(r'(?:Question:|Câu hỏi:?)\s*(.+?)\n', question_block, re.IGNORECASE)
+    question_text = question_line_match.group(1).strip() if question_line_match else question_block[:300]
+
+    llm_prompt = f"""Bạn là chuyên gia kiểm định câu hỏi trắc nghiệm. Hãy đánh giá câu hỏi sau:
+
+Câu hỏi: {question_text}
+
+Các đáp án:
+{options_display}
+
+Hãy kiểm tra:
+1. Câu hỏi có rõ nghĩa, có thể trả lời được không?
+2. Chỉ có đúng 1 đáp án đúng không?
+3. Các đáp án có phân biệt rõ ràng với nhau không (không trùng ý)?
+
+Nếu câu hỏi HỢP LỆ (thỏa mãn tất cả 3 tiêu chí), chỉ trả lời đúng 1 từ: "HỢP LỆ"
+Nếu KHÔNG HỢP LỆ, giải thích ngắn gọn vấn đề (1-2 câu)."""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": llm_prompt}],
+            temperature=0.1,
+            max_tokens=256,
+            timeout=60
+        )
+        review = response.choices[0].message.content.strip()
+        is_valid = "HỢP LỆ" in review.upper() or "VALID" in review.upper()
+
+        if is_valid:
+            print("[validate_qa] ✓ LLM: HỢP LỆ")
+            return {
+                "qa_validation_passed": True,
+                "qa_validation_attempts": state.get('qa_validation_attempts', 0),
+                "reasoning_logs": state.get('reasoning_logs', []) + ["[validate_qa] PASS"]
+            }
+        else:
+            msg = f"[validate_qa] ✗ FAIL (LLM): {review[:200]}"
+            print(msg)
+            return {
+                "qa_validation_passed": False,
+                "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"[validate_qa] Lỗi LLM validation: {e}. Bỏ qua, coi như PASS.")
+        return {
+            "qa_validation_passed": True,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0)
+        }
+
 
 def parse_steps_node(state: AgentState) -> Dict[str, Any]:
     """
     Parse individual <step> tags from the reasoning output.
     """
     raw = state['reasoning_raw_output']
-    
-    # Extract steps
+
     step_pattern = r'<step>(.*?)</step>'
     steps = re.findall(step_pattern, raw, re.DOTALL)
-    
+
     if not steps:
         print("Warning: No <step> tags found. Treating as single step.")
-        # Fallback: treat as one step
         steps = [raw]
-    
+
     print(f"Parsed {len(steps)} steps for verification.")
-    
+
     return {
         "reasoning_steps": steps,
-        "step_verification_results": [False] * len(steps)  # Initialize all as not verified
+        "step_verification_results": [False] * len(steps)
     }
+
 
 def verify_single_step_node(state: AgentState) -> Dict[str, Any]:
     """
@@ -276,39 +551,50 @@ def verify_single_step_node(state: AgentState) -> Dict[str, Any]:
     """
     current_idx = state['current_step_index']
     if current_idx >= len(state['reasoning_steps']):
-        return {"verification_passed": True}  # All done
-    
+        return {"verification_passed": True}
+
     current_step = state['reasoning_steps'][current_idx]
     print(f"Verifying Step {current_idx}...")
-    
-    prompt = f"""Kiểm tra logic của bước suy luận sau:
+
+    prompt = f"""Kiểm tra logic của bước suy luận tâm lý sau:
 
 {current_step}
 
-Nếu bước này ĐÚNG logic, trả lời "ĐÚNG".
-Nếu SAI, giải thích ngắn gọn lỗi.
+Nếu bước này ĐÚNG logic, chỉ trả lời duy nhất: "ĐÚNG".
+Nếu SAI, chỉ giải thích ngắn gọn lỗi.
+TUYỆT ĐỐI KHÔNG thêm bất kỳ câu thừa nào như "Sửa lỗi như sau", "Đề xuất sửa", v.v...
 """
-    
-    response = openai_client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.3,
-        max_tokens=9000,
-        timeout=120
-    )
-    
-    review = response.choices[0].message.content
-    is_valid = "ĐÚNG" in review.upper() or "VALID" in review.upper()
-    print(f"  > Verification Result: {'PASSED' if is_valid else 'FAILED'}")
-    
-    # Update verification result for this step
-    results = state['step_verification_results'].copy()
-    results[current_idx] = is_valid
-    
-    return {
-        "step_verification_results": results,
-        "reasoning_logs": state.get('reasoning_logs', []) + [f"Step {current_idx}: {review}"]
-    }
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=4096,
+            timeout=120
+        )
+
+        review = response.choices[0].message.content
+        is_valid = "ĐÚNG" in review.upper() or "VALID" in review.upper()
+        print(f"  > Verification Result: {'PASSED' if is_valid else 'FAILED'}")
+
+        results = state['step_verification_results'].copy()
+        results[current_idx] = is_valid
+
+        return {
+            "step_verification_results": results,
+            "reasoning_logs": state.get('reasoning_logs', []) + [f"Step {current_idx}: {review}"]
+        }
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"Error in verify_single_step_node: {e}")
+        results = state['step_verification_results'].copy()
+        results[current_idx] = False
+        return {
+            "step_verification_results": results,
+            "reasoning_logs": state.get('reasoning_logs', []) + [f"Step {current_idx}: Error - {e}"]
+        }
+
 
 def refine_single_step_node(state: AgentState) -> Dict[str, Any]:
     """
@@ -318,8 +604,8 @@ def refine_single_step_node(state: AgentState) -> Dict[str, Any]:
     print(f"  > Refining Step {current_idx} (Attempt {state.get('step_retry_count', 0) + 1})...")
     current_step = state['reasoning_steps'][current_idx]
     feedback = state['reasoning_logs'][-1]
-    
-    prompt = f"""Bước suy luận sau có lỗi:
+
+    prompt = f"""Bước suy luận tâm lý sau có lỗi:
 
 {current_step}
 
@@ -327,24 +613,27 @@ Phản hồi: {feedback}
 
 Viết lại bước này cho ĐÚNG.
 """
-    
-    response = openai_client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-        max_tokens=800
-    )
-    
-    refined = response.choices[0].message.content
-    
-    # Update the step
-    steps = state['reasoning_steps'].copy()
-    steps[current_idx] = refined
-    
-    return {
-        "reasoning_steps": steps,
-        "step_retry_count": state.get('step_retry_count', 0) + 1
-    }
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=800
+        )
+
+        refined = response.choices[0].message.content
+        steps = state['reasoning_steps'].copy()
+        steps[current_idx] = refined
+
+        return {
+            "reasoning_steps": steps,
+            "step_retry_count": state.get('step_retry_count', 0) + 1
+        }
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"Error in refine_single_step_node: {e}")
+        return {"step_retry_count": state.get('step_retry_count', 0) + 1}
+
 
 def increment_step_node(state: AgentState) -> Dict[str, Any]:
     """
@@ -355,151 +644,99 @@ def increment_step_node(state: AgentState) -> Dict[str, Any]:
         "step_retry_count": 0
     }
 
+
 def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
     """
     After completing one QA, check if more iterations needed.
-    Also moves to next step index if in reasoning flow.
     """
-    # If in reasoning flow and current step verified, move to next
-    if state.get('is_reasoning_flow') and state['current_step_index'] < len(state['reasoning_steps']):
-        # Check if current step is verified OR max retries reached
-        # Actually logic is handled by route: we only reach here if step is done.
-        # But we need to check if we are at the last step to save.
-        
-        # Save the reasoning QA if we are at the last step
-        # Note: 'current_step_index' is technically pointing to the *just verified* step here, 
-        # but the logic in route increments it? No, route logic sends to 'check_more' when 
-        # current_idx + 1 == len. So current_idx is the last step index.
-        
-        if state['current_step_index'] == len(state['reasoning_steps']) - 1:
-             # Construct final reasoning QA
-            question_match = re.search(r'Question:\s*(.*?)(?=<think>|<step>|<tool_call>|$)', state['reasoning_raw_output'], re.DOTALL)
-            answer_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', state['reasoning_raw_output'], re.DOTALL | re.IGNORECASE)
-            
-            # If thinking failed to parse correctly (i.e. it contains the question), try to clean it
-            raw_thinking = "\n".join(state['reasoning_steps'])
-            if question_match and question_match.group(1).strip() in raw_thinking:
-                 # The raw output was probably just "Question: ..." without tags, so it got dumped into 'steps'
-                 # We can try to separate if there are newlines, but it's risky.
-                 pass
+    if state.get('is_reasoning_flow') and state['current_step_index'] == len(state['reasoning_steps']) - 1:
+        question_match = re.search(r'Question:\s*(.*?)(?=<think>|<step>|<tool_call>|$)', state['reasoning_raw_output'], re.DOTALL)
+        answer_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', state['reasoning_raw_output'], re.DOTALL | re.IGNORECASE)
 
-            qa_entry = {
-                "type": "reasoning_qa",
-                "anchor_id": state['anchor']['uuid'],
-                "question": question_match.group(1).strip() if question_match else "Error parsing question",
-                "thinking": raw_thinking,
-                "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer - Model failed to output <answer> tag"
-            }
-            
-            # Only save if format check passed (or if check skipped/legacy)
-            if state.get('format_check_passed', True):
-                 state['all_outputs'] = state.get('all_outputs', []) + [qa_entry]
-                 state['iteration_count'] += 1
-            else:
-                 print("Skipping invalid entry (Format Check Failed)")
-            
-            # Continue to save check logic below
+        raw_thinking = "\n".join(state['reasoning_steps'])
+
+        qa_entry = {
+            "type": "reasoning_qa",
+            "anchor_id": state['anchor']['uuid'],
+            "question": question_match.group(1).strip() if question_match else "Error parsing question",
+            "thinking": raw_thinking,
+            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer"
+        }
+
+        if state.get('format_check_passed', True):
+            state['all_outputs'] = state.get('all_outputs', []) + [qa_entry]
+            state['iteration_count'] += 1
         else:
-            # Move to next step
-            return {
-                "current_step_index": state['current_step_index'] + 1,
-                "step_retry_count": 0
-            }
-    
-    # Save Logic: Every 100 iterations (or whatever batch size)
-    # Note: SimpleQA increments iteration_count in its node, so we just check here.
-    # ReasoningQA increments above.
-    import os
-    import json
-    
+            print("Skipping invalid entry (Format Check Failed)")
+
+    # Save every 5 iterations
     current_iter = state['iteration_count']
     if current_iter > 0 and current_iter % 5 == 0:
         last_saved = state.get('last_saved_count', 0)
         new_items = state.get('all_outputs', [])[last_saved:]
-        
+
         if new_items:
-            output_path = "data/output/generated_reasoning_qa.jsonl"
+            output_path = "data/output/generated_psychology_multiple_choice.jsonl"
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             print(f"Saving batch of {len(new_items)} items to {output_path}...")
-            
+
             with open(output_path, 'a', encoding='utf-8') as f:
                 for entry in new_items:
                     f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-            
+
             state['last_saved_count'] = len(state.get('all_outputs', []))
 
-    # Return valid state update
-    # Note: For ReasoningQA, we manually updated state dict above, so we must return it or keys
     if state.get('is_reasoning_flow'):
-         # If we just finished a reasoning QA
-         if state['current_step_index'] == len(state['reasoning_steps']) - 1:
-             return {
-                 "all_outputs": state['all_outputs'],
-                 "iteration_count": state['iteration_count'],
-                 "current_step_index": state['current_step_index'] + 1,
-                 "step_retry_count": 0,
-                 "last_saved_count": state.get('last_saved_count', 0)
-             }
-         
-    # Default for SimpleQA (iteration already incremented) or just passing through
+        if state['current_step_index'] == len(state['reasoning_steps']) - 1:
+            return {
+                "all_outputs": state['all_outputs'],
+                "iteration_count": state['iteration_count'],
+                "current_step_index": state['current_step_index'] + 1,
+                "step_retry_count": 0,
+                "last_saved_count": state.get('last_saved_count', 0)
+            }
+
     return {"last_saved_count": state.get('last_saved_count', 0)}
 
 
 def check_format_node(state: AgentState) -> Dict[str, Any]:
     """
     Validates and auto-fixes the format of the reasoning output.
-    Strictly requires <answer>...</answer> but will attempt to convert:
-    Strictly requires <answer>...</answer> but will attempt to convert:
-    - (answer) ...
-    - (answer> ...
-    - Answer: ...
-    to <answer>...</answer> if found.
     """
     if not state.get('is_reasoning_flow'):
         return {"format_check_passed": True}
 
     raw_output = state.get('reasoning_raw_output', "")
-    
-    # 1. Check for basic "Question:" presence
+
     if "Question:" not in raw_output:
         msg = "Format Check Failed: Missing 'Question:'"
         print(f"X {msg}")
         return {
-            "format_check_passed": False, 
+            "format_check_passed": False,
             "reasoning_logs": state.get('reasoning_logs', []) + [msg]
         }
 
-    # 2. Check for strictly valid <answer> tag
-    # We want to ensure there is an <answer>... content ...</answer> block.
     strict_answer_pattern = r'<answer>.*?</answer>'
     if re.search(strict_answer_pattern, raw_output, re.DOTALL | re.IGNORECASE):
-        # Already perfect
         return {"format_check_passed": True}
 
-    # 3. Attempt Auto-Fix
-    # Look for convertible patterns
-    # Note: re.DOTALL means . matches newlines
     convertible_pattern = r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)'
     match = re.search(convertible_pattern, raw_output, re.DOTALL | re.IGNORECASE)
-    
+
     if match:
         answer_content = match.group(1).strip()
-        # If the content is empty, that's also a failure of sorts, but let's assume valid content if matched.
         if not answer_content:
-             msg = "Format Check Failed: Empty answer content"
-             print(f"X {msg}")
-             return {
-                "format_check_passed": False, 
+            msg = "Format Check Failed: Empty answer content"
+            print(f"X {msg}")
+            return {
+                "format_check_passed": False,
                 "reasoning_logs": state.get('reasoning_logs', []) + [msg]
             }
 
         start_idx = match.start()
         end_idx = match.end()
-        
-        # Construct new output: Prefix + <answer>Content</answer> + Suffix
-        # Note: raw_output[end_idx:] preserves anything after the answer block
         fixed_output = raw_output[:start_idx] + f"<answer>{answer_content}</answer>" + raw_output[end_idx:]
-        
+
         log_msg = "Format Auto-Fixed: Converted answer format to <answer>...</answer>"
         print(f"✓ {log_msg}")
         return {
@@ -508,10 +745,9 @@ def check_format_node(state: AgentState) -> Dict[str, Any]:
             "reasoning_logs": state.get('reasoning_logs', []) + [log_msg]
         }
 
-    # 4. Fail if no answer found
     msg = "Format Check Failed: No valid answer tag found"
     print(f"X {msg}")
     return {
-        "format_check_passed": False, 
+        "format_check_passed": False,
         "reasoning_logs": state.get('reasoning_logs', []) + [msg]
     }
