@@ -524,6 +524,91 @@ Nếu KHÔNG HỢP LỆ, giải thích ngắn gọn vấn đề (1-2 câu)."""
         }
 
 
+def verify_grounding_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Kiểm tra xem câu hỏi và đáp án có ĐÚNG với kiến thức trong context_docs không.
+    Tránh trường hợp LLM tự bịa (hallucinate) sai lệch với tài liệu.
+    """
+    print("[verify_grounding] Bắt đầu đối chiếu QA với tài liệu tham khảo...")
+    is_reasoning = state.get('is_reasoning_flow', False)
+    
+    # 1. Trích xuất Câu hỏi và Đáp án
+    if is_reasoning:
+        raw = state.get('reasoning_raw_output', '')
+        # Tách câu hỏi
+        q_match = re.search(r'(Question:.*?)(?=<think>|<step>|<tool_call>|$)', raw, re.DOTALL)
+        question_block = q_match.group(1).strip() if q_match else raw
+        # Tách đáp án
+        a_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', raw, re.DOTALL | re.IGNORECASE)
+        answer_text = a_match.group(1).strip() if a_match else "[Không tìm thấy đáp án]"
+    else:
+        qa = state.get('simple_qa', {})
+        question_block = qa.get('question', '') if qa else ''
+        answer_text = qa.get('answer', '') if qa else ''
+
+    # 2. Gom tài liệu tham khảo
+    context_text = "\n\n".join([d.page_content for d in state.get('context_docs', [])])
+    
+    if not context_text.strip():
+        print("[verify_grounding] Không có context docs, tự động PASS.")
+        return {"grounding_passed": True, "grounding_attempts": state.get('grounding_attempts', 0)}
+
+    # 3. Prompt kiểm tra
+    llm_prompt = f"""Bạn là chuyên gia thẩm định nội dung tâm lý học. 
+Nhiệm vụ của bạn là kiểm tra tính chính xác của Câu Hỏi và Đáp Án dựa trên Tài Liệu Tham Khảo.
+
+Tài Liệu Tham Khảo:
+{context_text[:6000]}
+
+Câu hỏi trắc nghiệm:
+{question_block}
+
+Đáp án được chọn là đúng:
+{answer_text}
+
+Tiêu chí đánh giá:
+1. Đáp án đúng được chọn PHẢI được hỗ trợ bởi thông tin trong Tài Liệu Tham Khảo.
+2. Không mâu thuẫn với nội dung của tài liệu.
+
+Nếu ĐẠT tiêu chí trên, bạn CHỈ trả lời một từ duy nhất: "ĐẠT"
+Nếu KHÔNG ĐẠT (sai kiến thức, tài liệu không nhắc tới, hoặc bịa đặt), hãy giải thích ngắn gọn lý do (1-2 câu)."""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": llm_prompt}],
+            temperature=0.1,
+            max_tokens=256,
+            timeout=60
+        )
+        review = response.choices[0].message.content.strip()
+        is_valid = "ĐẠT" in review.upper() or "PASSED" in review.upper()
+        
+        if is_valid:
+            print(f"[verify_grounding] ✓ ĐẠT: Phù hợp với reference.")
+            return {
+                "grounding_passed": True,
+                "grounding_attempts": state.get('grounding_attempts', 0),
+                "reasoning_logs": state.get('reasoning_logs', []) + ["[verify_grounding] PASS"]
+            }
+        else:
+            msg = f"[verify_grounding] ✗ KHÔNG ĐẠT: {review[:200]}"
+            print(msg)
+            return {
+                "grounding_passed": False,
+                "grounding_attempts": state.get('grounding_attempts', 0) + 1,
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+            
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"[verify_grounding] Lỗi LLM: {e}. Bỏ qua, coi như PASS.")
+        return {
+            "grounding_passed": True,
+            "grounding_attempts": state.get('grounding_attempts', 0)
+        }
+
+
 def parse_steps_node(state: AgentState) -> Dict[str, Any]:
     """
     Parse individual <step> tags from the reasoning output.
@@ -686,17 +771,26 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
 
             state['last_saved_count'] = len(state.get('all_outputs', []))
 
+    # Construct the state updates dictionary
+    updates = {
+        "last_saved_count": state.get('last_saved_count', 0),
+        # Đặt lại các biến đếm để iteration tiếp theo bắt đầu mới hoàn toàn
+        "qa_validation_attempts": 0,
+        "grounding_attempts": 0
+    }
+
+    # Return state update for reasoning flow
     if state.get('is_reasoning_flow'):
         if state['current_step_index'] == len(state['reasoning_steps']) - 1:
-            return {
+            updates.update({
                 "all_outputs": state['all_outputs'],
                 "iteration_count": state['iteration_count'],
                 "current_step_index": state['current_step_index'] + 1,
-                "step_retry_count": 0,
-                "last_saved_count": state.get('last_saved_count', 0)
-            }
+                "step_retry_count": 0
+            })
+            return updates
 
-    return {"last_saved_count": state.get('last_saved_count', 0)}
+    return updates
 
 
 def check_format_node(state: AgentState) -> Dict[str, Any]:

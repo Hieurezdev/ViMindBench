@@ -40,6 +40,10 @@ class AgentState(TypedDict):
     qa_validation_passed: bool  # True nếu câu hỏi hợp lệ
     qa_validation_attempts: int # Số lần thử lại do validate fail
     
+    # Grounding Validation (kiểm tra factual với reference)
+    grounding_passed: bool      # True nếu match với tài liệu gốc
+    grounding_attempts: int     # Số lần thử lại do sai khác tài liệu
+    
     # Output Collection
     all_outputs: List[Dict[str, Any]]  # Collected QA pairs across iterations
     last_saved_count: int               # Index of the last saved QA pair

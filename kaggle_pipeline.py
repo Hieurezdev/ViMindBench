@@ -1,5 +1,3 @@
-!uv pip install pymongo openai langchain-core langchain-openai langgraph python-dotenv numpy sentence-transformers vllm
-
 import os
 import sys
 import time
@@ -97,7 +95,7 @@ class Config:
     MODEL_NAME = "Qwen/Qwen3-30B-A3B-Instruct-2507"
     
     # vLLM Command (for local deployment)
-    VLLM_CMD = 'uv run vllm serve "Qwen/Qwen3-30B-A3B-Instruct-2507" --dtype auto --gpu-memory-utilization 0.85 --max-model-len 14000 --host 0.0.0.0 --port 8000 --trust-remote-code'
+    VLLM_CMD = 'uv run vllm serve "Qwen/Qwen3-30B-A3B-Instruct-2507" --dtype auto --gpu-memory-utilization 0.85 --max-model-len 14000 --no-enable-prefix-caching --host 0.0.0.0 --port 8000 --trust-remote-code'
     
     # Embedding Configuration
     USE_LOCAL_EMBEDDING = True
@@ -155,9 +153,13 @@ class AgentState(TypedDict):
     qa_validation_passed: bool  # True nếu câu hỏi hợp lệ
     qa_validation_attempts: int # Số lần thử lại do validate fail
     
+    # Grounding Validation (kiểm tra factual với reference)
+    grounding_passed: bool      # True nếu match với tài liệu gốc
+    grounding_attempts: int     # Số lần thử lại do sai khác tài liệu
+    
     # Output Collection
     all_outputs: List[Dict[str, Any]]  # Collected QA pairs across iterations
-    last_saved_count: int               # Index of the last saved QA pair
+    last_saved_count: int              # Index of the last saved QA pair
 
 
 # ==========================================
@@ -630,11 +632,11 @@ def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     
     num_options = random.choice([4, 5])
     if num_options == 4:
-        options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]"
+        options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]"
         answer_format = "[Đáp án đúng: A, B, C hoặc D]"
         req_text = "4 đáp án (A, B, C, D)"
     else:
-        options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]\\nE. [Đáp án E]"
+        options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]\nE. [Đáp án E]"
         answer_format = "[Đáp án đúng: A, B, C, D hoặc E]"
         req_text = "5 đáp án (A, B, C, D, E)"
 
@@ -778,6 +780,229 @@ LƯU Ý QUAN TRỌNG:
              "current_step_index": 0,
              "step_retry_count": 0,
              "step_verification_results": []
+        }
+
+def validate_qa_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Kiểm tra câu hỏi trắc nghiệm sinh ra trước khi đi vào step verification.
+    Gồm 2 tầng:
+    1. Rule-based: kiểm tra số đáp án, đáp án trùng lặp.
+    2. LLM-based: kiểm tra câu hỏi hợp lí, chỉ 1 đáp án đúng, đáp án phân biệt rõ.
+    """
+    is_reasoning = state.get('is_reasoning_flow', False)
+    
+    if is_reasoning:
+        raw = state.get('reasoning_raw_output', '')
+        # Trích xuất phần câu hỏi (trước <think>)
+        question_block_match = re.search(
+            r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL
+        )
+        question_block = question_block_match.group(1).strip() if question_block_match else raw
+    else:
+        qa = state.get('simple_qa', {})
+        question_block = qa.get('question', '') if qa else ''
+
+    print(f"[validate_qa] Bắt đầu kiểm tra câu hỏi...")
+
+    # ──────────────────────────────────────────
+    # TẦNG 1: Rule-based checks
+    # ──────────────────────────────────────────
+    
+    # Trích xuất các đáp án (A. / B. / C. / D. / E.)
+    option_pattern = r'^([A-E])[\.\)]\s*(.+)$'
+    options = re.findall(option_pattern, question_block, re.MULTILINE)
+    option_texts = [text.strip().lower() for _, text in options]
+    
+    # 1a. Kiểm tra số đáp án (phải là 4 hoặc 5)
+    num_opts = len(options)
+    if num_opts not in (4, 5):
+        msg = f"[validate_qa] ✗ FAIL (Rule): Số đáp án không hợp lệ: {num_opts} (cần 4 hoặc 5)"
+        print(msg)
+        return {
+            "qa_validation_passed": False,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+        }
+    
+    # 1b. Kiểm tra đáp án trùng lặp (so sánh chuỗi chuẩn hóa)
+    def _normalize(text: str) -> str:
+        # Loại bỏ dấu câu, khoảng trắng thừa để so sánh
+        return re.sub(r'[\s\.,;:!?()\'"]+', ' ', text.lower()).strip()
+    
+    normalized = [_normalize(t) for t in option_texts]
+    duplicates_found = False
+    for i in range(len(normalized)):
+        for j in range(i + 1, len(normalized)):
+            a, b = normalized[i], normalized[j]
+            # Kiểm tra một trong hai chứa chuỗi kia (subset check)
+            shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+            if shorter and shorter in longer:
+                duplicates_found = True
+                break
+            # Kiểm tra kí tự trùng lặp (Jaccard similarity > 0.8)
+            set_a, set_b = set(a.split()), set(b.split())
+            if set_a and set_b:
+                intersection = len(set_a & set_b)
+                union = len(set_a | set_b)
+                if union > 0 and intersection / union > 0.8:
+                    duplicates_found = True
+                    break
+        if duplicates_found:
+            break
+    
+    if duplicates_found:
+        msg = f"[validate_qa] ✗ FAIL (Rule): Phát hiện đáp án trùng lặp hoặc quá giống nhau"
+        print(msg)
+        return {
+            "qa_validation_passed": False,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+        }
+    
+    print(f"[validate_qa] ✓ Rule-based: OK ({num_opts} đáp án, không trùng lặp)")
+
+    # ──────────────────────────────────────────
+    # TẦNG 2: LLM-based validation
+    # ──────────────────────────────────────────
+    print("[validate_qa] Kiểm tra LLM...")
+    
+    options_display = "\n".join([f"{label}. {text}" for label, text in options])
+    
+    # Trích câu hỏi chính (dòng đầu tiên bắt đầu bằng "Question:" hoặc "Câu")
+    question_line_match = re.search(r'(?:Question:|Câu hỏi:?)\s*(.+?)\n', question_block, re.IGNORECASE)
+    question_text = question_line_match.group(1).strip() if question_line_match else question_block[:300]
+    
+    llm_prompt = f"""Bạn là chuyên gia kiểm định câu hỏi trắc nghiệm. Hãy đánh giá câu hỏi sau:
+
+Câu hỏi: {question_text}
+
+Các đáp án:
+{options_display}
+
+Hãy kiểm tra:
+1. Câu hỏi có rõ nghĩa, có thể trả lời được không?
+2. Chỉ có đúng 1 đáp án đúng không?
+3. Các đáp án có phân biệt rõ ràng với nhau không (không trùng ý)?
+
+Nếu câu hỏi HỢP LỆ (thỏa mãn tất cả 3 tiêu chí), chỉ trả lời đúng 1 từ: "HỢP LỆ"
+Nếu KHÔNG HỢP LỆ, giải thích ngắn gọn vấn đề (1-2 câu)."""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": llm_prompt}],
+            temperature=0.1,
+            max_tokens=256,
+            timeout=60
+        )
+        review = response.choices[0].message.content.strip()
+        is_valid = "HỢP LỆ" in review.upper() or "VALID" in review.upper()
+        
+        if is_valid:
+            print(f"[validate_qa] ✓ LLM: HỢP LỆ")
+            return {
+                "qa_validation_passed": True,
+                "qa_validation_attempts": state.get('qa_validation_attempts', 0),
+                "reasoning_logs": state.get('reasoning_logs', []) + ["[validate_qa] PASS"]
+            }
+        else:
+            msg = f"[validate_qa] ✗ FAIL (LLM): {review[:200]}"
+            print(msg)
+            return {
+                "qa_validation_passed": False,
+                "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"[validate_qa] Lỗi LLM validation: {e}. Bỏ qua, coi như PASS.")
+        return {
+            "qa_validation_passed": True,
+            "qa_validation_attempts": state.get('qa_validation_attempts', 0)
+        }
+
+def verify_grounding_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Kiểm tra xem câu hỏi và đáp án có ĐÚNG với kiến thức trong context_docs không.
+    Tránh trường hợp LLM tự bịa (hallucinate) sai lệch với tài liệu.
+    """
+    print("[verify_grounding] Bắt đầu đối chiếu QA với tài liệu tham khảo...")
+    is_reasoning = state.get('is_reasoning_flow', False)
+    
+    # 1. Trích xuất Câu hỏi và Đáp án
+    if is_reasoning:
+        raw = state.get('reasoning_raw_output', '')
+        # Tách câu hỏi
+        q_match = re.search(r'(Question:.*?)(?=<think>|<step>|<tool_call>|$)', raw, re.DOTALL)
+        question_block = q_match.group(1).strip() if q_match else raw
+        # Tách đáp án
+        a_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', raw, re.DOTALL | re.IGNORECASE)
+        answer_text = a_match.group(1).strip() if a_match else "[Không tìm thấy đáp án]"
+    else:
+        qa = state.get('simple_qa', {})
+        question_block = qa.get('question', '') if qa else ''
+        answer_text = qa.get('answer', '') if qa else ''
+
+    # 2. Gom tài liệu tham khảo
+    context_text = "\n\n".join([d.page_content for d in state.get('context_docs', [])])
+    
+    if not context_text.strip():
+        print("[verify_grounding] Không có context docs, tự động PASS.")
+        return {"grounding_passed": True, "grounding_attempts": state.get('grounding_attempts', 0)}
+
+    # 3. Prompt kiểm tra
+    llm_prompt = f"""Bạn là chuyên gia thẩm định nội dung tâm lý học. 
+Nhiệm vụ của bạn là kiểm tra tính chính xác của Câu Hỏi và Đáp Án dựa trên Tài Liệu Tham Khảo.
+
+Tài Liệu Tham Khảo:
+{context_text[:6000]}
+
+Câu hỏi trắc nghiệm:
+{question_block}
+
+Đáp án được chọn là đúng:
+{answer_text}
+
+Tiêu chí đánh giá:
+1. Đáp án đúng được chọn PHẢI được hỗ trợ bởi thông tin trong Tài Liệu Tham Khảo.
+2. Không mâu thuẫn với nội dung của tài liệu.
+
+Nếu ĐẠT tiêu chí trên, bạn CHỈ trả lời một từ duy nhất: "ĐẠT"
+Nếu KHÔNG ĐẠT (sai kiến thức, tài liệu không nhắc tới, hoặc bịa đặt), hãy giải thích ngắn gọn lý do (1-2 câu)."""
+
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": llm_prompt}],
+            temperature=0.1,
+            max_tokens=256,
+            timeout=60
+        )
+        review = response.choices[0].message.content.strip()
+        is_valid = "ĐẠT" in review.upper() or "PASSED" in review.upper()
+        
+        if is_valid:
+            print(f"[verify_grounding] ✓ ĐẠT: Phù hợp với reference.")
+            return {
+                "grounding_passed": True,
+                "grounding_attempts": state.get('grounding_attempts', 0),
+                "reasoning_logs": state.get('reasoning_logs', []) + ["[verify_grounding] PASS"]
+            }
+        else:
+            msg = f"[verify_grounding] ✗ KHÔNG ĐẠT: {review[:200]}"
+            print(msg)
+            return {
+                "grounding_passed": False,
+                "grounding_attempts": state.get('grounding_attempts', 0) + 1,
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+            
+    except Exception as e:
+        check_and_raise_503(e)
+        print(f"[verify_grounding] Lỗi LLM: {e}. Bỏ qua, coi như PASS.")
+        return {
+            "grounding_passed": True,
+            "grounding_attempts": state.get('grounding_attempts', 0)
         }
 
 def parse_steps_node(state: AgentState) -> Dict[str, Any]:
@@ -943,18 +1168,26 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
             
             state['last_saved_count'] = len(state.get('all_outputs', []))
 
-    # Return state update
+    # Construct the state updates dictionary
+    updates = {
+        "last_saved_count": state.get('last_saved_count', 0),
+        # Đặt lại các biến đếm để iteration tiếp theo bắt đầu mới hoàn toàn
+        "qa_validation_attempts": 0,
+        "grounding_attempts": 0
+    }
+
+    # Return state update for reasoning flow
     if state.get('is_reasoning_flow'):
          if state['current_step_index'] == len(state['reasoning_steps']) - 1:
-             return {
+             updates.update({
                  "all_outputs": state['all_outputs'],
                  "iteration_count": state['iteration_count'],
                  "current_step_index": state['current_step_index'] + 1,
-                 "step_retry_count": 0,
-                 "last_saved_count": state.get('last_saved_count', 0)
-             }
+                 "step_retry_count": 0
+             })
+             return updates
          
-    return {"last_saved_count": state.get('last_saved_count', 0)}
+    return updates
 
 def check_format_node(state: AgentState) -> Dict[str, Any]:
     """
@@ -1014,145 +1247,6 @@ def check_format_node(state: AgentState) -> Dict[str, Any]:
         "reasoning_logs": state.get('reasoning_logs', []) + [msg]
     }
 
-def validate_qa_node(state: AgentState) -> Dict[str, Any]:
-    """
-    Kiểm tra câu hỏi trắc nghiệm sinh ra trước khi đi vào step verification.
-    Gồm 2 tầng:
-    1. Rule-based: kiểm tra số đáp án, đáp án trùng lặp.
-    2. LLM-based: kiểm tra câu hỏi hợp lí, chỉ 1 đáp án đúng, đáp án phân biệt rõ.
-    """
-    is_reasoning = state.get('is_reasoning_flow', False)
-    
-    if is_reasoning:
-        raw = state.get('reasoning_raw_output', '')
-        # Trích xuất phần câu hỏi (trước <think>)
-        question_block_match = re.search(
-            r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL
-        )
-        question_block = question_block_match.group(1).strip() if question_block_match else raw
-    else:
-        qa = state.get('simple_qa', {})
-        question_block = qa.get('question', '') if qa else ''
-
-    print(f"[validate_qa] Bắt đầu kiểm tra câu hỏi...")
-
-    # ──────────────────────────────────────────
-    # TẦNG 1: Rule-based checks
-    # ──────────────────────────────────────────
-    
-    # Trích xuất các đáp án (A. / B. / C. / D. / E.)
-    option_pattern = r'^([A-E])[\.\)]\s*(.+)$'
-    options = re.findall(option_pattern, question_block, re.MULTILINE)
-    option_texts = [text.strip().lower() for _, text in options]
-    
-    # 1a. Kiểm tra số đáp án (phải là 4 hoặc 5)
-    num_opts = len(options)
-    if num_opts not in (4, 5):
-        msg = f"[validate_qa] ✗ FAIL (Rule): Số đáp án không hợp lệ: {num_opts} (cần 4 hoặc 5)"
-        print(msg)
-        return {
-            "qa_validation_passed": False,
-            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
-            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
-        }
-    
-    # 1b. Kiểm tra đáp án trùng lặp (so sánh chuỗi chuẩn hóa)
-    def _normalize(text: str) -> str:
-        # Loại bỏ dấu câu, khoảng trắng thừa để so sánh
-        return re.sub(r'[\s\.,;:!?()\'"]+', ' ', text.lower()).strip()
-    
-    normalized = [_normalize(t) for t in option_texts]
-    duplicates_found = False
-    for i in range(len(normalized)):
-        for j in range(i + 1, len(normalized)):
-            a, b = normalized[i], normalized[j]
-            # Kiểm tra một trong hai chứa chuỗi kia (subset check)
-            shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
-            if shorter and shorter in longer:
-                duplicates_found = True
-                break
-            # Kiểm tra kí tự trùng lặp (Jaccard similarity > 0.8)
-            set_a, set_b = set(a.split()), set(b.split())
-            if set_a and set_b:
-                intersection = len(set_a & set_b)
-                union = len(set_a | set_b)
-                if union > 0 and intersection / union > 0.8:
-                    duplicates_found = True
-                    break
-        if duplicates_found:
-            break
-    
-    if duplicates_found:
-        msg = f"[validate_qa] ✗ FAIL (Rule): Phát hiện đáp án trùng lặp hoặc quá giống nhau"
-        print(msg)
-        return {
-            "qa_validation_passed": False,
-            "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
-            "reasoning_logs": state.get('reasoning_logs', []) + [msg]
-        }
-    
-    print(f"[validate_qa] ✓ Rule-based: OK ({num_opts} đáp án, không trùng lặp)")
-
-    # ──────────────────────────────────────────
-    # TẦNG 2: LLM-based validation
-    # ──────────────────────────────────────────
-    print("[validate_qa] Kiểm tra LLM...")
-    
-    options_display = "\n".join([f"{label}. {text}" for label, text in options])
-    
-    # Trích câu hỏi chính (dòng đầu tiên bắt đầu bằng "Question:" hoặc "Câu")
-    question_line_match = re.search(r'(?:Question:|Câu hỏi:?)\s*(.+?)\n', question_block, re.IGNORECASE)
-    question_text = question_line_match.group(1).strip() if question_line_match else question_block[:300]
-    
-    llm_prompt = f"""Bạn là chuyên gia kiểm định câu hỏi trắc nghiệm. Hãy đánh giá câu hỏi sau:
-
-Câu hỏi: {question_text}
-
-Các đáp án:
-{options_display}
-
-Hãy kiểm tra:
-1. Câu hỏi có rõ nghĩa, có thể trả lời được không?
-2. Chỉ có đúng 1 đáp án đúng không?
-3. Các đáp án có phân biệt rõ ràng với nhau không (không trùng ý)?
-
-Nếu câu hỏi HỢP LỆ (thỏa mãn tất cả 3 tiêu chí), chỉ trả lời đúng 1 từ: "HỢP LỆ"
-Nếu KHÔNG HỢP LỆ, giải thích ngắn gọn vấn đề (1-2 câu)."""
-
-    try:
-        response = openai_client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=[{"role": "user", "content": llm_prompt}],
-            temperature=0.1,
-            max_tokens=256,
-            timeout=60
-        )
-        review = response.choices[0].message.content.strip()
-        is_valid = "HỢP LỆ" in review.upper() or "VALID" in review.upper()
-        
-        if is_valid:
-            print(f"[validate_qa] ✓ LLM: HỢP LỆ")
-            return {
-                "qa_validation_passed": True,
-                "qa_validation_attempts": state.get('qa_validation_attempts', 0),
-                "reasoning_logs": state.get('reasoning_logs', []) + ["[validate_qa] PASS"]
-            }
-        else:
-            msg = f"[validate_qa] ✗ FAIL (LLM): {review[:200]}"
-            print(msg)
-            return {
-                "qa_validation_passed": False,
-                "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
-                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
-            }
-    except Exception as e:
-        check_and_raise_503(e)
-        print(f"[validate_qa] Lỗi LLM validation: {e}. Bỏ qua, coi như PASS.")
-        return {
-            "qa_validation_passed": True,
-            "qa_validation_attempts": state.get('qa_validation_attempts', 0)
-        }
-
 
 # ==========================================
 # 4. Workflow Definition
@@ -1168,7 +1262,8 @@ def create_graph():
     workflow.add_node("retrieve_negative", retrieve_negative_node)
     workflow.add_node("simple_qa", generate_simple_qa_node)
     workflow.add_node("generate_reasoning", generate_reasoning_node)
-    workflow.add_node("validate_qa", validate_qa_node)          # ← NODE MỚI
+    workflow.add_node("validate_qa", validate_qa_node)
+    workflow.add_node("verify_grounding", verify_grounding_node)  # ← NODE MỚI THÊM VÀO
     workflow.add_node("parse_steps", parse_steps_node)
     workflow.add_node("verify_step", verify_single_step_node)
     workflow.add_node("refine_step", refine_single_step_node)
@@ -1212,14 +1307,14 @@ def create_graph():
     workflow.add_edge("retrieve", "generate_reasoning")
     workflow.add_edge("retrieve_negative", "generate_reasoning")
     
-    # Simple QA → validate_qa (thay vì trực tiếp check_more)
+    # Simple QA → validate_qa 
     workflow.add_edge("simple_qa", "validate_qa")
     
-    # Reasoning path: Generate → validate_qa (thay vì trực tiếp parse_steps)
+    # Reasoning path: Generate → validate_qa 
     workflow.add_edge("generate_reasoning", "validate_qa")
     
     # ──────────────────────────────────────────────────
-    # Routing sau validate_qa
+    # Routing sau validate_qa: Đẩy qua verify_grounding
     # ──────────────────────────────────────────────────
     def route_after_validate(state: AgentState):
         passed = state.get('qa_validation_passed', False)
@@ -1227,28 +1322,52 @@ def create_graph():
         is_reasoning = state.get('is_reasoning_flow', False)
         
         if passed:
-            # Câu hỏi hợp lệ: đi vào luồng tiếp theo
-            if is_reasoning:
-                return "parse_steps"
-            else:
-                return "check_more"
+            # Nếu định dạng QA ok, đi kiểm tra tính factual
+            return "verify_grounding"
         else:
-            # Câu hỏi không hợp lệ
+            # Nếu câu hỏi không hợp lệ
             if attempts < 2:
-                # Còn lần retry: sinh lại câu hỏi
                 print(f"[validate_qa] Thử lại lần {attempts + 1}/2...")
-                if is_reasoning:
-                    return "generate_reasoning"
-                else:
-                    return "simple_qa"
+                return "generate_reasoning" if is_reasoning else "simple_qa"
             else:
-                # Hết lần retry: bỏ qua, tăng iteration và check_more
                 print("[validate_qa] Hết lần thử. Bỏ qua câu hỏi này.")
                 return "check_more"
     
     workflow.add_conditional_edges(
         "validate_qa",
         route_after_validate,
+        {
+            "verify_grounding": "verify_grounding",
+            "check_more": "check_more",
+            "generate_reasoning": "generate_reasoning",
+            "simple_qa": "simple_qa"
+        }
+    )
+
+    # ──────────────────────────────────────────────────
+    # Routing SAU verify_grounding
+    # ──────────────────────────────────────────────────
+    def route_after_grounding(state: AgentState):
+        passed = state.get('grounding_passed', False)
+        attempts = state.get('grounding_attempts', 0)
+        is_reasoning = state.get('is_reasoning_flow', False)
+        
+        if passed:
+            if is_reasoning:
+                return "parse_steps"
+            else:
+                return "check_more"
+        else:
+            if attempts < 2:
+                print(f"[verify_grounding] Thử lại lần {attempts + 1}/2 do lệch tài liệu...")
+                return "generate_reasoning" if is_reasoning else "simple_qa"
+            else:
+                print("[verify_grounding] Hết lần thử. Bỏ qua câu hỏi này.")
+                return "check_more"
+
+    workflow.add_conditional_edges(
+        "verify_grounding",
+        route_after_grounding,
         {
             "parse_steps": "parse_steps",
             "check_more": "check_more",
@@ -1301,7 +1420,6 @@ def create_graph():
     # Check if more questions need to be generated
     def route_after_check_more(state: AgentState):
         if state['iteration_count'] < state['max_iterations']:
-            # Reset qa_validation_attempts cho iteration mới
             return "first_filter"
         else:
             return END
@@ -1354,7 +1472,32 @@ def main():
     num_qa_pairs = Config.NUM_QA_PAIRS
     
     print(f"Running pipeline to generate {num_qa_pairs} Psychology QA pairs...")
-    
+
+    # Load already-used anchor_ids from existing output file(s) to avoid duplicates
+    used_anchor_ids = []
+    output_path = "/kaggle/working/generated_psychology_multiple_choice.jsonl"
+    existing_output_files = [
+        output_path,
+        "/kaggle/input/datasets/hiudev/psychology/generated_psychology_multiple_choice-2.jsonl",
+    ]
+    for existing_file in existing_output_files:
+        if os.path.exists(existing_file):
+            print(f"Loading used anchor_ids from: {existing_file}")
+            with open(existing_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entry = json.loads(line)
+                        aid = entry.get("anchor_id")
+                        if aid and aid not in used_anchor_ids:
+                            used_anchor_ids.append(aid)
+                    except json.JSONDecodeError:
+                        pass
+            print(f"  → {len(used_anchor_ids)} unique anchor_ids loaded so far.")
+    print(f"Total used anchor_ids (will be skipped): {len(used_anchor_ids)}")
+
     initial_state = {
         "iteration_count": 0,
         "max_iterations": num_qa_pairs,
@@ -1375,11 +1518,16 @@ def main():
         "format_check_passed": True,
         "final_output_ready": False,
         "all_outputs": [],
-        "used_anchor_ids": [],
+        "used_anchor_ids": used_anchor_ids,
         "last_saved_count": 0,
+        
         # QA Validation
         "qa_validation_passed": False,
-        "qa_validation_attempts": 0
+        "qa_validation_attempts": 0,
+        
+        # Grounding Validation (Kiểm tra kiến thức với tài liệu)
+        "grounding_passed": False,
+        "grounding_attempts": 0
     }
     
     # Run the graph

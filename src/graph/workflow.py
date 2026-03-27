@@ -10,6 +10,7 @@ from .nodes import (
     generate_simple_qa_node,
     generate_reasoning_node,
     validate_qa_node,
+    verify_grounding_node,
     parse_steps_node,
     verify_single_step_node,
     refine_single_step_node,
@@ -30,6 +31,7 @@ def create_graph():
     workflow.add_node("simple_qa", generate_simple_qa_node)
     workflow.add_node("generate_reasoning", generate_reasoning_node)
     workflow.add_node("validate_qa", validate_qa_node)
+    workflow.add_node("verify_grounding", verify_grounding_node)
     workflow.add_node("parse_steps", parse_steps_node)
     workflow.add_node("verify_step", verify_single_step_node)
     workflow.add_node("refine_step", refine_single_step_node)
@@ -75,14 +77,15 @@ def create_graph():
     workflow.add_edge("simple_qa", "validate_qa")
     workflow.add_edge("generate_reasoning", "validate_qa")
 
-    # Route after validation
+    # Routing sau validate_qa: Đẩy qua verify_grounding
     def route_after_validate(state: AgentState):
         passed = state.get('qa_validation_passed', False)
         attempts = state.get('qa_validation_attempts', 0)
         is_reasoning = state.get('is_reasoning_flow', False)
 
         if passed:
-            return "parse_steps" if is_reasoning else "check_more"
+            # Nếu định dạng QA ok, đi kiểm tra tính factual
+            return "verify_grounding"
         else:
             if attempts < 2:
                 print(f"[validate_qa] Thử lại lần {attempts + 1}/2...")
@@ -94,6 +97,36 @@ def create_graph():
     workflow.add_conditional_edges(
         "validate_qa",
         route_after_validate,
+        {
+            "verify_grounding": "verify_grounding",
+            "check_more": "check_more",
+            "generate_reasoning": "generate_reasoning",
+            "simple_qa": "simple_qa"
+        }
+    )
+
+    # Routing SAU verify_grounding
+    def route_after_grounding(state: AgentState):
+        passed = state.get('grounding_passed', False)
+        attempts = state.get('grounding_attempts', 0)
+        is_reasoning = state.get('is_reasoning_flow', False)
+
+        if passed:
+            if is_reasoning:
+                return "parse_steps"
+            else:
+                return "check_more"
+        else:
+            if attempts < 2:
+                print(f"[verify_grounding] Thử lại lần {attempts + 1}/2 do lệch tài liệu...")
+                return "generate_reasoning" if is_reasoning else "simple_qa"
+            else:
+                print("[verify_grounding] Hết lần thử. Bỏ qua câu hỏi này.")
+                return "check_more"
+
+    workflow.add_conditional_edges(
+        "verify_grounding",
+        route_after_grounding,
         {
             "parse_steps": "parse_steps",
             "check_more": "check_more",

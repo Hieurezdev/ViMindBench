@@ -4,7 +4,11 @@ from pymongo import MongoClient
 from openai import OpenAI
 from langchain_core.documents import Document
 from dotenv import load_dotenv
-import numpy as np
+
+try:
+    from sentence_transformers import SentenceTransformer
+except ImportError:
+    SentenceTransformer = None
 
 load_dotenv()
 
@@ -13,12 +17,13 @@ class MongoDBRetriever:
     MongoDB-based retriever using:
     1. Atlas Vector Search (if available)
     2. Text search fallback
-    3. Local embedding model via OpenAI API
+    3. Local embedding model via sentence-transformers
     """
     
     def __init__(self, 
                  embedding_base_url: str = None,
-                 embedding_model: str = None):
+                 embedding_model: str = None,
+                 use_local_embedding: bool = None):
         """
         Initialize MongoDB retriever with local embedding model.
         
@@ -32,27 +37,47 @@ class MongoDBRetriever:
         self.collection_name = os.getenv("MONGO_COLLECTION_NAME", "mental")
         
         if not self.mongo_uri:
-            raise ValueError("MONGO_URI environment variable not set")
-        
-        self.client = MongoClient(self.mongo_uri)
-        self.db = self.client[self.db_name]
-        self.collection = self.db[self.collection_name]
-        
-        # Embedding client (local OpenAI-compatible API)
+            print("Warning: MONGO_URI not set. Retriever will fail if used.")
+
+        self.collection = None
+        if self.mongo_uri:
+            self.client = MongoClient(self.mongo_uri)
+            self.db = self.client[self.db_name]
+            self.collection = self.db[self.collection_name]
+            print(f"✓ Connected to MongoDB: {self.db_name}.{self.collection_name}")
+
+        # Embedding configuration
+        if use_local_embedding is None:
+            self.use_local_embedding = os.getenv("USE_LOCAL_EMBEDDING", "true").lower() in ("1", "true", "yes")
+        else:
+            self.use_local_embedding = use_local_embedding
+
         self.embedding_base_url = embedding_base_url or os.getenv("EMBEDDING_BASE_URL", "http://127.0.0.1:1234/v1")
-        self.embedding_model = embedding_model or os.getenv("EMBEDDING_MODEL", "text-embedding-qwen3-embedding-0.6b")
-        
-        self.embedding_client = OpenAI(
-            base_url=self.embedding_base_url,
-            api_key="dummy"  # Local models don't need real key
-        )
-        
-        print(f"✓ Connected to MongoDB: {self.db_name}.{self.collection_name}")
-        print(f"✓ Using local embedding model: {self.embedding_model}")
+        self.embedding_model = embedding_model or os.getenv("EMBEDDING_MODEL", "namdp-ptit/ViDense")
+
+        self.local_model = None
+        self.embedding_client = None
+
+        if self.use_local_embedding:
+            if SentenceTransformer is None:
+                raise ImportError("sentence-transformers not installed. Please install it or set USE_LOCAL_EMBEDDING=false")
+            print(f"✓ Initializing Local Embedding Model: {self.embedding_model}")
+            self.local_model = SentenceTransformer(self.embedding_model, trust_remote_code=True)
+            print("✓ Local model loaded successfully.")
+        else:
+            self.embedding_client = OpenAI(
+                base_url=self.embedding_base_url,
+                api_key="dummy"
+            )
+            print(f"✓ Using API embedding model: {self.embedding_model} at {self.embedding_base_url}")
         
     def _generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding vector using local OpenAI-compatible API."""
+        """Generate embedding vector using local model or API."""
         try:
+            if self.use_local_embedding and self.local_model:
+                vector = self.local_model.encode(text, normalize_embeddings=True)
+                return vector.tolist()
+
             response = self.embedding_client.embeddings.create(
                 model=self.embedding_model,
                 input=text
@@ -60,7 +85,7 @@ class MongoDBRetriever:
             return response.data[0].embedding
         except Exception as e:
             print(f"Warning: Embedding generation failed: {e}")
-            # Return zero vector as fallback (Qwen embedding model uses 1024 dimensions)
+            # Fallback size for common embedding dims in this pipeline
             return [0.0] * 1024
     
     def add_documents(self, chunks: List[Dict[str, Any]]):
@@ -89,6 +114,14 @@ class MongoDBRetriever:
         Returns:
             List of LangChain Document objects
         """
+        if self.collection is None:
+            print("Error: MongoDB collection not initialized. Cannot search.")
+            return []
+
+        if self.use_local_embedding and self.local_model is None:
+            print("Error: Local embedding model not initialized. Cannot search.")
+            return []
+
         try:
             # Strategy 1: Try Atlas Vector Search (requires atlas_vector_search index)
             return self._vector_search(query, k)
@@ -108,6 +141,9 @@ class MongoDBRetriever:
         
         Requires: Vector search index on 'embedding' field in Atlas
         """
+        if self.collection is None:
+            return []
+
         query_embedding = self._generate_embedding(query)
         
         pipeline = [
@@ -123,10 +159,11 @@ class MongoDBRetriever:
             {
                 "$project": {
                     "content": 1,
+                    "title": 1,
                     "summary": 1,
+                    "tags": 1,
                     "keywords": 1,
                     "uuid": 1,
-                    "headers": 1,
                     "type": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
@@ -148,7 +185,7 @@ class MongoDBRetriever:
                     "index": "atlas_index",  # User specified index name
                     "text": {
                         "query": query,
-                        "path": ["content", "summary", "keywords"]
+                        "path": ["content", "title", "summary", "keywords"]
                     }
                 }
             },
@@ -158,10 +195,11 @@ class MongoDBRetriever:
             {
                 "$project": {
                     "content": 1,
+                    "title": 1,
                     "summary": 1,
+                    "tags": 1,
                     "keywords": 1,
                     "uuid": 1,
-                    "headers": 1,
                     "type": 1,
                     "score": {"$meta": "searchScore"}
                 }
@@ -200,8 +238,9 @@ class MongoDBRetriever:
         results = self.collection.find({
             "$or": [
                 {"content": {"$in": regex_patterns}},
+                {"title": {"$in": regex_patterns}},
                 {"summary": {"$in": regex_patterns}},
-                {"keywords": {"$in": keywords}}
+                {"keywords": {"$in": regex_patterns}}
             ]
         }).limit(k)
         
@@ -212,14 +251,17 @@ class MongoDBRetriever:
         documents = []
         
         for result in results:
-            # Use 'content' as page_content
-            page_content = result.get('content', result.get('summary', ''))
+            title = result.get('title', '')
+            summary = result.get('summary', '')
+            content = result.get('content', '')
+
+            page_content = f"Tiêu đề: {title}\nTóm tắt: {summary}\nNội dung:\n{content}"
             
-            # Metadata
             metadata = {
                 'uuid': result.get('uuid'),
-                'headers': result.get('headers', []),
-                'summary': result.get('summary'),
+                'title': title,
+                'summary': summary,
+                'tags': result.get('tags', []),
                 'keywords': result.get('keywords', []),
                 'type': result.get('type'),
                 'score': result.get('score', 0.0)
@@ -234,7 +276,7 @@ class MongoDBRetriever:
     
     def close(self):
         """Close MongoDB connection."""
-        if self.client:
+        if hasattr(self, 'client') and self.client:
             self.client.close()
             print("MongoDB connection closed")
 
