@@ -727,7 +727,7 @@ Chủ đề: {state['anchor'].get('title', '')}
 Tóm tắt: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
-1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
+1. Tạo một câu hỏi trắc nghiệm với độ phức tạp khó dạng: **{question_type}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
    - Bạn có thể suy nghĩ súc tích, ngắn gọn theo cách tự nhiên nhất của mình
    - Hãy phân tích câu hỏi, phân tích từng đáp án, loại trừ đáp án sai và chứng minh đáp án đúng
@@ -966,6 +966,7 @@ Câu hỏi trắc nghiệm:
 Tiêu chí đánh giá:
 1. Đáp án đúng được chọn PHẢI được hỗ trợ bởi thông tin trong Tài Liệu Tham Khảo.
 2. Không mâu thuẫn với nội dung của tài liệu.
+3. Không sai lệch so ngữ cảnh
 
 Nếu ĐẠT tiêu chí trên, bạn CHỈ trả lời một từ duy nhất: "ĐẠT"
 Nếu KHÔNG ĐẠT (sai kiến thức, tài liệu không nhắc tới, hoặc bịa đặt), hãy giải thích ngắn gọn lý do (1-2 câu)."""
