@@ -129,6 +129,8 @@ class AgentState(TypedDict):
     # Anchor and Context
     anchor: Optional[Dict[str, Any]]      # Randomly selected anchor
     query: str                  # Query derived from anchor
+    primary_retrieval_query: str # Query used for main retrieval
+    negative_retrieval_query: str # Query used for opposing retrieval
     context_docs: List[Document]# Retrieved documents (3-5 related/opposing)
     negative_docs: List[Document] # Retrieved documents opposing the anchor
     
@@ -429,6 +431,71 @@ MODEL_NAME = Config.MODEL_NAME
 # 3. Graph Nodes
 # ==========================================
 
+def _log_retrieved_docs(docs: List[Document], label: str) -> None:
+    """Pretty-print retrieved documents for debugging and traceability."""
+    if not docs:
+        print(f"[{label}] No documents retrieved.")
+        return
+
+    print(f"[{label}] Retrieved {len(docs)} document(s):")
+    for idx, doc in enumerate(docs, 1):
+        meta = doc.metadata or {}
+        print(
+            f"  - #{idx} | uuid={meta.get('uuid', '')} | "
+            f"title={meta.get('title', '')[:120]} | "
+            f"score={meta.get('score', 0.0)}"
+        )
+
+
+def _build_references(state: AgentState) -> List[Dict[str, Any]]:
+    """
+    Build list of references used to generate QA.
+    Includes anchor + retrieved docs (similar/opposing).
+    """
+    references: List[Dict[str, Any]] = []
+
+    anchor = state.get('anchor')
+    if anchor:
+        references.append({
+            "role": "anchor",
+            "uuid": anchor.get('uuid'),
+            "title": anchor.get('title', ''),
+            "summary": anchor.get('summary', ''),
+            "type": anchor.get('type'),
+            "tags": anchor.get('tags', []),
+            "keywords": anchor.get('keywords', [])
+        })
+
+    for doc in state.get('context_docs', []):
+        meta = doc.metadata or {}
+        references.append({
+            "role": "retrieved_context",
+            "query": state.get('primary_retrieval_query', state.get('query', '')),
+            "uuid": meta.get('uuid'),
+            "title": meta.get('title', ''),
+            "summary": meta.get('summary', ''),
+            "type": meta.get('type'),
+            "tags": meta.get('tags', []),
+            "keywords": meta.get('keywords', []),
+            "score": meta.get('score', 0.0)
+        })
+
+    for doc in state.get('negative_docs', []):
+        meta = doc.metadata or {}
+        references.append({
+            "role": "retrieved_negative",
+            "query": state.get('negative_retrieval_query', ''),
+            "uuid": meta.get('uuid'),
+            "title": meta.get('title', ''),
+            "summary": meta.get('summary', ''),
+            "type": meta.get('type'),
+            "tags": meta.get('tags', []),
+            "keywords": meta.get('keywords', []),
+            "score": meta.get('score', 0.0)
+        })
+
+    return references
+
 def first_filter_node(state: AgentState) -> Dict[str, Any]:
     """
     First Filter: Randomly decide if this iteration generates Simple QA or Reasoning QA.
@@ -514,7 +581,10 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     anchor_doc = results[0]
     new_id = anchor_doc.get('uuid')
     
-    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected ({'Simple' if not is_reasoning else 'Reasoning'}): {anchor_doc.get('title', '')[:100]}...")
+    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected ({'Simple' if not is_reasoning else 'Reasoning'}):")
+    print(f"  - uuid: {anchor_doc.get('uuid', '')}")
+    print(f"  - title: {anchor_doc.get('title', '')[:150]}")
+    print(f"  - summary: {anchor_doc.get('summary', '')[:200]}")
 
     # Map to metadata format expected by pipeline
     title = anchor_doc.get('title', '')
@@ -532,6 +602,7 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     updates = {
         "anchor": metadata,
         "query": f"{title} {summary}",
+        "primary_retrieval_query": f"{title} {summary}",
         "used_anchor_ids": list(set(used_ids) | {new_id})
     }
     
@@ -559,7 +630,11 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
     print(f"Retrieving docs for query: {query[:50]}...")
     docs = retriever.search(query, k=random.randint(3, 5))
     print(f"Found {len(docs)} documents.")
-    return {"context_docs": docs}
+    _log_retrieved_docs(docs, "retrieve")
+    return {
+        "context_docs": docs,
+        "primary_retrieval_query": query
+    }
 
 def retrieve_negative_node(state: AgentState) -> Dict[str, Any]:
     """
@@ -619,7 +694,11 @@ Chỉ trả về câu truy vấn, không giải thích thêm."""
     ][:k]
 
     print(f"[retrieve_negative] Found {len(negative_docs)} opposing doc(s).")
-    return {"negative_docs": negative_docs}
+    _log_retrieved_docs(negative_docs, "retrieve_negative")
+    return {
+        "negative_docs": negative_docs,
+        "negative_retrieval_query": generated_query
+    }
 
 
 
@@ -670,7 +749,8 @@ Tóm tắt: {state['anchor'].get('summary', '')}
             "type": "simple_qa",
             "anchor_id": state['anchor']['uuid'],
             "question": qa.get('question'),
-            "answer": qa.get('answer')
+            "answer": qa.get('answer'),
+            "references": _build_references(state)
         }
         
         return {
@@ -1141,7 +1221,8 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
             "anchor_id": state['anchor']['uuid'],
             "question": question_match.group(1).strip() if question_match else "Error parsing question",
             "thinking": raw_thinking,
-            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer"
+            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer",
+            "references": _build_references(state)
         }
         
         # Only save if format check passed
@@ -1504,6 +1585,8 @@ def main():
         "is_reasoning_flow": True,
         "anchor": None,
         "query": "",
+        "primary_retrieval_query": "",
+        "negative_retrieval_query": "",
         "context_docs": [],
         "negative_docs": [],
         "simple_qa": None,
