@@ -16,7 +16,9 @@ class AgentState(TypedDict):
     # Anchor and Context
     anchor: Optional[Dict[str, Any]]      # Randomly selected anchor
     query: str                  # Query derived from anchor
-    context_docs: List[Document]  # Retrieved documents (similar)
+    primary_retrieval_query: str # Query used for main retrieval
+    negative_retrieval_query: str # Query used for opposing retrieval
+    context_docs: List[Document]  # Retrieved documents (similar/opposing)
     negative_docs: List[Document] # Retrieved documents opposing the anchor
     
     # Outputs

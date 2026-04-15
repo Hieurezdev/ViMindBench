@@ -7,9 +7,38 @@ import json
 import random
 import re
 import builtins
+import tempfile
 from typing import List, Dict, Any, TypedDict, Optional
 from pymongo import MongoClient
 import numpy as np
+
+def _tail_file(file_path: str, max_lines: int = 80) -> str:
+    """Read last max_lines from a text file."""
+    if not file_path or not os.path.exists(file_path):
+        return ""
+    try:
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            lines = f.readlines()
+        return "".join(lines[-max_lines:])
+    except Exception:
+        return ""
+
+
+def _is_vllm_ready(base_url: str = "http://localhost:8000") -> bool:
+    """Check readiness using common vLLM endpoints."""
+    ready_endpoints = [
+        f"{base_url}/health",
+        f"{base_url}/v1/models",
+    ]
+    for endpoint in ready_endpoints:
+        try:
+            response = requests.get(endpoint, timeout=5)
+            if response.status_code == 200:
+                return True
+        except requests.exceptions.RequestException:
+            continue
+    return False
+
 
 def start_vllm_background():
     """
@@ -18,50 +47,76 @@ def start_vllm_background():
     cmd = Config.VLLM_CMD
     print(f"Starting vLLM with command: {cmd}")
     
-    # Start process
-    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    # Start process and stream logs to a temp file for easier debugging
+    log_file_path = os.path.join(tempfile.gettempdir(), f"vllm_startup_{int(time.time())}.log")
+    log_file = open(log_file_path, "w", encoding="utf-8")
+    process = subprocess.Popen(
+        cmd,
+        shell=True,
+        stdout=log_file,
+        stderr=subprocess.STDOUT
+    )
     print(f"vLLM process started with PID: {process.pid}")
+    print(f"vLLM startup logs: {log_file_path}")
     
     # Wait for server to be ready
-    api_url = "http://localhost:8000/v1/models"
     print("Waiting for vLLM server to be ready...")
     
-    max_retries = 60 # Wait up to 10 minutes (60 * 10s)
+    check_interval_sec = 10
+    timeout_sec = getattr(Config, "VLLM_STARTUP_TIMEOUT_SEC", 1800)
+    max_retries = max(1, timeout_sec // check_interval_sec)
     for i in range(max_retries):
-        try:
-            response = requests.get(api_url, timeout=5)
-            if response.status_code == 200:
-                print("\n✓ vLLM Server is READY!")
-                return process
-        except requests.exceptions.ConnectionError:
-            pass
+        if _is_vllm_ready("http://localhost:8000"):
+            print("\n✓ vLLM Server is READY!")
+            return process
         
         sys.stdout.write(".")
         sys.stdout.flush()
-        time.sleep(10)
+        time.sleep(check_interval_sec)
         
         # Check if process died
         if process.poll() is not None:
-            stderr_output = process.stderr.read().decode('utf-8')
-            print(f"\nERROR: vLLM process exited unexpectedly with code {process.returncode}")
-            print(f"STDERR:\n{stderr_output}")
-            sys.exit(1)
+            log_file.flush()
+            stderr_output = _tail_file(log_file_path, max_lines=120)
+            raise RuntimeError(
+                f"vLLM process exited unexpectedly with code {process.returncode}.\n"
+                f"Last startup logs:\n{stderr_output}"
+            )
 
-    print("\nTimeout waiting for vLLM server.")
-    sys.exit(1)
+        if i > 0 and i % 12 == 0:
+            log_file.flush()
+            print(f"\n[wait] still starting... elapsed ~{i * check_interval_sec}s")
+
+    log_file.flush()
+    last_logs = _tail_file(log_file_path, max_lines=120)
+
+    if process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=10)
+        except Exception:
+            process.kill()
+
+    raise RuntimeError(
+        "Timeout waiting for vLLM server. "
+        f"Please inspect logs at: {log_file_path}\n"
+        f"Last startup logs:\n{last_logs}"
+    )
 
 def check_and_raise_503(e):
     """
     Check if the exception is a 503 Service Unavailable error.
-    If so, print a critical error message and exit the script.
+    If so, print a warning and allow pipeline to continue.
+    Returns True if this is a 503-like error, otherwise False.
     """
     error_msg = str(e)
-    if "503" in error_msg:
+    if "503" in error_msg or "tunnel unavailable" in error_msg.lower():
         print("\n" + "="*50)
-        print("CRITICAL ERROR: 503 Service Unavailable detected.")
-        print("The server is overloaded or down. Stopping pipeline immediately.")
+        print("WARNING: 503 Service Unavailable detected.")
+        print("The server is overloaded or down. Skipping this call and continuing pipeline.")
         print("="*50 + "\n")
-        sys.exit(1)
+        return True
+    return False
 
 # LangChain / LangGraph imports
 from langchain_core.documents import Document
@@ -96,6 +151,7 @@ class Config:
     
     # vLLM Command (for local deployment)
     VLLM_CMD = 'uv run vllm serve "Qwen/Qwen3-30B-A3B-Instruct-2507" --dtype auto --gpu-memory-utilization 0.85 --max-model-len 14000 --no-enable-prefix-caching --host 0.0.0.0 --port 8000 --trust-remote-code'
+    VLLM_STARTUP_TIMEOUT_SEC = 1800
     
     # Embedding Configuration
     USE_LOCAL_EMBEDDING = True
@@ -1538,10 +1594,17 @@ def main():
     # Start Local vLLM if configured
     if Config.USE_LOCAL_VLLM:
         print("Configured to use Local vLLM. Starting server...")
-        start_vllm_background()
-        # Override OpenAI Base URL to local
-        Config.OPENAI_BASE_URL = "http://localhost:8000/v1"
-        # Re-initialize client with new URL
+        fallback_base_url = Config.OPENAI_BASE_URL
+        try:
+            start_vllm_background()
+            Config.OPENAI_BASE_URL = "http://localhost:8000/v1"
+            print("✓ Using local vLLM endpoint.")
+        except Exception as e:
+            print(f"⚠ Local vLLM startup failed: {e}")
+            print(f"⚠ Fallback to configured endpoint: {fallback_base_url}")
+            Config.OPENAI_BASE_URL = fallback_base_url
+
+        # Re-initialize client with chosen URL
         global openai_client
         openai_client = OpenAI(
             base_url=Config.OPENAI_BASE_URL,

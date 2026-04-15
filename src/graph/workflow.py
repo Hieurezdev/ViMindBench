@@ -42,7 +42,7 @@ def create_graph():
     # Define Flow
     workflow.set_entry_point("first_filter")
 
-    # First Filter → Select Anchor (always)
+    # First Filter → Select Anchor (pass-through; flow choice is already in state)
     def route_after_filter(state: AgentState):
         return "select_anchor"
 
@@ -142,8 +142,13 @@ def create_graph():
     def route_after_step_verification(state: AgentState):
         current_idx = state['current_step_index']
         retry_count = state.get('step_retry_count', 0)
+        step_results = state.get('step_verification_results', [])
+        reasoning_steps = state.get('reasoning_steps', [])
 
-        if not state['step_verification_results'][current_idx]:
+        if current_idx >= len(step_results) or current_idx >= len(reasoning_steps):
+            return "check_format"
+
+        if not step_results[current_idx]:
             if retry_count < 3:
                 return "refine_step"
 

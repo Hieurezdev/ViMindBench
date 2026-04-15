@@ -29,15 +29,83 @@ MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507")
 def check_and_raise_503(e):
     """
     Check if the exception is a 503 Service Unavailable error.
-    If so, print a critical error message and exit the script.
+    If so, print a warning and allow pipeline to continue.
+    Returns True if this is a 503-like error, otherwise False.
     """
     error_msg = str(e)
-    if "503" in error_msg:
+    if "503" in error_msg or "tunnel unavailable" in error_msg.lower():
         print("\n" + "="*50)
-        print("CRITICAL ERROR: 503 Service Unavailable detected.")
-        print("The server is overloaded or down. Stopping pipeline immediately.")
+        print("WARNING: 503 Service Unavailable detected.")
+        print("The server is overloaded or down. Skipping this call and continuing pipeline.")
         print("="*50 + "\n")
-        sys.exit(1)
+        return True
+    return False
+
+
+def _log_retrieved_docs(docs: List[Document], label: str) -> None:
+    """Pretty-print retrieved documents for debugging and traceability."""
+    if not docs:
+        print(f"[{label}] No documents retrieved.")
+        return
+
+    print(f"[{label}] Retrieved {len(docs)} document(s):")
+    for idx, doc in enumerate(docs, 1):
+        meta = doc.metadata or {}
+        print(
+            f"  - #{idx} | uuid={meta.get('uuid', '')} | "
+            f"title={meta.get('title', '')[:120]} | "
+            f"score={meta.get('score', 0.0)}"
+        )
+
+
+def _build_references(state: AgentState) -> List[Dict[str, Any]]:
+    """
+    Build list of references used to generate QA.
+    Includes anchor + retrieved docs (similar/opposing).
+    """
+    references: List[Dict[str, Any]] = []
+
+    anchor = state.get('anchor')
+    if anchor:
+        references.append({
+            "role": "anchor",
+            "uuid": anchor.get('uuid'),
+            "title": anchor.get('title', ''),
+            "summary": anchor.get('summary', ''),
+            "type": anchor.get('type'),
+            "tags": anchor.get('tags', []),
+            "keywords": anchor.get('keywords', [])
+        })
+
+    for doc in state.get('context_docs', []):
+        meta = doc.metadata or {}
+        references.append({
+            "role": "retrieved_context",
+            "query": state.get('primary_retrieval_query', state.get('query', '')),
+            "uuid": meta.get('uuid'),
+            "title": meta.get('title', ''),
+            "summary": meta.get('summary', ''),
+            "type": meta.get('type'),
+            "tags": meta.get('tags', []),
+            "keywords": meta.get('keywords', []),
+            "score": meta.get('score', 0.0)
+        })
+
+    for doc in state.get('negative_docs', []):
+        meta = doc.metadata or {}
+        references.append({
+            "role": "retrieved_negative",
+            "query": state.get('negative_retrieval_query', ''),
+            "uuid": meta.get('uuid'),
+            "title": meta.get('title', ''),
+            "summary": meta.get('summary', ''),
+            "type": meta.get('type'),
+            "tags": meta.get('tags', []),
+            "keywords": meta.get('keywords', []),
+            "score": meta.get('score', 0.0)
+        })
+
+    return references
 
 
 # ==========================================
@@ -128,9 +196,10 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     anchor_doc = results[0]
     new_id = anchor_doc.get('uuid')
 
-    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected "
-          f"({'Simple' if not is_reasoning else 'Reasoning'}): "
-          f"{anchor_doc.get('title', '')[:100]}...")
+    print(f"\n[{state.get('iteration_count', 0) + 1}] Anchor Selected ({'Simple' if not is_reasoning else 'Reasoning'}):")
+    print(f"  - uuid: {anchor_doc.get('uuid', '')}")
+    print(f"  - title: {anchor_doc.get('title', '')[:150]}")
+    print(f"  - summary: {anchor_doc.get('summary', '')[:200]}")
 
     title = anchor_doc.get('title', '')
     summary = anchor_doc.get('summary', '')
@@ -147,6 +216,7 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
     updates = {
         "anchor": metadata,
         "query": f"{title} {summary}",
+        "primary_retrieval_query": f"{title} {summary}",
         "used_anchor_ids": list(set(used_ids) | {new_id})
     }
 
@@ -174,7 +244,11 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
     print(f"Retrieving docs for query: {query[:50]}...")
     docs = retriever.search(query, k=random.randint(3, 5))
     print(f"Found {len(docs)} documents.")
-    return {"context_docs": docs}
+    _log_retrieved_docs(docs, "retrieve")
+    return {
+        "context_docs": docs,
+        "primary_retrieval_query": query
+    }
 
 
 def retrieve_negative_node(state: AgentState) -> Dict[str, Any]:
@@ -235,7 +309,11 @@ Chỉ trả về câu truy vấn, không giải thích thêm."""
     ][:k]
 
     print(f"[retrieve_negative] Found {len(negative_docs)} opposing doc(s).")
-    return {"negative_docs": negative_docs}
+    _log_retrieved_docs(negative_docs, "retrieve_negative")
+    return {
+        "negative_docs": negative_docs,
+        "negative_retrieval_query": generated_query
+    }
 
 
 def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
@@ -284,7 +362,8 @@ Tóm tắt: {state['anchor'].get('summary', '')}
             "type": "simple_qa",
             "anchor_id": state['anchor']['uuid'],
             "question": qa.get('question'),
-            "answer": qa.get('answer')
+            "answer": qa.get('answer'),
+            "references": _build_references(state)
         }
 
         return {
@@ -745,7 +824,8 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
             "anchor_id": state['anchor']['uuid'],
             "question": question_match.group(1).strip() if question_match else "Error parsing question",
             "thinking": raw_thinking,
-            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer"
+            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer",
+            "references": _build_references(state)
         }
 
         if state.get('format_check_passed', True):
@@ -761,7 +841,10 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
         new_items = state.get('all_outputs', [])[last_saved:]
 
         if new_items:
-            output_path = "data/output/generated_psychology_multiple_choice.jsonl"
+            output_path = os.getenv(
+                "OUTPUT_PATH",
+                "data/output/generated_psychology_multiple_choice.jsonl"
+            )
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
             print(f"Saving batch of {len(new_items)} items to {output_path}...")
 
