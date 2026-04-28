@@ -16,7 +16,8 @@ from .nodes import (
     refine_single_step_node,
     check_more_questions_node,
     increment_step_node,
-    check_format_node
+    check_format_node,
+    format_output_node
 )
 
 
@@ -37,6 +38,7 @@ def create_graph():
     workflow.add_node("refine_step", refine_single_step_node)
     workflow.add_node("check_more", check_more_questions_node)
     workflow.add_node("check_format", check_format_node)
+    workflow.add_node("format_output", format_output_node)
     workflow.add_node("increment_step", increment_step_node)
 
     # Define Flow
@@ -115,7 +117,7 @@ def create_graph():
             if is_reasoning:
                 return "parse_steps"
             else:
-                return "check_more"
+                return "format_output"
         else:
             if attempts < 2:
                 print(f"[verify_grounding] Thử lại lần {attempts + 1}/2 do lệch tài liệu...")
@@ -129,6 +131,7 @@ def create_graph():
         route_after_grounding,
         {
             "parse_steps": "parse_steps",
+            "format_output": "format_output",
             "check_more": "check_more",
             "generate_reasoning": "generate_reasoning",
             "simple_qa": "simple_qa"
@@ -169,7 +172,8 @@ def create_graph():
 
     workflow.add_edge("refine_step", "verify_step")
     workflow.add_edge("increment_step", "verify_step")
-    workflow.add_edge("check_format", "check_more")
+    workflow.add_edge("check_format", "format_output")
+    workflow.add_edge("format_output", "check_more")
 
     # Check if more questions are needed
     def route_after_check_more(state: AgentState):

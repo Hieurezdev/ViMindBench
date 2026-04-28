@@ -24,6 +24,8 @@ class AgentState(TypedDict):
     # Outputs
     simple_qa: Optional[Dict[str, str]]     # Normal QA output
     reasoning_qa: Optional[Dict[str, str]]  # Reasoning QA output
+    formatted_qa: Optional[Dict[str, Any]]  # Final formatted JSON output
+    question_type_enum: str                 # Enum for question type
     
     # Reasoning Step-by-Step Verification
     reasoning_raw_output: str   # Raw LLM output with <think> tags

@@ -323,7 +323,7 @@ def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     print("Generating Simple QA...")
     context_text = "\n\n".join([d.page_content for d in state['context_docs']])
 
-    num_options = random.choice([4, 5])
+    num_options = random.choices([4, 5], weights=[0.6, 0.4])[0]
     if num_options == 4:
         options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]"
         answer_format = "[Đáp án đúng: A, B, C hoặc D]"
@@ -336,7 +336,7 @@ def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     prompt = f"""Bạn là chuyên gia tâm lý học. Dựa vào ngữ cảnh sau, tạo một câu hỏi trắc nghiệm và câu trả lời về tâm lý. Câu hỏi phải gồm {req_text} và chỉ có 1 đáp án đúng.
     
 Ngữ cảnh:
-{context_text[:6000]}
+{context_text[:8192]}
 
 Chủ đề: {state['anchor'].get('title', '')}
 Tóm tắt: {state['anchor'].get('summary', '')}
@@ -351,7 +351,7 @@ Tóm tắt: {state['anchor'].get('summary', '')}
             model=MODEL_NAME,
             messages=[{"role": "user", "content": prompt}],
             temperature=0.7,
-            max_tokens=7000,
+            max_tokens=8192,
             timeout=120
         )
 
@@ -368,8 +368,8 @@ Tóm tắt: {state['anchor'].get('summary', '')}
 
         return {
             "simple_qa": qa,
-            "all_outputs": state.get('all_outputs', []) + [output_entry],
-            "iteration_count": state['iteration_count'] + 1
+            "question_type_enum": "factual_recall",
+            "iteration_count": state['iteration_count']
         }
     except Exception as e:
         check_and_raise_503(e)
@@ -393,7 +393,7 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
     print("Generating Reasoning QA (this may take a while)...")
     context_text = "\n\n".join([d.page_content for d in state.get('context_docs', [])])
 
-    num_options = random.choice([4, 5])
+    num_options = random.choices([4, 5], weights=[0.6, 0.4])[0]
     if num_options == 4:
         options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]"
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C hoặc D]"
@@ -403,14 +403,15 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C, D hoặc E]"
         req_text = "5 đáp án (A, B, C, D, E)"
 
-    question_types = [
-        "so sánh hai lý thuyết/trường phái tâm lý học trái chiều hoặc tương đồng nhau",
-        "tình huống lâm sàng: chẩn đoán hoặc lựa chọn can thiệp phù hợp",
-        "phân tích nguyên nhân – hậu quả của một hiện tượng tâm lý",
-        "nhận diện sai lầm nhận thức (cognitive bias) trong một mô tả",
-        "ứng dụng lý thuyết tâm lý vào cuộc sống / công việc thực tế",
-    ]
-    question_type = random.choice(question_types)
+    question_types = {
+        "so sánh hai lý thuyết/trường phái tâm lý học trái chiều hoặc tương đồng nhau": "theory_comparison",
+        "tình huống lâm sàng: chẩn đoán hoặc lựa chọn can thiệp phù hợp": "clinical_scenario",
+        "phân tích nguyên nhân – hậu quả của một hiện tượng tâm lý": "causal_analysis",
+        "nhận diện sai lầm nhận thức (cognitive bias) trong một mô tả": "cognitive_bias",
+        "ứng dụng lý thuyết tâm lý vào cuộc sống / công việc thực tế": "application"
+    }
+    question_type_desc = random.choice(list(question_types.keys()))
+    question_type_enum = question_types[question_type_desc]
 
     prompt = f"""Bạn là chuyên gia tâm lý với khả năng suy luận sâu sắc.
 
@@ -421,12 +422,11 @@ Chủ đề: {state['anchor'].get('title', '')}
 Tóm tắt: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
-1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
+1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type_desc}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
-   - Bạn có thể suy nghĩ súc tích, ngắn gọn theo cách tự nhiên nhất của mình
-   - Hãy phân tích câu hỏi, phân tích từng đáp án, loại trừ đáp án sai và chứng minh đáp án đúng
-   - Không cần cứng nhắc các step như ví dụ, hãy linh hoạt 
-   - Mỗi <step> có thể là phân tích, so sánh, kết nối ý tưởng, etc.
+   - HÃY BẮT ĐẦU BẰNG VIỆC: Đưa ra các reference đầu vào (trích dẫn thông tin quan trọng từ tài liệu đã cho).
+   - SAU ĐÓ: Suy luận như một con người đang tự suy nghĩ nội bộ. Hãy dùng nhiều văn phong khác nhau một cách linh hoạt (ví dụ: phân tích từng bước, suy luận tự nhiên, hoặc đúc kết nguyên nhân-kết quả ngắn gọn).
+   - Hãy phân tích câu hỏi, phân tích từng đáp án, loại trừ đáp án sai và chứng minh đáp án đúng một cách tự nhiên.
 3. Đưa ra đáp án cuối cùng trong <answer>
 
 **format bắt buộc (bạn PHẢI tuân thủ cấu trúc này):**
@@ -462,6 +462,7 @@ LƯU Ý QUAN TRỌNG:
 
         return {
             "reasoning_raw_output": result,
+            "question_type_enum": question_type_enum,
             "current_step_index": 0,
             "step_retry_count": 0,
             "step_verification_results": []
@@ -637,7 +638,7 @@ def verify_grounding_node(state: AgentState) -> Dict[str, Any]:
 Nhiệm vụ của bạn là kiểm tra tính chính xác của Câu Hỏi và Đáp Án dựa trên Tài Liệu Tham Khảo.
 
 Tài Liệu Tham Khảo:
-{context_text[:6000]}
+{context_text[:8192]}
 
 Câu hỏi trắc nghiệm:
 {question_block}
@@ -813,26 +814,17 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
     """
     After completing one QA, check if more iterations needed.
     """
-    if state.get('is_reasoning_flow') and state['current_step_index'] == len(state['reasoning_steps']) - 1:
-        question_match = re.search(r'Question:\s*(.*?)(?=<think>|<step>|<tool_call>|$)', state['reasoning_raw_output'], re.DOTALL)
-        answer_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', state['reasoning_raw_output'], re.DOTALL | re.IGNORECASE)
-
-        raw_thinking = "\n".join(state['reasoning_steps'])
-
-        qa_entry = {
-            "type": "reasoning_qa",
-            "anchor_id": state['anchor']['uuid'],
-            "question": question_match.group(1).strip() if question_match else "Error parsing question",
-            "thinking": raw_thinking,
-            "answer": answer_match.group(1).strip() if answer_match else "Error parsing answer",
-            "references": _build_references(state)
-        }
-
-        if state.get('format_check_passed', True):
-            state['all_outputs'] = state.get('all_outputs', []) + [qa_entry]
+    qa_entry = state.get('formatted_qa')
+    
+    # We only increment and save if format_output_node has successfully created the final entry
+    if qa_entry:
+        all_outputs = state.get('all_outputs', [])
+        # Prevent double adding if somehow called twice
+        if not all_outputs or all_outputs[-1].get('id') != qa_entry.get('id'):
+            state['all_outputs'] = all_outputs + [qa_entry]
             state['iteration_count'] += 1
-        else:
-            print("Skipping invalid entry (Format Check Failed)")
+    else:
+        print("Skipping entry: formatted_qa is None")
 
     # Save every 5 iterations
     current_iter = state['iteration_count']
@@ -857,6 +849,7 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
     # Construct the state updates dictionary
     updates = {
         "last_saved_count": state.get('last_saved_count', 0),
+        "formatted_qa": None,
         # Đặt lại các biến đếm để iteration tiếp theo bắt đầu mới hoàn toàn
         "qa_validation_attempts": 0,
         "grounding_attempts": 0
@@ -864,14 +857,13 @@ def check_more_questions_node(state: AgentState) -> Dict[str, Any]:
 
     # Return state update for reasoning flow
     if state.get('is_reasoning_flow'):
-        if state['current_step_index'] == len(state['reasoning_steps']) - 1:
-            updates.update({
-                "all_outputs": state['all_outputs'],
-                "iteration_count": state['iteration_count'],
-                "current_step_index": state['current_step_index'] + 1,
-                "step_retry_count": 0
-            })
-            return updates
+        updates.update({
+            "all_outputs": state['all_outputs'],
+            "iteration_count": state['iteration_count'],
+            "current_step_index": state.get('current_step_index', 0) + 1,
+            "step_retry_count": 0
+        })
+        return updates
 
     return updates
 
@@ -928,3 +920,129 @@ def check_format_node(state: AgentState) -> Dict[str, Any]:
         "format_check_passed": False,
         "reasoning_logs": state.get('reasoning_logs', []) + [msg]
     }
+
+
+def format_output_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Format output into the required JSON structure and extract metadata using LLM.
+    """
+    print("Formatting Output to Final JSON...")
+    
+    is_reasoning = state.get('is_reasoning_flow', False)
+    anchor = state.get('anchor', {})
+    keywords = anchor.get('keywords', [])
+    anchor_type = anchor.get('type', '')
+    
+    # Extract source based on keywords
+    source_val = "synthetic"
+    keywords_str = " ".join(keywords).lower() if keywords else ""
+    if "dsm-5" in keywords_str or "dsm" in keywords_str:
+        source_val = "DSM-5"
+    elif "giáo trình" in keywords_str or "textbook" in keywords_str or "sách" in keywords_str:
+        source_val = "textbook"
+        
+    question_block = ""
+    answer_text = ""
+    reasoning_raw = ""
+    
+    if is_reasoning:
+        raw = state.get('reasoning_raw_output', '')
+        reasoning_raw = raw
+        q_match = re.search(r'(Question:.*?)(?=<think>|<step>|<tool_call>|$)', raw, re.DOTALL)
+        question_block = q_match.group(1).strip() if q_match else raw
+        a_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', raw, re.DOTALL | re.IGNORECASE)
+        answer_text = a_match.group(1).strip() if a_match else "A"
+    else:
+        qa = state.get('simple_qa', {})
+        question_block = qa.get('question', '') if qa else ''
+        answer_text = qa.get('answer', '') if qa else 'A'
+        reasoning_raw = "Câu hỏi trắc nghiệm kiến thức (không có suy luận chi tiết)."
+
+    # Extract options using regex
+    option_pattern = r'^([A-E])[\.\)]\s*(.+)$'
+    options_matches = re.findall(option_pattern, question_block, re.MULTILINE)
+    
+    options_dict = {}
+    for label, text in options_matches:
+        options_dict[label.upper()] = text.strip()
+        
+    # Clean up the question part
+    q_text_only = re.sub(r'^[A-E][\.\)]\s*.+$', '', question_block, flags=re.MULTILINE).strip()
+    if q_text_only.lower().startswith("question:"):
+        q_text_only = q_text_only[9:].strip()
+        
+    # Extract correct answer letter
+    ans_letter_match = re.search(r'([A-E])', answer_text, re.IGNORECASE)
+    ans_letter = ans_letter_match.group(1).upper() if ans_letter_match else "A"
+    
+    # Call LLM to extract metadata & steps
+    prompt = f"""Dựa vào nội dung câu hỏi và suy luận dưới đây, hãy trích xuất các thông tin siêu dữ liệu (metadata) dưới dạng JSON.
+
+Nội dung câu hỏi:
+{q_text_only}
+
+Quá trình suy luận:
+{reasoning_raw[:5000]}
+
+Từ khóa của tài liệu gốc: {', '.join(keywords) if keywords else 'Không có'}
+Loại tài liệu: {anchor_type}
+
+Hãy trả về CHỈ MỘT OBJECT JSON với cấu trúc sau:
+{{
+  "topic": "[Chủ đề chính, dựa vào từ khóa và câu hỏi]",
+  "subtopic": "[Chủ đề phụ]",
+  "cognitive_skill": "[Loại kỹ năng nhận thức, vd: factual_recall, causal_reasoning, diagnostic_reasoning, bias_detection, decision_making...]",
+  "steps": [
+    "[Bước 1 của quá trình suy luận]",
+    "[Bước 2 của quá trình suy luận]"
+  ]
+}}
+Lưu ý: "steps" là một mảng tóm tắt các bước logic chính từ "Quá trình suy luận". Nếu không có suy luận chi tiết, mảng "steps" có thể chứa 1-2 bước cơ bản.
+"""
+    try:
+        response = openai_client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=1024,
+            timeout=60
+        )
+        result_text = response.choices[0].message.content.strip()
+        result_json_str = re.sub(r'```json\n|\n```|```', '', result_text).strip()
+        meta_data = json.loads(result_json_str)
+    except Exception as e:
+        print(f"Error parsing metadata via LLM: {e}")
+        meta_data = {
+            "topic": keywords[0] if keywords else "general",
+            "subtopic": "general",
+            "cognitive_skill": "factual_recall" if not is_reasoning else "analytical",
+            "steps": ["Read question", "Identify answer"]
+        }
+        
+    formatted_qa = {
+        "id": f"PSY-{state.get('iteration_count', 0) + 1:06d}",
+        "question": q_text_only,
+        "options": options_dict,
+        "answer": ans_letter,
+        "reasoning": {
+            "steps": meta_data.get("steps", []),
+            "explanation": reasoning_raw
+        },
+        "metadata": {
+            "topic": meta_data.get("topic", ""),
+            "subtopic": meta_data.get("subtopic", ""),
+            "question_type": state.get("question_type_enum", "factual_recall"),
+            "cognitive_skill": meta_data.get("cognitive_skill", ""),
+            "difficulty": "hard" if is_reasoning else "medium",
+            "language": "vi",
+            "source": source_val,
+            "has_reasoning": is_reasoning
+        },
+        "validation": {
+            "expert_verified": False,
+            "consistency_checked": True,
+            "reasoning_verified": is_reasoning and state.get("verification_passed", False)
+        }
+    }
+    
+    return {"formatted_qa": formatted_qa}
