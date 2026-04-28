@@ -514,8 +514,14 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
             
         if missing_tags:
             print(f"[validate_qa] Phát hiện thiếu thẻ {', '.join(missing_tags)}, đang tự động sửa (Auto-fix)...")
-            fix_prompt = f"""Bạn là một hệ thống chỉnh sửa định dạng văn bản.
-Hãy lấy đoạn văn bản sau và bọc phần suy luận (tư duy) bằng cặp thẻ <think>...</think>, và bọc đáp án đúng bằng cặp thẻ <answer>...</answer>. Tuyệt đối KHÔNG thay đổi nội dung, KHÔNG trả lời thêm bất cứ câu gì ngoài văn bản kết quả.
+            fix_prompt = f"""Bạn là một hệ thống tự động chỉnh sửa định dạng văn bản (XML parser).
+Nhiệm vụ: Lấy đoạn văn bản dưới đây, bọc phần suy luận (tư duy) bằng cặp thẻ <think>...</think>, và bọc đáp án đúng bằng cặp thẻ <answer>...</answer>.
+
+Yêu cầu TỐI QUAN TRỌNG:
+1. CHỈ TRẢ VỀ ĐÚNG ĐOẠN VĂN BẢN ĐÃ ĐƯỢC BỌC THẺ.
+2. TUYỆT ĐỐI KHÔNG thêm bất kỳ tiêu đề, lời dẫn, giải thích hay định dạng in đậm nào (ví dụ: KHÔNG ĐƯỢC thêm "**Bước suy luận...**", "Dưới đây là...").
+3. Bắt đầu ngay lập tức với thẻ <think> và kết thúc ngay sau khi đóng thẻ </answer>.
+4. KHÔNG thay đổi bất kỳ từ ngữ nào của nội dung gốc.
 
 Văn bản gốc:
 {raw}"""
@@ -712,7 +718,6 @@ Tiêu chí đánh giá:
 
 Nếu ĐẠT tiêu chí trên, bạn CHỈ trả lời một từ duy nhất: "ĐẠT"
 Nếu KHÔNG ĐẠT (sai kiến thức, tài liệu không nhắc tới, hoặc bịa đặt), hãy giải thích ngắn gọn lý do (1-2 câu)."""
-
     try:
         response = openai_client.chat.completions.create(
             model=MODEL_NAME,
@@ -836,7 +841,11 @@ def refine_single_step_node(state: AgentState) -> Dict[str, Any]:
 
 Phản hồi: {feedback}
 
-Viết lại bước này cho ĐÚNG.
+Nhiệm vụ: Viết lại bước này cho ĐÚNG logic và kiến thức.
+Yêu cầu TỐI QUAN TRỌNG:
+- TUYỆT ĐỐI CHỈ TRẢ VỀ nội dung văn bản đã được sửa.
+- KHÔNG THÊM BẤT KỲ tiêu đề, lời dẫn hay giải thích nào (ví dụ: KHÔNG ĐƯỢC thêm "**Bước suy luận tâm lý đã được hiệu chỉnh**", "Dưới đây là...").
+- KHÔNG bọc nội dung bằng bất kỳ dấu nháy, markdown hay thẻ XML nào nếu không cần thiết.
 """
     try:
         response = openai_client.chat.completions.create(
@@ -1020,14 +1029,13 @@ def format_output_node(state: AgentState) -> Dict[str, Any]:
         reasoning_steps = state.get('reasoning_steps', [])
         
         # Nếu reasoning_steps chỉ là 1 mảng chứa nguyên chuỗi raw (do parse_steps_node fallback)
-        # hoặc nếu không có reasoning_steps, ta trích xuất thẻ <think>
+        # hoặc nếu không có reasoning_steps, ta trích xuất nội dung thẻ <think>
         if reasoning_steps and not (len(reasoning_steps) == 1 and reasoning_steps[0] == raw):
-            # Nếu có steps thực sự, ráp lại thành chuỗi có thẻ <think> và <step>
-            steps_text = "\n".join([f"<step>{step}</step>" for step in reasoning_steps])
-            reasoning_raw = f"<think>\n{steps_text}\n</think>"
+            # Ráp lại thành chuỗi văn bản thuần túy
+            reasoning_raw = "\n".join(reasoning_steps)
         else:
-            # Rút trích đúng nội dung từ <think> đến </think>
-            think_match = re.search(r'(<think>.*?</think>)', raw, re.DOTALL | re.IGNORECASE)
+            # Rút trích đúng nội dung bên TRONG thẻ <think>
+            think_match = re.search(r'<think>(.*?)</think>', raw, re.DOTALL | re.IGNORECASE)
             if think_match:
                 reasoning_raw = think_match.group(1).strip()
             else:
@@ -1035,6 +1043,11 @@ def format_output_node(state: AgentState) -> Dict[str, Any]:
                 stripped = re.sub(r'Question:.*?(?=<step>|<tool_call>|$)', '', raw, flags=re.DOTALL | re.IGNORECASE)
                 stripped = re.sub(r'(?:<answer>|\(answer\)|Answer:|\(answer>).*', '', stripped, flags=re.DOTALL | re.IGNORECASE)
                 reasoning_raw = stripped.strip()
+                
+        # Loại bỏ hoàn toàn mọi thẻ <think> và <step> còn sót lại bằng regex
+        reasoning_raw = re.sub(r'</?think>', '', reasoning_raw, flags=re.IGNORECASE)
+        reasoning_raw = re.sub(r'</?step>', '', reasoning_raw, flags=re.IGNORECASE)
+        reasoning_raw = reasoning_raw.strip()
     else:
         qa = state.get('simple_qa', {})
         question_block = qa.get('question', '') if qa else ''
