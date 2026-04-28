@@ -486,10 +486,25 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
     2. LLM-based: kiểm tra câu hỏi hợp lí, chỉ 1 đáp án đúng, đáp án phân biệt rõ.
     """
     is_reasoning = state.get('is_reasoning_flow', False)
+    updates = {}
 
     if is_reasoning:
         raw = state.get('reasoning_raw_output') or ""
         
+        # Thử rule-based auto-fix cho thẻ <think> trước nếu có thẻ <step>
+        if "<think>" not in raw or "</think>" not in raw:
+            if "<step>" in raw and "</step>" in raw:
+                first_step_idx = raw.find("<step>")
+                last_step_idx = raw.rfind("</step>") + len("</step>")
+                if first_step_idx != -1 and last_step_idx > first_step_idx:
+                    # Gỡ bỏ các thẻ <think> lỗi nếu có (ví dụ chỉ có <think> mà ko có </think>)
+                    raw = raw.replace("<think>", "").replace("</think>", "")
+                    first_step_idx = raw.find("<step>")
+                    last_step_idx = raw.rfind("</step>") + len("</step>")
+                    raw = raw[:first_step_idx] + "<think>\n" + raw[first_step_idx:last_step_idx] + "\n</think>" + raw[last_step_idx:]
+                    updates["reasoning_raw_output"] = raw
+                    print("[validate_qa] Đã tự động bọc các thẻ <step> vào trong <think> bằng Rule-based.")
+
         # Kiểm tra các thẻ bắt buộc
         missing_tags = []
         if "<think>" not in raw or "</think>" not in raw:
@@ -498,13 +513,31 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
             missing_tags.append("<answer>")
             
         if missing_tags:
-            msg = f"[validate_qa] ✗ FAIL (Rule): Thiếu thẻ bắt buộc {', '.join(missing_tags)}"
-            print(msg)
-            return {
-                "qa_validation_passed": False,
-                "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
-                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
-            }
+            print(f"[validate_qa] Phát hiện thiếu thẻ {', '.join(missing_tags)}, đang tự động sửa (Auto-fix)...")
+            fix_prompt = f"""Bạn là một hệ thống chỉnh sửa định dạng văn bản.
+Hãy lấy đoạn văn bản sau và bọc phần suy luận (tư duy) bằng cặp thẻ <think>...</think>, và bọc đáp án đúng bằng cặp thẻ <answer>...</answer>. Tuyệt đối KHÔNG thay đổi nội dung, KHÔNG trả lời thêm bất cứ câu gì ngoài văn bản kết quả.
+
+Văn bản gốc:
+{raw}"""
+            try:
+                response = openai_client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[{"role": "user", "content": fix_prompt}],
+                    temperature=0.1,
+                    max_tokens=4096,
+                    timeout=60
+                )
+                raw = response.choices[0].message.content.strip()
+                updates["reasoning_raw_output"] = raw
+                print("[validate_qa] Đã auto-fix format thành công.")
+            except Exception as e:
+                msg = f"[validate_qa] ✗ FAIL (Rule): Thiếu thẻ bắt buộc {', '.join(missing_tags)} và Auto-fix lỗi ({e})"
+                print(msg)
+                return {
+                    "qa_validation_passed": False,
+                    "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+                    "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+                }
 
         question_block_match = re.search(
             r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL | re.IGNORECASE
@@ -525,11 +558,13 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
     if num_opts not in (4, 5):
         msg = f"[validate_qa] ✗ FAIL (Rule): Số đáp án không hợp lệ: {num_opts} (cần 4 hoặc 5)"
         print(msg)
-        return {
+        res = {
             "qa_validation_passed": False,
             "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
             "reasoning_logs": state.get('reasoning_logs', []) + [msg]
         }
+        res.update(updates)
+        return res
 
     def _normalize(text: str) -> str:
         return re.sub(r'[\s\.,;:!?()\'"]+', ' ', text.lower()).strip()
@@ -556,11 +591,13 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
     if duplicates_found:
         msg = "[validate_qa] ✗ FAIL (Rule): Phát hiện đáp án trùng lặp hoặc quá giống nhau"
         print(msg)
-        return {
+        res = {
             "qa_validation_passed": False,
             "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
             "reasoning_logs": state.get('reasoning_logs', []) + [msg]
         }
+        res.update(updates)
+        return res
 
     print(f"[validate_qa] ✓ Rule-based: OK ({num_opts} đáp án, không trùng lặp)")
 
@@ -599,26 +636,32 @@ Nếu KHÔNG HỢP LỆ, giải thích ngắn gọn vấn đề (1-2 câu)."""
 
         if is_valid:
             print("[validate_qa] ✓ LLM: HỢP LỆ")
-            return {
+            res = {
                 "qa_validation_passed": True,
                 "qa_validation_attempts": state.get('qa_validation_attempts', 0),
                 "reasoning_logs": state.get('reasoning_logs', []) + ["[validate_qa] PASS"]
             }
+            res.update(updates)
+            return res
         else:
             msg = f"[validate_qa] ✗ FAIL (LLM): {review[:200]}"
             print(msg)
-            return {
+            res = {
                 "qa_validation_passed": False,
                 "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
                 "reasoning_logs": state.get('reasoning_logs', []) + [msg]
             }
+            res.update(updates)
+            return res
     except Exception as e:
         check_and_raise_503(e)
         print(f"[validate_qa] Lỗi LLM validation: {e}. Bỏ qua, coi như PASS.")
-        return {
+        res = {
             "qa_validation_passed": True,
             "qa_validation_attempts": state.get('qa_validation_attempts', 0)
         }
+        res.update(updates)
+        return res
 
 
 def verify_grounding_node(state: AgentState) -> Dict[str, Any]:
