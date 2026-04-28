@@ -242,7 +242,7 @@ def retrieve_node(state: AgentState) -> Dict[str, Any]:
 
     query = state['query']
     print(f"Retrieving docs for query: {query[:50]}...")
-    docs = retriever.search(query, k=random.randint(3, 5))
+    docs = retriever.search(query, k=random.randint(4, 6))
     print(f"Found {len(docs)} documents.")
     _log_retrieved_docs(docs, "retrieve")
     return {
@@ -295,7 +295,7 @@ Chỉ trả về câu truy vấn, không giải thích thêm."""
         print(f"[retrieve_negative] LLM query generation failed, using fallback: {e}")
 
     # ── Step 2: Search ─────────────────────────────────────────────────────
-    k = random.randint(2, 3)
+    k = random.randint(3, 4)
     candidates = retriever.search(generated_query, k=k + 5)
 
     # ── Step 3: Filter out anchor and existing context docs ────────────────
