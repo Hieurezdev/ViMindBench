@@ -457,7 +457,7 @@ LƯU Ý QUAN TRỌNG:
             timeout=300
         )
 
-        result = response.choices[0].message.content
+        result = response.choices[0].message.content or ""
         print(f"RAW OUTPUT:\n{result}\n-------------------")
 
         return {
@@ -488,7 +488,7 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
     is_reasoning = state.get('is_reasoning_flow', False)
 
     if is_reasoning:
-        raw = state.get('reasoning_raw_output', '')
+        raw = state.get('reasoning_raw_output') or ""
         question_block_match = re.search(
             r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL
         )
@@ -614,7 +614,7 @@ def verify_grounding_node(state: AgentState) -> Dict[str, Any]:
     
     # 1. Trích xuất Câu hỏi và Đáp án
     if is_reasoning:
-        raw = state.get('reasoning_raw_output', '')
+        raw = state.get('reasoning_raw_output') or ""
         # Tách câu hỏi
         q_match = re.search(r'(Question:.*?)(?=<think>|<step>|<tool_call>|$)', raw, re.DOTALL)
         question_block = q_match.group(1).strip() if q_match else raw
@@ -693,7 +693,7 @@ def parse_steps_node(state: AgentState) -> Dict[str, Any]:
     """
     Parse individual <step> tags from the reasoning output.
     """
-    raw = state['reasoning_raw_output']
+    raw = state.get('reasoning_raw_output') or ""
 
     step_pattern = r'<step>(.*?)</step>'
     steps = re.findall(step_pattern, raw, re.DOTALL)
@@ -875,7 +875,7 @@ def check_format_node(state: AgentState) -> Dict[str, Any]:
     if not state.get('is_reasoning_flow'):
         return {"format_check_passed": True}
 
-    raw_output = state.get('reasoning_raw_output', "")
+    raw_output = state.get('reasoning_raw_output') or ""
 
     if "Question:" not in raw_output:
         msg = "Format Check Failed: Missing 'Question:'"
@@ -946,12 +946,25 @@ def format_output_node(state: AgentState) -> Dict[str, Any]:
     reasoning_raw = ""
     
     if is_reasoning:
-        raw = state.get('reasoning_raw_output', '')
-        reasoning_raw = raw
+        raw = state.get('reasoning_raw_output') or ""
+        
+        # Extract question block
         q_match = re.search(r'(Question:.*?)(?=<think>|<step>|<tool_call>|$)', raw, re.DOTALL)
         question_block = q_match.group(1).strip() if q_match else raw
+        
+        # Extract answer block
         a_match = re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)', raw, re.DOTALL | re.IGNORECASE)
         answer_text = a_match.group(1).strip() if a_match else "A"
+        
+        # Extract thinking/explanation
+        # Ưu tiên lấy từ reasoning_steps (đã qua refine nếu có)
+        reasoning_steps = state.get('reasoning_steps', [])
+        if reasoning_steps:
+            reasoning_raw = "\n".join(reasoning_steps)
+        else:
+            # Nếu không có steps, cố gắng trích xuất trong thẻ <think>
+            think_match = re.search(r'<think>(.*?)</think>', raw, re.DOTALL)
+            reasoning_raw = think_match.group(1).strip() if think_match else raw
     else:
         qa = state.get('simple_qa', {})
         question_block = qa.get('question', '') if qa else ''
