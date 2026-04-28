@@ -489,8 +489,25 @@ def validate_qa_node(state: AgentState) -> Dict[str, Any]:
 
     if is_reasoning:
         raw = state.get('reasoning_raw_output') or ""
+        
+        # Kiểm tra các thẻ bắt buộc
+        missing_tags = []
+        if "<think>" not in raw or "</think>" not in raw:
+            missing_tags.append("<think>")
+        if not re.search(r'(?:<answer>|\(answer\)|Answer:|\(answer>)', raw, re.IGNORECASE):
+            missing_tags.append("<answer>")
+            
+        if missing_tags:
+            msg = f"[validate_qa] ✗ FAIL (Rule): Thiếu thẻ bắt buộc {', '.join(missing_tags)}"
+            print(msg)
+            return {
+                "qa_validation_passed": False,
+                "qa_validation_attempts": state.get('qa_validation_attempts', 0) + 1,
+                "reasoning_logs": state.get('reasoning_logs', []) + [msg]
+            }
+
         question_block_match = re.search(
-            r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL
+            r'(Question:.*?)(?=<think>|$)', raw, re.DOTALL | re.IGNORECASE
         )
         question_block = question_block_match.group(1).strip() if question_block_match else raw
     else:
@@ -957,14 +974,24 @@ def format_output_node(state: AgentState) -> Dict[str, Any]:
         answer_text = a_match.group(1).strip() if a_match else "A"
         
         # Extract thinking/explanation
-        # Ưu tiên lấy từ reasoning_steps (đã qua refine nếu có)
         reasoning_steps = state.get('reasoning_steps', [])
-        if reasoning_steps:
-            reasoning_raw = "\n".join(reasoning_steps)
+        
+        # Nếu reasoning_steps chỉ là 1 mảng chứa nguyên chuỗi raw (do parse_steps_node fallback)
+        # hoặc nếu không có reasoning_steps, ta trích xuất thẻ <think>
+        if reasoning_steps and not (len(reasoning_steps) == 1 and reasoning_steps[0] == raw):
+            # Nếu có steps thực sự, ráp lại thành chuỗi có thẻ <think> và <step>
+            steps_text = "\n".join([f"<step>{step}</step>" for step in reasoning_steps])
+            reasoning_raw = f"<think>\n{steps_text}\n</think>"
         else:
-            # Nếu không có steps, cố gắng trích xuất trong thẻ <think>
-            think_match = re.search(r'<think>(.*?)</think>', raw, re.DOTALL)
-            reasoning_raw = think_match.group(1).strip() if think_match else raw
+            # Rút trích đúng nội dung từ <think> đến </think>
+            think_match = re.search(r'(<think>.*?</think>)', raw, re.DOTALL | re.IGNORECASE)
+            if think_match:
+                reasoning_raw = think_match.group(1).strip()
+            else:
+                # Nếu LLM không sinh thẻ <think>, thử loại bỏ phần câu hỏi và đáp án
+                stripped = re.sub(r'Question:.*?(?=<step>|<tool_call>|$)', '', raw, flags=re.DOTALL | re.IGNORECASE)
+                stripped = re.sub(r'(?:<answer>|\(answer\)|Answer:|\(answer>).*', '', stripped, flags=re.DOTALL | re.IGNORECASE)
+                reasoning_raw = stripped.strip()
     else:
         qa = state.get('simple_qa', {})
         question_block = qa.get('question', '') if qa else ''
