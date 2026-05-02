@@ -20,6 +20,8 @@ class AgentState(TypedDict):
     negative_retrieval_query: str # Query used for opposing retrieval
     context_docs: List[Document]  # Retrieved documents (similar/opposing)
     negative_docs: List[Document] # Retrieved documents opposing the anchor
+    dsm5_docs: List[Document]     # Retrieved documents from DSM-5 collection
+    dsm5_retrieval_query: str     # Query used for DSM-5 retrieval
     
     # Outputs
     simple_qa: Optional[Dict[str, str]]     # Normal QA output

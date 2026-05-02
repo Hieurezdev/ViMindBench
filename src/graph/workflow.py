@@ -7,6 +7,7 @@ from .nodes import (
     select_anchor_node,
     retrieve_node,
     retrieve_negative_node,
+    retrieve_dsm5_node,
     generate_simple_qa_node,
     generate_reasoning_node,
     validate_qa_node,
@@ -29,6 +30,7 @@ def create_graph():
     workflow.add_node("select_anchor", select_anchor_node)
     workflow.add_node("retrieve", retrieve_node)
     workflow.add_node("retrieve_negative", retrieve_negative_node)
+    workflow.add_node("retrieve_dsm5", retrieve_dsm5_node)
     workflow.add_node("simple_qa", generate_simple_qa_node)
     workflow.add_node("generate_reasoning", generate_reasoning_node)
     workflow.add_node("validate_qa", validate_qa_node)
@@ -54,26 +56,28 @@ def create_graph():
         {"select_anchor": "select_anchor"}
     )
 
-    # After anchor selection: simple_qa uses anchor directly, reasoning randomly picks retrieve mode
+    # After anchor selection: simple_qa uses anchor directly, reasoning picks retrieve_negative or retrieve_dsm5
     def route_after_anchor(state: AgentState):
         if not state['is_reasoning_flow']:
             return "simple_qa"
-        # Reasoning: randomly pick similar (retrieve) or opposing (retrieve_negative)
-        return "retrieve" if random.random() < 0.5 else "retrieve_negative"
+        # Reasoning: randomly pick opposing (retrieve_negative - will also get dsm5) or just DSM-5 (retrieve_dsm5)
+        return "retrieve_negative" if random.random() < 0.5 else "retrieve_dsm5"
 
     workflow.add_conditional_edges(
         "select_anchor",
         route_after_anchor,
         {
-            "retrieve": "retrieve",
             "retrieve_negative": "retrieve_negative",
+            "retrieve_dsm5": "retrieve_dsm5",
             "simple_qa": "simple_qa"
         }
     )
 
-    # Both retrieval paths lead to reasoning generator
-    workflow.add_edge("retrieve", "generate_reasoning")
-    workflow.add_edge("retrieve_negative", "generate_reasoning")
+    # If retrieve_negative, then also get DSM-5 before reasoning
+    workflow.add_edge("retrieve_negative", "retrieve_dsm5")
+    
+    # retrieve_dsm5 always leads to reasoning generator
+    workflow.add_edge("retrieve_dsm5", "generate_reasoning")
 
     # Both generation paths go through validate_qa
     workflow.add_edge("simple_qa", "validate_qa")

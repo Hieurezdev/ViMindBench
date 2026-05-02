@@ -128,6 +128,8 @@ def main():
         "negative_retrieval_query": "",
         "context_docs": [],
         "negative_docs": [],
+        "dsm5_docs": [],
+        "dsm5_retrieval_query": "",
         "simple_qa": None,
         "reasoning_qa": None,
         "reasoning_raw_output": "",

@@ -88,6 +88,13 @@ class MongoDBRetriever:
             # Fallback size for common embedding dims in this pipeline
             return [0.0] * 1024
     
+    def generate_embedding(self, text: str) -> List[float]:
+        """
+        Public method to generate embedding for a given text.
+        Same as _generate_embedding but accessible from outside.
+        """
+        return self._generate_embedding(text)
+    
     def add_documents(self, chunks: List[Dict[str, Any]]):
         """
         Add documents to MongoDB with embeddings.
@@ -97,6 +104,60 @@ class MongoDBRetriever:
         """
         print(f"MongoDB retriever uses existing collection: {self.collection_name}")
         print(f"Total documents in collection: {self.collection.count_documents({})}")
+    
+    def search_dsm5(self, query_embedding: List[float], k: int = 5) -> List[Document]:
+        """
+        Search DSM-5 collection using vector search with provided embedding.
+        Uses only embedding search (vector_index).
+        
+        Args:
+            query_embedding: Pre-computed embedding vector
+            k: Number of results to return (default 5)
+            
+        Returns:
+            List of LangChain Document objects from DSM-5 collection
+        """
+        if self.collection is None:
+            print("Error: MongoDB connection not initialized. Cannot search DSM-5.")
+            return []
+
+        dsm5_collection_name = os.getenv("MONGO_DSM5_COLLECTION_NAME", "DSM-5")
+        dsm5_collection = self.db[dsm5_collection_name]
+        
+        try:
+            pipeline = [
+                {
+                    "$vectorSearch": {
+                        "index": "vector_index",  # Same index name as main collection
+                        "path": "embedding",
+                        "queryVector": query_embedding,
+                        "numCandidates": k * 10,
+                        "limit": k
+                    }
+                },
+                {
+                    "$project": {
+                        "content": 1,
+                        "title": 1,
+                        "summary": 1,
+                        "tags": 1,
+                        "keywords": 1,
+                        "uuid": 1,
+                        "type": 1,
+                        "disease_name": 1,
+                        "code": 1,
+                        "differential_diagnosis": 1,
+                        "_id": 1,
+                        "score": {"$meta": "vectorSearchScore"}
+                    }
+                }
+            ]
+            
+            results = list(dsm5_collection.aggregate(pipeline))
+            return self._format_results(results)
+        except Exception as e:
+            print(f"DSM-5 vector search failed: {e}")
+            return []
     
     def search(self, query: str, k: int = 5) -> List[Document]:
         """
@@ -165,6 +226,10 @@ class MongoDBRetriever:
                     "keywords": 1,
                     "uuid": 1,
                     "type": 1,
+                    "disease_name": 1,
+                    "code": 1,
+                    "differential_diagnosis": 1,
+                    "_id": 1,
                     "score": {"$meta": "vectorSearchScore"}
                 }
             }
@@ -201,6 +266,10 @@ class MongoDBRetriever:
                     "keywords": 1,
                     "uuid": 1,
                     "type": 1,
+                    "disease_name": 1,
+                    "code": 1,
+                    "differential_diagnosis": 1,
+                    "_id": 1,
                     "score": {"$meta": "searchScore"}
                 }
             }
@@ -251,20 +320,41 @@ class MongoDBRetriever:
         documents = []
         
         for result in results:
-            title = result.get('title', '')
+            # Handle both regular and DSM-5 collection formats
+            disease_name = result.get('disease_name')
+            code = result.get('code')
+            differential_diagnosis = result.get('differential_diagnosis', [])
+            
+            title = result.get('title', disease_name or '')
             summary = result.get('summary', '')
             content = result.get('content', '')
 
-            page_content = f"Tiêu đề: {title}\nTóm tắt: {summary}\nNội dung:\n{content}"
+            # Format page_content with available fields
+            if disease_name:
+                # DSM-5 format
+                dsm5_info = f"Bệnh: {disease_name}"
+                if code:
+                    dsm5_info += f"\nMã ICD: {code}"
+                if differential_diagnosis:
+                    if isinstance(differential_diagnosis, list):
+                        dsm5_info += f"\nChẩn đoán phân biệt: {', '.join(differential_diagnosis)}"
+                    else:
+                        dsm5_info += f"\nChẩn đoán phân biệt: {differential_diagnosis}"
+                page_content = f"{dsm5_info}\n\nNội dung:\n{content}"
+            else:
+                # Regular format
+                page_content = f"Tiêu đề: {title}\nTóm tắt: {summary}\nNội dung:\n{content}"
             
             metadata = {
-                'uuid': result.get('uuid'),
-                'title': title,
-                'summary': summary,
+                'uuid': result.get('uuid', result.get('_id', '')),
+                'title': title or disease_name or '',
+                'summary': summary or '',
                 'tags': result.get('tags', []),
                 'keywords': result.get('keywords', []),
-                'type': result.get('type'),
-                'score': result.get('score', 0.0)
+                'type': result.get('type', 'DSM-5' if disease_name else ''),
+                'score': result.get('score', 0.0),
+                'code': code or '',
+                'disease_name': disease_name or ''
             }
             
             documents.append(Document(

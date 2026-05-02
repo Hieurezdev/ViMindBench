@@ -316,12 +316,60 @@ Chỉ trả về câu truy vấn, không giải thích thêm."""
     }
 
 
+def retrieve_dsm5_node(state: AgentState) -> Dict[str, Any]:
+    """
+    Retrieves 2-3 documents from DSM-5 collection using embedding search only.
+    Uses the anchor document to generate an embedding, then searches DSM-5 collection.
+    """
+    retriever = getattr(builtins, 'RETRIEVER', None)
+    if not retriever:
+        print("Warning: Retriever not found. Skipping DSM-5 retrieval.")
+        return {"dsm5_docs": []}
+
+    anchor = state.get('anchor', {})
+    if not anchor:
+        print("Warning: No anchor found. Cannot search DSM-5.")
+        return {"dsm5_docs": []}
+
+    title = anchor.get('title', '')
+    summary = anchor.get('summary', '')
+    
+    # Generate embedding from anchor title + summary
+    anchor_text = f"{title} {summary}"
+    print(f"[retrieve_dsm5] Searching DSM-5 using anchor: {anchor_text[:80]}...")
+    
+    try:
+        # Generate embedding for anchor
+        query_embedding = retriever.generate_embedding(anchor_text)
+        
+        # Search DSM-5 collection using vector search
+        k = random.randint(2, 3)
+        dsm5_docs = retriever.search_dsm5(query_embedding, k=k)
+        
+        print(f"[retrieve_dsm5] Found {len(dsm5_docs)} document(s) from DSM-5.")
+        _log_retrieved_docs(dsm5_docs, "retrieve_dsm5")
+        
+        return {
+            "dsm5_docs": dsm5_docs,
+            "dsm5_retrieval_query": anchor_text
+        }
+    except Exception as e:
+        print(f"[retrieve_dsm5] Error during DSM-5 retrieval: {e}")
+        return {"dsm5_docs": []}
+
+
 def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     """
     Generates Normal Psychology QA without reasoning (multiple choice, 4-5 options).
     """
     print("Generating Simple QA...")
     context_text = "\n\n".join([d.page_content for d in state['context_docs']])
+    
+    # Add DSM-5 documents if available
+    dsm5_text = ""
+    if state.get('dsm5_docs'):
+        dsm5_content = "\n\n".join([d.page_content for d in state['dsm5_docs']])
+        dsm5_text = f"\n\n=== KIẾN THỨC TỪ DSM-5 (Diagnostic and Statistical Manual of Mental Disorders) ===\n{dsm5_content}"
 
     num_options = random.choices([4, 5], weights=[0.6, 0.4])[0]
     if num_options == 4:
@@ -336,7 +384,7 @@ def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
     prompt = f"""Bạn là chuyên gia tâm lý học. Dựa vào ngữ cảnh sau, tạo một câu hỏi trắc nghiệm và câu trả lời về tâm lý. Câu hỏi phải gồm {req_text} và chỉ có 1 đáp án đúng.
     
 Ngữ cảnh:
-{context_text[:8192]}
+{context_text[:8192]}{dsm5_text}
 
 Chủ đề: {state['anchor'].get('title', '')}
 Tóm tắt: {state['anchor'].get('summary', '')}
@@ -392,6 +440,12 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
 
     print("Generating Reasoning QA (this may take a while)...")
     context_text = "\n\n".join([d.page_content for d in state.get('context_docs', [])])
+    
+    # Add DSM-5 documents if available
+    dsm5_text = ""
+    if state.get('dsm5_docs'):
+        dsm5_content = "\n\n".join([d.page_content for d in state['dsm5_docs']])
+        dsm5_text = f"\n\n=== KIẾN THỨC TỪ DSM-5 (Diagnostic and Statistical Manual of Mental Disorders) ===\n{dsm5_content}"
 
     num_options = random.choices([4, 5], weights=[0.6, 0.4])[0]
     if num_options == 4:
@@ -416,7 +470,7 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
     prompt = f"""Bạn là chuyên gia tâm lý với khả năng suy luận sâu sắc.
 
 Ngữ cảnh (Các tài liệu tâm lý liên quan):
-{context_text}
+{context_text}{dsm5_text}
 
 Chủ đề: {state['anchor'].get('title', '')}
 Tóm tắt: {state['anchor'].get('summary', '')}
