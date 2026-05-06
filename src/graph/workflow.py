@@ -56,16 +56,20 @@ def create_graph():
         {"select_anchor": "select_anchor"}
     )
 
-    # After anchor selection: simple_qa uses anchor directly, reasoning picks retrieve_negative or retrieve_dsm5
-    def route_after_anchor(state: AgentState):
+    # After anchor selection: BOTH paths need to retrieve context docs
+    # Then simple_qa goes straight to generation, reasoning picks opposing or DSM-5
+    workflow.add_edge("select_anchor", "retrieve")
+    
+    # After retrieve, route based on flow type
+    def route_after_retrieve(state: AgentState):
         if not state['is_reasoning_flow']:
             return "simple_qa"
         # Reasoning: randomly pick opposing (retrieve_negative - will also get dsm5) or just DSM-5 (retrieve_dsm5)
         return "retrieve_negative" if random.random() < 0.5 else "retrieve_dsm5"
 
     workflow.add_conditional_edges(
-        "select_anchor",
-        route_after_anchor,
+        "retrieve",
+        route_after_retrieve,
         {
             "retrieve_negative": "retrieve_negative",
             "retrieve_dsm5": "retrieve_dsm5",

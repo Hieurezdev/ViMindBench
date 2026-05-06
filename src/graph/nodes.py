@@ -220,13 +220,6 @@ def select_anchor_node(state: AgentState) -> Dict[str, Any]:
         "used_anchor_ids": list(set(used_ids) | {new_id})
     }
 
-    # If Simple QA, skip retrieval — provide anchor content as context
-    if not is_reasoning:
-        content = anchor_doc.get('content', '')
-        page_content = f"Tiêu đề: {title}\nTóm tắt: {summary}\nNội dung:\n{content}"
-        anchor_as_doc = Document(page_content=page_content, metadata=metadata)
-        updates["context_docs"] = [anchor_as_doc]
-
     return updates
 
 
