@@ -153,7 +153,7 @@ def main():
     }
 
     # ── 6. Run ────────────────────────────────────────────────────────────
-    final_state = app.invoke(initial_state, {"recursion_limit": 25000})
+    final_state = app.invoke(initial_state, {"recursion_limit": 50000})
 
     # ── 7. Final Save (remaining items not yet flushed by check_more) ─────
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
