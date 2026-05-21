@@ -8,3 +8,16 @@ wheels/
 
 # Virtual environments
 .venv
+# Large files
+backup.zip
+*.zip
+*.tar.gz
+
+# Data directories
+/data/
+*.json
+*.jsonl
+
+# Environment variables
+.env
+.env.local

@@ -1677,7 +1677,7 @@ def main():
     }
     
     # Run the graph
-    final_state = app.invoke(initial_state)
+    final_state = app.invoke(initial_state, {"recursion_limit": 25000})
     
     # Final save
     output_path = "/kaggle/working/generated_psychology_multiple_choice.jsonl"
