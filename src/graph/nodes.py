@@ -108,6 +108,119 @@ def _build_references(state: AgentState) -> List[Dict[str, Any]]:
     return references
 
 
+def _obsolete_randomize_answer_position(question_text: str, correct_answer_letter: str) -> tuple[str, str]:
+    """
+    Randomize the position of the correct answer in a multiple-choice question.
+    
+    Args:
+        question_text: The question text with options (e.g., "A. [option]\nB. [option]\n...")
+        correct_answer_letter: The letter of the correct answer (e.g., "A", "B", "C", "D", "E")
+    
+    Returns:
+        (updated_question_text, new_answer_letter): Updated question with shuffled options and the new position of correct answer
+    """
+    # Extract all options from the question
+    option_pattern = r'^([A-E])[\.\)]\s*(.+)$'
+    options = re.findall(option_pattern, question_text, re.MULTILINE)
+    
+    if not options:
+        print("[_randomize_answer_position] Warning: Could not parse options. Returning original.")
+        return question_text, correct_answer_letter
+    
+    # Build a mapping of letter -> option text
+    option_dict = {letter: text for letter, text in options}
+    
+    # Get the text of the correct answer
+    correct_answer_text = option_dict.get(correct_answer_letter)
+    if not correct_answer_text:
+        print(f"[_randomize_answer_position] Warning: Correct answer letter '{correct_answer_letter}' not found. Returning original.")
+        return question_text, correct_answer_letter
+    
+    # Get all option texts (without letter)
+    option_texts = [text for _, text in options]
+    
+    # Shuffle the option texts
+    shuffled_texts = option_texts.copy()
+    random.shuffle(shuffled_texts)
+    
+    # Find the new position of the correct answer
+    new_correct_letter = ['A', 'B', 'C', 'D', 'E'][shuffled_texts.index(correct_answer_text)]
+    
+    # Rebuild the question with shuffled options
+    letters = ['A', 'B', 'C', 'D', 'E'][:len(options)]
+    updated_question = question_text.split('\n')[0]  # Get the question part (before options)
+    
+    # Find where options start
+    for line in question_text.split('\n'):
+        if not re.match(option_pattern, line):
+            updated_question = line
+        else:
+            break
+    
+    # Rebuild with all lines up to first option
+    lines = question_text.split('\n')
+    updated_question_lines = []
+    for line in lines:
+        if not re.match(option_pattern, line):
+            updated_question_lines.append(line)
+        else:
+            break
+    
+    # Add shuffled options
+    for i, text in enumerate(shuffled_texts):
+        updated_question_lines.append(f"{letters[i]}. {text}")
+    
+    updated_question_text = '\n'.join(updated_question_lines)
+    
+    print(f"[_randomize_answer_position] Relocalized answer from '{correct_answer_letter}' to '{new_correct_letter}'")
+    
+    return updated_question_text, new_correct_letter
+
+
+def _obsolete_randomize_reasoning_output(reasoning_raw_output: str) -> str:
+    """
+    Extract question and answer from reasoning output, randomize answer position, and return updated output.
+    
+    Args:
+        reasoning_raw_output: The raw output from LLM containing Question, <think>, <step>, <answer>
+    
+    Returns:
+        Updated reasoning_raw_output with randomized answer position
+    """
+    # Extract question block
+    q_match = re.search(r'(Question:.*?)(?=<think>|<step>|$)', reasoning_raw_output, re.DOTALL)
+    if not q_match:
+        print("[_randomize_reasoning_output] Warning: Could not extract question. Returning original.")
+        return reasoning_raw_output
+    
+    question_block = q_match.group(1).strip()
+    
+    # Extract answer from <answer> tag
+    a_match = re.search(r'<answer>\s*([A-E])\b', reasoning_raw_output, re.IGNORECASE)
+    if not a_match:
+        print("[_randomize_reasoning_output] Warning: Could not extract answer letter. Returning original.")
+        return reasoning_raw_output
+    
+    original_answer_letter = a_match.group(1).upper()
+    
+    # Randomize answer position
+    randomized_question, new_answer_letter = _randomize_answer_position(question_block, original_answer_letter)
+    
+    # Replace original question with randomized one
+    updated_output = reasoning_raw_output.replace(question_block, randomized_question, 1)
+    
+    # Replace answer letter in <answer> tag
+    updated_output = re.sub(
+        r'<answer>\s*' + original_answer_letter + r'\b',
+        f'<answer>{new_answer_letter}',
+        updated_output,
+        flags=re.IGNORECASE
+    )
+    
+    print(f"[_randomize_reasoning_output] Answer randomized from '{original_answer_letter}' to '{new_answer_letter}'")
+    return updated_output
+
+
 # ==========================================
 # Nodes
 # ==========================================
@@ -369,12 +482,19 @@ def generate_simple_qa_node(state: AgentState) -> Dict[str, Any]:
         options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]"
         answer_format = "[Đáp án đúng: A, B, C hoặc D]"
         req_text = "4 đáp án (A, B, C, D)"
+        available_positions = ['A', 'B', 'C', 'D']
     else:
         options_format = "A. [Đáp án A]\\nB. [Đáp án B]\\nC. [Đáp án C]\\nD. [Đáp án D]\\nE. [Đáp án E]"
         answer_format = "[Đáp án đúng: A, B, C, D hoặc E]"
         req_text = "5 đáp án (A, B, C, D, E)"
+        available_positions = ['A', 'B', 'C', 'D', 'E']
+    
+    # Random correct answer position from the start
+    correct_answer_position = random.choice(available_positions)
 
     prompt = f"""Bạn là chuyên gia tâm lý học. Dựa vào ngữ cảnh sau, tạo một câu hỏi trắc nghiệm và câu trả lời về tâm lý. Câu hỏi phải gồm {req_text} và chỉ có 1 đáp án đúng.
+
+**QUAN TRỌNG: Đáp án đúng PHẢI LÀ \"{correct_answer_position}\".**
     
 Ngữ cảnh:
 {context_text[:8192]}{dsm5_text}
@@ -399,17 +519,22 @@ Tóm tắt: {state['anchor'].get('summary', '')}
         result = response.choices[0].message.content
         qa = json.loads(result.replace("```json", "").replace("```", "").strip())
 
+        # Store correct answer position (already specified in prompt)
+        print(f"[generate_simple_qa] Correct answer position: {correct_answer_position}")
+
         output_entry = {
             "type": "simple_qa",
             "anchor_id": state['anchor']['uuid'],
             "question": qa.get('question'),
             "answer": qa.get('answer'),
+            "correct_answer_position": correct_answer_position,
             "references": _build_references(state)
         }
 
         return {
             "simple_qa": qa,
             "question_type_enum": "factual_recall",
+            "correct_answer_position": correct_answer_position,
             "iteration_count": state['iteration_count']
         }
     except Exception as e:
@@ -445,10 +570,15 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
         options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]"
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C hoặc D]"
         req_text = "4 đáp án (A, B, C, D)"
+        available_positions = ['A', 'B', 'C', 'D']
     else:
         options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]\nE. [Đáp án E]"
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C, D hoặc E]"
         req_text = "5 đáp án (A, B, C, D, E)"
+        available_positions = ['A', 'B', 'C', 'D', 'E']
+    
+    # Random correct answer position from the start
+    correct_answer_position = random.choice(available_positions)
 
     question_types = {
         "so sánh hai lý thuyết/trường phái tâm lý học trái chiều hoặc tương đồng nhau": "theory_comparison",
@@ -470,6 +600,7 @@ Tóm tắt: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
 1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type_desc}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
+   **ĐẶC BIỆT QUAN TRỌNG: Đáp án đúng PHẢI LÀ "{correct_answer_position}".**
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
    - HÃY BẮT ĐẦU BẰNG VIỆC: Đưa ra các reference đầu vào (trích dẫn thông tin quan trọng từ tài liệu đã cho).
    - SAU ĐÓ: Suy luận như một con người đang tự suy nghĩ nội bộ. Hãy dùng nhiều văn phong khác nhau một cách linh hoạt (ví dụ: phân tích từng bước, suy luận tự nhiên, hoặc đúc kết nguyên nhân-kết quả ngắn gọn).
@@ -506,10 +637,12 @@ LƯU Ý QUAN TRỌNG:
 
         result = response.choices[0].message.content or ""
         print(f"RAW OUTPUT:\n{result}\n-------------------")
+        print(f"[generate_reasoning_node] Correct answer position: {correct_answer_position}")
 
         return {
             "reasoning_raw_output": result,
             "question_type_enum": question_type_enum,
+            "correct_answer_position": correct_answer_position,
             "current_step_index": 0,
             "step_retry_count": 0,
             "step_verification_results": []
@@ -1114,9 +1247,8 @@ def format_output_node(state: AgentState) -> Dict[str, Any]:
     if q_text_only.lower().startswith("question:"):
         q_text_only = q_text_only[9:].strip()
         
-    # Extract correct answer letter
-    ans_letter_match = re.search(r'([A-E])', answer_text, re.IGNORECASE)
-    ans_letter = ans_letter_match.group(1).upper() if ans_letter_match else "A"
+    # Get correct answer letter from state (already specified in prompt)
+    ans_letter = state.get('correct_answer_position', 'A').upper()
     
     # Call LLM to extract metadata & steps
     prompt = f"""Dựa vào nội dung câu hỏi và suy luận dưới đây, hãy trích xuất các thông tin siêu dữ liệu (metadata) dưới dạng JSON.
