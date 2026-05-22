@@ -600,11 +600,11 @@ Tóm tắt: {state['anchor'].get('summary', '')}
 
 Nhiệm vụ:
 1. Tạo một câu hỏi trắc nghiệm dạng: **{question_type_desc}**. Câu hỏi phải đi kèm {req_text} và chỉ có 1 đáp án đúng.
-   **ĐẶC BIỆT QUAN TRỌNG: Đáp án đúng PHẢI LÀ "{correct_answer_position}".**
+    **ĐÁP ÁN CUỐI CÙNG PHẢI LÀ "{correct_answer_position}"**, nhưng phần <think> phải được viết như một quá trình suy luận trung lập, không được giả định trước đáp án.
 2. Suy nghĩ từng bước trong thẻ <think>. Mỗi bước suy luận đặt trong thẻ <step>.
-   - HÃY BẮT ĐẦU BẰNG VIỆC: Đưa ra các reference đầu vào (trích dẫn thông tin quan trọng từ tài liệu đã cho).
-   - SAU ĐÓ: Suy luận như một con người đang tự suy nghĩ nội bộ. Hãy dùng nhiều văn phong khác nhau một cách linh hoạt (ví dụ: phân tích từng bước, suy luận tự nhiên, hoặc đúc kết nguyên nhân-kết quả ngắn gọn).
-   - Hãy phân tích câu hỏi, phân tích từng đáp án, loại trừ đáp án sai và chứng minh đáp án đúng một cách tự nhiên.
+    - HÃY BẮT ĐẦU BẰNG VIỆC: Nhận diện các dữ kiện và khái niệm liên quan, rồi so sánh các lựa chọn một cách trung lập.
+    - SAU ĐÓ: Suy luận như một người đang cân nhắc nhiều khả năng cùng lúc, không viết theo kiểu đã biết sẵn đáp án từ đầu.
+    - Hãy phân tích câu hỏi, đánh giá từng đáp án, loại trừ đáp án sai, rồi mới chốt đáp án phù hợp nhất ở cuối.
 3. Đưa ra đáp án cuối cùng trong <answer>
 
 **format bắt buộc (bạn PHẢI tuân thủ cấu trúc này):**
