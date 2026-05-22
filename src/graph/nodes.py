@@ -570,12 +570,12 @@ def generate_reasoning_node(state: AgentState) -> Dict[str, Any]:
         options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]"
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C hoặc D]"
         req_text = "4 đáp án (A, B, C, D)"
-        available_positions = ['B', 'C', 'D']
+        available_positions = ['A','B', 'C', 'D']
     else:
         options_format = "A. [Đáp án A]\nB. [Đáp án B]\nC. [Đáp án C]\nD. [Đáp án D]\nE. [Đáp án E]"
         answer_format = "[Chỉ ghi đáp án đúng: A, B, C, D hoặc E]"
         req_text = "5 đáp án (A, B, C, D, E)"
-        available_positions = ['B', 'C', 'D', 'E']
+        available_positions = ['A','B', 'C', 'D', 'E']
     
     # Random correct answer position from the start
     correct_answer_position = random.choice(available_positions)
