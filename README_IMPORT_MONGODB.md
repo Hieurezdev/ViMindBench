@@ -54,6 +54,7 @@ MONGO_COLLECTION_NAME=psychology_data         # Tên collection
 
 # Data Directory
 DATA_DIR=data/formated_data                   # Thư mục chứa file JSON
+SOURCE_TIER=tier_2                            # Tier của toàn bộ source set đang import
 ```
 
 ### Các biến cấu hình:
@@ -75,8 +76,30 @@ DATA_DIR=data/formated_data                   # Thư mục chứa file JSON
 ### Chạy script để import tất cả file JSON:
 
 ```bash
-python import_json_to_mongodb.py
+uv run python test/import_json_to_mongodb.py --source-tier tier_2
 ```
+
+`source_tier` phải do người quản trị dữ liệu xác nhận theo nguồn, không suy ra
+tự động từ nội dung chunk:
+
+- `tier_1`: nguồn chuẩn/chuyên môn có thẩm quyền cao (ví dụ DSM-5 hoặc guideline chính thức).
+- `tier_2`: giáo trình, tài liệu đào tạo hoặc nguồn chuyên môn đã được duyệt.
+- `tier_3`: nguồn phổ thông, diễn đàn hoặc nội dung không đủ điều kiện làm evidence chuyên môn.
+
+Để gắn tier cho collection đã import, chạy dry-run trước:
+
+```bash
+uv run python test/backfill_source_tier.py --source-tier tier_2
+```
+
+Sau khi xác nhận đúng source set mới ghi vào MongoDB:
+
+```bash
+uv run python test/backfill_source_tier.py --source-tier tier_2 --apply
+```
+
+Khi tất cả nguồn đã được gắn nhãn, chạy generator với
+`ALLOW_UNTIERED_EVIDENCE=false` để chỉ dùng Tier 1/2.
 
 ### Import từ thư mục khác:
 
@@ -95,6 +118,7 @@ DATA_DIR=data/formated_data_tam_li_voi_cuoc_song python import_json_to_mongodb.p
 ✅ **Metadata Tracking**: Tự động thêm thông tin về file nguồn vào mỗi document:
    - `_source_file`: Tên file
    - `_source_path`: Đường dẫn đầy đủ
+   - `source_tier`: provenance tier được chỉ định lúc import
 
 ✅ **Error Handling**: Xử lý lỗi khi parse JSON hoặc insert vào MongoDB
 

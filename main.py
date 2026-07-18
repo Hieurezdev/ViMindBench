@@ -3,6 +3,7 @@ import os
 import json
 import builtins
 import argparse
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Simple global context pattern for the retriever to be accessible by nodes
@@ -20,6 +21,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--embedding_base_url", type=str, default=None, help="Override EMBEDDING_BASE_URL")
     parser.add_argument("--num_qa_pairs", type=int, default=None, help="Override NUM_QA_PAIRS")
     parser.add_argument("--output_path", type=str, default=None, help="Override OUTPUT_PATH")
+    parser.add_argument(
+        "--levels",
+        type=str,
+        default=None,
+        help="Comma-separated MCQ levels: theory,emotion,educational_scenario,clinical_scenario",
+    )
     return parser.parse_args()
 
 
@@ -47,6 +54,51 @@ def load_used_anchor_ids(output_files: list[str]) -> list[str]:
                     pass
         print(f"  → {len(used)} unique anchor_ids loaded so far.")
     return used
+
+
+def load_anchor_sidecar(path: str) -> list[str]:
+    """Load opaque anchor IDs without adding provenance fields to train JSONL."""
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return [str(value) for value in data if value]
+
+
+def load_json_list(path: str) -> list[dict]:
+    """Load an optional, non-training sidecar such as judge failure memory."""
+    if not os.path.exists(path):
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, list) else []
+
+
+def load_playbook(persisted_path: str) -> str:
+    """Prefer an accumulated playbook; otherwise start from the versioned seed."""
+    seed_path = Path(__file__).parent / "config" / "initial_playbook.md"
+    source = Path(persisted_path) if os.path.exists(persisted_path) else seed_path
+    try:
+        with open(source, "r", encoding="utf-8") as f:
+            playbook = f.read().strip()
+        if "## " not in playbook or "helpful=" not in playbook:
+            raise ValueError("playbook must use ACE Markdown sections and bullets")
+        print(f"Loaded ACE playbook: {source}")
+        return playbook
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"Cannot load playbook from {source}: {exc}") from exc
+
+
+def parse_levels(raw_levels: str | None) -> list[str]:
+    """Validate the optional curriculum filter before starting external clients."""
+    allowed = {"theory", "emotion", "educational_scenario", "clinical_scenario"}
+    if not raw_levels:
+        return ["theory", "emotion", "educational_scenario", "clinical_scenario"]
+    levels = [level.strip() for level in raw_levels.split(",") if level.strip()]
+    invalid = sorted(set(levels) - allowed)
+    if not levels or invalid:
+        raise ValueError(f"Invalid --levels value. Allowed: {', '.join(sorted(allowed))}; received: {raw_levels}")
+    return list(dict.fromkeys(levels))
 
 
 def main():
@@ -84,13 +136,19 @@ def main():
     if args.output_path:
         os.environ["OUTPUT_PATH"] = args.output_path
 
+    try:
+        curriculum_levels = parse_levels(args.levels)
+    except ValueError as exc:
+        parser_error = argparse.ArgumentTypeError(str(exc))
+        raise SystemExit(f"error: {parser_error}") from exc
+
     # If local LLM is requested, default to local embeddings as well unless explicitly disabled.
     if args.model_local and "USE_LOCAL_EMBEDDING" not in os.environ:
         os.environ["USE_LOCAL_EMBEDDING"] = "true"
         print("Auto-enabling local embedding because local model endpoint is used")
 
     from src.retriever import Retriever
-    from src.graph.workflow import create_graph
+    from src.mcq.workflow import create_mcq_graph
 
     # ── 1. Retriever ──────────────────────────────────────────────────────
     print("Initializing pipeline...")
@@ -98,7 +156,7 @@ def main():
     builtins.RETRIEVER = retriever
 
     # ── 2. Graph ──────────────────────────────────────────────────────────
-    app = create_graph()
+    app = create_mcq_graph()
 
     # ── 3. Config ─────────────────────────────────────────────────────────
     num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
@@ -108,66 +166,68 @@ def main():
     )
 
     print(f"Running pipeline to generate {num_qa_pairs} QA pairs...")
+    print(f"Curriculum levels: {', '.join(curriculum_levels)}")
 
     # ── 4. Load already-used anchor_ids to avoid duplicates ───────────────
     existing_output_files = [
         output_path,
         "data/output/generated_psychology_multiple_choice-2.jsonl",
     ]
-    used_anchor_ids = load_used_anchor_ids(existing_output_files)
+    anchor_sidecar = os.path.splitext(output_path)[0] + ".anchors.json"
+    playbook_path = os.path.splitext(output_path)[0] + ".playbook.md"
+    judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
+    used_anchor_ids = list(set(load_used_anchor_ids(existing_output_files) + load_anchor_sidecar(anchor_sidecar)))
     print(f"Total used anchor_ids (will be skipped): {len(used_anchor_ids)}")
 
     # ── 5. Initial State ──────────────────────────────────────────────────
     initial_state = {
         "iteration_count": 0,
         "max_iterations": num_qa_pairs,
-        "is_reasoning_flow": True,
+        "curriculum_levels": curriculum_levels,
         "anchor": None,
-        "query": "",
-        "primary_retrieval_query": "",
-        "negative_retrieval_query": "",
-        "context_docs": [],
-        "negative_docs": [],
-        "dsm5_docs": [],
-        "dsm5_retrieval_query": "",
-        "simple_qa": None,
-        "reasoning_qa": None,
-        "reasoning_raw_output": "",
-        "reasoning_steps": [],
-        "current_step_index": 0,
-        "step_retry_count": 0,
-        "step_verification_results": [],
-        "verification_passed": False,
-        "reasoning_logs": [],
-        "format_check_passed": True,
-        "final_output_ready": False,
-        "all_outputs": [],
+        "blueprint": {},
+        "evidence_docs": [],
+        "dsm5_safety_docs": [],
+        "mcq": {},
+        "judge_reports": {},
+        "verdict": "",
+        "quarantine_reason": [],
+        "verified_outputs": [],
+        "quarantine_outputs": [],
+        "failure_memory": [],
+        "judge_failure_memory": load_json_list(judge_memory_path),
+        "playbook": load_playbook(playbook_path),
+        "playbook_delta": [],
         "used_anchor_ids": used_anchor_ids,
         "last_saved_count": 0,
-        # QA Validation
-        "qa_validation_passed": False,
-        "qa_validation_attempts": 0,
-        # Grounding Validation
-        "grounding_passed": False,
-        "grounding_attempts": 0,
     }
 
     # ── 6. Run ────────────────────────────────────────────────────────────
     final_state = app.invoke(initial_state, {"recursion_limit": 50000})
 
-    # ── 7. Final Save (remaining items not yet flushed by check_more) ─────
+    # ── 7. Save verified data and a separate quarantine audit trail ───────
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    last_saved = final_state.get("last_saved_count", 0)
-    remaining_items = final_state["all_outputs"][last_saved:]
-
-    if remaining_items:
-        print(f"Saving final batch of {len(remaining_items)} items to {output_path}...")
+    verified_items = final_state.get("verified_outputs", [])
+    if verified_items:
+        print(f"Saving {len(verified_items)} verified items to {output_path}...")
         with open(output_path, "a", encoding="utf-8") as f:
-            for entry in remaining_items:
+            for entry in verified_items:
                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
+    quarantine_items = final_state.get("quarantine_outputs", [])
+    if quarantine_items:
+        with open(quarantine_path, "a", encoding="utf-8") as f:
+            for entry in quarantine_items:
+                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    with open(playbook_path, "w", encoding="utf-8") as f:
+        f.write(final_state.get("playbook", ""))
+    with open(anchor_sidecar, "w", encoding="utf-8") as f:
+        json.dump(final_state.get("used_anchor_ids", []), f, ensure_ascii=False, indent=2)
+    with open(judge_memory_path, "w", encoding="utf-8") as f:
+        json.dump(final_state.get("judge_failure_memory", []), f, ensure_ascii=False, indent=2)
 
-    print(f"Done. Generated {len(final_state['all_outputs'])} QA pairs in total.")
-    print(f"Saved results to {output_path}")
+    print(f"Done. Verified={len(verified_items)}, quarantined={len(quarantine_items)}.")
+    print(f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; judge memory: {judge_memory_path}")
 
 
 if __name__ == "__main__":

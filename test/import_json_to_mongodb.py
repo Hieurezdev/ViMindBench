@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 from typing import List, Dict, Any
 import logging
+import argparse
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError, ConnectionFailure
 from dotenv import load_dotenv
@@ -19,6 +20,7 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+VALID_SOURCE_TIERS = ("tier_1", "tier_2", "tier_3")
 
 # Load environment variables
 load_dotenv()
@@ -72,7 +74,7 @@ class JSONToMongoImporter:
         
         return json_files
     
-    def load_json_file(self, file_path: Path) -> List[Dict[str, Any]]:
+    def load_json_file(self, file_path: Path, source_tier: str | None = None) -> List[Dict[str, Any]]:
         """
         Load JSON file and return data as list
         
@@ -101,6 +103,9 @@ class JSONToMongoImporter:
                 if isinstance(item, dict):
                     item['_source_file'] = str(file_path.name)
                     item['_source_path'] = str(file_path)
+                    # Source tier is explicit provenance, never inferred from text.
+                    if source_tier and not item.get('source_tier'):
+                        item['source_tier'] = source_tier
             
             return data
             
@@ -146,7 +151,7 @@ class JSONToMongoImporter:
             return 0
     
     def import_directory(self, directory: str, collection_name: str = None,
-                        batch_size: int = 1000) -> Dict[str, Any]:
+                        batch_size: int = 1000, source_tier: str | None = None) -> Dict[str, Any]:
         """
         Import all JSON files from directory to MongoDB
         
@@ -176,7 +181,7 @@ class JSONToMongoImporter:
         for file_path in json_files:
             logger.info(f"Processing: {file_path.name}")
             
-            documents = self.load_json_file(file_path)
+            documents = self.load_json_file(file_path, source_tier=source_tier)
             
             if documents:
                 batch.extend(documents)
@@ -216,9 +221,15 @@ class JSONToMongoImporter:
 
 def main():
     """Main function"""
+    parser = argparse.ArgumentParser(description="Import JSON chunks into MongoDB with source provenance")
+    parser.add_argument("--data-dir", default=os.getenv("DATA_DIR", "data/formated_data"))
+    parser.add_argument("--collection", default=os.getenv("MONGO_COLLECTION_NAME", "Data"))
+    parser.add_argument("--source-tier", choices=VALID_SOURCE_TIERS, default=os.getenv("SOURCE_TIER"),
+                        help="Tier assigned to this imported source set; do not guess this from chunk text")
+    args = parser.parse_args()
     # Configuration
-    DATA_DIR = os.getenv("DATA_DIR", "data/formated_data")
-    COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME", "Data")
+    DATA_DIR = args.data_dir
+    COLLECTION_NAME = args.collection
     
     # Initialize importer
     importer = JSONToMongoImporter()
@@ -228,7 +239,8 @@ def main():
         stats = importer.import_directory(
             directory=DATA_DIR,
             collection_name=COLLECTION_NAME,
-            batch_size=1000
+            batch_size=1000,
+            source_tier=args.source_tier,
         )
         
         logger.info("\n✓ Import completed successfully!")
