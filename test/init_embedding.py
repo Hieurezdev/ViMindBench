@@ -3,7 +3,7 @@ init_embedding.py
 -----------------
 Chạy file này TRƯỚC kaggle_pipeline.py để:
 1. Cài embedding stack ổn định
-2. Load viDense model lên GPU / RAM
+2. Load BGE-M3 model lên GPU / RAM
 3. Warm-up một lần encode thử
 4. Lưu trạng thái sẵn sàng (optional flag file)
 
@@ -15,11 +15,11 @@ Thứ tự chạy trên Kaggle:
 # ── Install embedding stack ổn định ──────────────────────────────────────────
 !uv pip install sentence-transformers==3.0.1 transformers==4.46.3
 
-# ── Load và warm-up viDense ───────────────────────────────────────────────────
+# ── Load và warm-up BGE-M3 ────────────────────────────────────────────────────
 import os
 import time
 
-EMBEDDING_MODEL = "namdp-ptit/ViDense"
+EMBEDDING_MODEL = "BAAI/bge-m3"
 READY_FLAG = "/kaggle/working/.embedding_ready"
 
 print(f"[init_embedding] Loading model: {EMBEDDING_MODEL}")
@@ -40,7 +40,7 @@ try:
     with open(READY_FLAG, "w") as f:
         f.write("ready")
     print(f"[init_embedding] ✓ Flag written: {READY_FLAG}")
-    print("[init_embedding] ✓ viDense sẵn sàng. Bây giờ có thể chạy kaggle_pipeline.py")
+    print("[init_embedding] ✓ BGE-M3 sẵn sàng. Bây giờ có thể chạy kaggle_pipeline.py")
 
 except Exception as e:
     print(f"[init_embedding] ✗ ERROR: {e}")

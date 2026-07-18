@@ -123,7 +123,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
 | `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by planner, generator, and judges. |
 | `USE_LOCAL_EMBEDDING` | `true` | Use local SentenceTransformer instead of embedding API. |
-| `EMBEDDING_MODEL` | `namdp-ptit/ViDense` | Local or remote embedding model. |
+| `EMBEDDING_MODEL` | `BAAI/bge-m3` | Local or remote embedding model; BGE-M3 vectors are 1024-dimensional. |
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
 | `NUM_QA_PAIRS` | `100` | Default attempt count. |
 | `OUTPUT_PATH` | `data/output/psychology_mcq.jsonl` | Default verified-output path. |
@@ -169,6 +169,27 @@ uv run python test/import_json_to_mongodb.py \
 ```
 
 See [README_IMPORT_MONGODB.md](README_IMPORT_MONGODB.md) for more import detail.
+
+## BGE-M3 embeddings
+
+`BAAI/bge-m3` is the default local embedding model. Its normalized vectors are
+1024-dimensional, matching the Atlas `vector_index` configuration. The model
+in the attached error, `text-embedding-qwen3-embedding-0.6b`, is not a valid
+public SentenceTransformers model ID; use `BAAI/bge-m3` instead.
+
+When changing embedding models, re-embed every document. Do not mix embeddings
+from different models in one collection, even if their dimensions match.
+
+```bash
+# Recompute main Tier-2 evidence vectors
+uv run python test/add_embeddings.py --collection mental --overwrite
+
+# Recompute DSM-5 vectors used by clinical A06 safety retrieval
+uv run python test/add_embeddings.py --collection DSM-5 --overwrite
+```
+
+The script stores `embedding_model=BAAI/bge-m3` with each document and rejects
+vectors that are not 1024-dimensional.
 
 ## Outputs and retained memory
 

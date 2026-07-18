@@ -53,7 +53,7 @@ class MongoDBRetriever:
             self.use_local_embedding = use_local_embedding
 
         self.embedding_base_url = embedding_base_url or os.getenv("EMBEDDING_BASE_URL", "http://127.0.0.1:1234/v1")
-        self.embedding_model = embedding_model or os.getenv("EMBEDDING_MODEL", "namdp-ptit/ViDense")
+        self.embedding_model = embedding_model or os.getenv("EMBEDDING_MODEL", "BAAI/bge-m3")
 
         self.local_model = None
         self.embedding_client = None

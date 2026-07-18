@@ -30,7 +30,7 @@ uv run python add_embeddings.py
 
 Script này sẽ:
 - Đọc tất cả documents từ MongoDB
-- Tạo embedding vector cho mỗi document (384 dimensions)
+- Tạo embedding vector cho mỗi document (BGE-M3: 1024 dimensions)
 - Lưu vào trường `embedding`
 
 **Lưu ý:** Quá trình này có thể mất vài phút tuỳ số lượng documents.
@@ -73,7 +73,7 @@ Script này sẽ:
 ```
 
 **Lưu ý:**
-- `numDimensions: 384` cho model `bge-small-en-v1.5`
+- `numDimensions: 1024` cho `BAAI/bge-m3`
 - `similarity: cosine` → Similarity metric
 - `filter` fields → Để filter kết quả theo type/keywords
 
