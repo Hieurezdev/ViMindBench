@@ -3,6 +3,7 @@
 No test in this module opens MongoDB or calls an LLM endpoint.
 """
 import os
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -13,6 +14,7 @@ from src.mcq.application.nodes.judging import quality_gate_node
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.failure_memory import record_judge_failures, retrieve_similar_failures
 from src.mcq.workflow import route_after_quality_gate
+from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
 
 
@@ -128,6 +130,20 @@ class RegenerationRoutingTests(unittest.TestCase):
 
     def test_verified_item_never_regenerates(self) -> None:
         self.assertEqual(route_after_quality_gate({"verdict": "verified", "generation_attempt": 1, "max_generation_retries": 2}), "reflect")
+
+
+class OutputCheckpointTests(unittest.TestCase):
+    def test_flushes_only_at_the_five_item_checkpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            output_path = os.path.join(directory, "verified.jsonl")
+            quarantine_path = os.path.join(directory, "quarantine.jsonl")
+            state = {"iteration_count": 4, "output_flush_interval": 5, "output_path": output_path, "quarantine_path": quarantine_path, "verified_outputs": [{"id": "PSY-1"}], "quarantine_outputs": [{"id": "PSY-2"}], "verified_flushed_count": 0, "quarantine_flushed_count": 0}
+            self.assertEqual(flush_outputs_node(state), {})
+            state["iteration_count"] = 5
+            result = flush_outputs_node(state)
+            self.assertEqual(result, {"verified_flushed_count": 1, "quarantine_flushed_count": 1})
+            with open(output_path, encoding="utf-8") as handle:
+                self.assertEqual(len(handle.readlines()), 1)
 
 
 if __name__ == "__main__":

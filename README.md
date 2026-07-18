@@ -105,6 +105,9 @@ Valid values: `theory`, `emotion`, `educational_scenario`,
 | `--num_qa_pairs N` | Number of attempted MCQs. Verified count may be lower because failures go to quarantine. |
 | `--output_path PATH` | Verified JSONL path. Sidecars use the same basename. |
 | `--max_generation_retries N` | Retry A03 after a failed judge pass, preserving blueprint and evidence. `0` disables regeneration. |
+| `--log_level LEVEL` | Console/file level: `DEBUG`, `INFO`, `WARNING`, or `ERROR`. |
+| `--log_path PATH` | Override the default `<output>.run.log` log file. |
+| `--output_flush_interval N` | Append JSONL checkpoints after every `N` completed items; default `5`. |
 | `--levels CSV` | Comma-separated curriculum filter, e.g. `theory,emotion`. |
 
 CLI values override `.env` values for that run.
@@ -127,10 +130,13 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
 | `NUM_QA_PAIRS` | `100` | Default attempt count. |
 | `OUTPUT_PATH` | `data/output/psychology_mcq.jsonl` | Default verified-output path. |
+| `OUTPUT_FLUSH_INTERVAL` | `5` | Persist verified/quarantine records after every five completed items. |
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 adds a playbook bullet. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
+| `LOG_LEVEL` | `INFO` | Verbosity for structured node-step logging. |
+| `LOG_PATH` | `<output>.run.log` | Optional custom log-file path. |
 | `ALLOW_UNTIERED_EVIDENCE` | `true` initially | Set `false` after all main evidence has explicit Tier 1/2 metadata. |
 | `DATA_DIR`, `SOURCE_TIER` | `data/formated_data`, `tier_2` | Used only by the JSON-to-Mongo import script. |
 | `START_INDEX`, `END_INDEX` | `0` | Legacy-pipeline compatibility only; ignored by the new MCQ workflow. |
@@ -206,6 +212,25 @@ For `data/output/psychology_mcq.jsonl`, the pipeline writes:
 The first run loads [`config/initial_playbook.md`](config/initial_playbook.md).
 Later runs with the same output basename reload the playbook, used-anchor IDs,
 and judge failure memory.
+
+## Run logging
+
+Every LangGraph node logs its start/end, iteration, generation attempt, evidence
+count, DSM-5 safety-context count, quality verdict, retry route, and output
+summary. Prompts, API keys, and full evidence excerpts are intentionally not
+logged.
+
+Verified and quarantined records are checkpointed every five completed items by
+default. The final partial batch is flushed when the run ends; no previously
+checkpointed record is written twice.
+
+```bash
+uv run python main.py \
+  --levels clinical_scenario \
+  --num_qa_pairs 10 \
+  --log_level DEBUG \
+  --log_path data/output/clinical_debug.log
+```
 
 ## Tests
 

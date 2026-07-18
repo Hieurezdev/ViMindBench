@@ -22,6 +22,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num_qa_pairs", type=int, default=None, help="Override NUM_QA_PAIRS")
     parser.add_argument("--output_path", type=str, default=None, help="Override OUTPUT_PATH")
     parser.add_argument("--max_generation_retries", type=int, default=None, help="Override MAX_GENERATION_RETRIES (retries after initial generation)")
+    parser.add_argument("--log_level", type=str, default=None, help="Override LOG_LEVEL: DEBUG, INFO, WARNING, ERROR")
+    parser.add_argument("--log_path", type=str, default=None, help="Optional run log path; defaults to <output>.run.log")
+    parser.add_argument("--output_flush_interval", type=int, default=None, help="Override OUTPUT_FLUSH_INTERVAL; defaults to 5 completed items")
     parser.add_argument(
         "--levels",
         type=str,
@@ -142,6 +145,15 @@ def main():
             raise SystemExit("error: --max_generation_retries must be >= 0")
         os.environ["MAX_GENERATION_RETRIES"] = str(args.max_generation_retries)
 
+    if args.log_level:
+        os.environ["LOG_LEVEL"] = args.log_level
+    if args.log_path:
+        os.environ["LOG_PATH"] = args.log_path
+    if args.output_flush_interval is not None:
+        if args.output_flush_interval < 1:
+            raise SystemExit("error: --output_flush_interval must be >= 1")
+        os.environ["OUTPUT_FLUSH_INTERVAL"] = str(args.output_flush_interval)
+
     try:
         curriculum_levels = parse_levels(args.levels)
     except ValueError as exc:
@@ -152,6 +164,11 @@ def main():
     if args.model_local and "USE_LOCAL_EMBEDDING" not in os.environ:
         os.environ["USE_LOCAL_EMBEDDING"] = "true"
         print("Auto-enabling local embedding because local model endpoint is used")
+
+    output_path = os.getenv("OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl")
+    from src.mcq.infrastructure.observability import configure_logging
+    logger = configure_logging(output_path=output_path, level=os.getenv("LOG_LEVEL", "INFO"), log_path=os.getenv("LOG_PATH"))
+    logger.info("Run requested: levels=%s; target_attempts=%s; max_generation_retries=%s", ",".join(curriculum_levels), os.getenv("NUM_QA_PAIRS", "5000"), os.getenv("MAX_GENERATION_RETRIES", "2"))
 
     from src.retriever import Retriever
     from src.mcq.workflow import create_mcq_graph
@@ -166,10 +183,7 @@ def main():
 
     # ── 3. Config ─────────────────────────────────────────────────────────
     num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
-    output_path = os.getenv(
-        "OUTPUT_PATH",
-        "data/output/generated_psychology_multiple_choice.jsonl"
-    )
+    output_path = os.getenv("OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl")
 
     print(f"Running pipeline to generate {num_qa_pairs} QA pairs...")
     print(f"Curriculum levels: {', '.join(curriculum_levels)}")
@@ -182,6 +196,7 @@ def main():
     anchor_sidecar = os.path.splitext(output_path)[0] + ".anchors.json"
     playbook_path = os.path.splitext(output_path)[0] + ".playbook.md"
     judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
+    quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
     used_anchor_ids = list(set(load_used_anchor_ids(existing_output_files) + load_anchor_sidecar(anchor_sidecar)))
     print(f"Total used anchor_ids (will be skipped): {len(used_anchor_ids)}")
 
@@ -191,6 +206,11 @@ def main():
         "max_iterations": num_qa_pairs,
         "generation_attempt": 0,
         "max_generation_retries": int(os.getenv("MAX_GENERATION_RETRIES", "2")),
+        "output_path": output_path,
+        "quarantine_path": quarantine_path,
+        "output_flush_interval": int(os.getenv("OUTPUT_FLUSH_INTERVAL", "5")),
+        "verified_flushed_count": 0,
+        "quarantine_flushed_count": 0,
         "curriculum_levels": curriculum_levels,
         "anchor": None,
         "blueprint": {},
@@ -217,17 +237,12 @@ def main():
     # ── 7. Save verified data and a separate quarantine audit trail ───────
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     verified_items = final_state.get("verified_outputs", [])
-    if verified_items:
-        print(f"Saving {len(verified_items)} verified items to {output_path}...")
-        with open(output_path, "a", encoding="utf-8") as f:
-            for entry in verified_items:
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
     quarantine_items = final_state.get("quarantine_outputs", [])
-    if quarantine_items:
-        with open(quarantine_path, "a", encoding="utf-8") as f:
-            for entry in quarantine_items:
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    from src.mcq.infrastructure.output_writer import append_jsonl
+    final_verified = append_jsonl(output_path, verified_items[final_state.get("verified_flushed_count", 0):])
+    final_quarantine = append_jsonl(quarantine_path, quarantine_items[final_state.get("quarantine_flushed_count", 0):])
+    if final_verified or final_quarantine:
+        logger.info("Final flush | verified=%s quarantine=%s", final_verified, final_quarantine)
     with open(playbook_path, "w", encoding="utf-8") as f:
         f.write(final_state.get("playbook", ""))
     with open(anchor_sidecar, "w", encoding="utf-8") as f:
@@ -237,6 +252,7 @@ def main():
 
     print(f"Done. Verified={len(verified_items)}, quarantined={len(quarantine_items)}.")
     print(f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; judge memory: {judge_memory_path}")
+    logger.info("Run complete: verified=%s; quarantined=%s; output=%s", len(verified_items), len(quarantine_items), output_path)
 
 
 if __name__ == "__main__":

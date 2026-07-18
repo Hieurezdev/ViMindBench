@@ -10,6 +10,11 @@ class MCQState(TypedDict, total=False):
     max_iterations: int
     generation_attempt: int
     max_generation_retries: int
+    output_path: str
+    quarantine_path: str
+    output_flush_interval: int
+    verified_flushed_count: int
+    quarantine_flushed_count: int
     curriculum_levels: List[str]
     used_anchor_ids: List[str]
     anchor: Optional[Dict[str, Any]]
