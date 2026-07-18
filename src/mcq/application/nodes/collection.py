@@ -22,4 +22,6 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
     key = "verified_outputs" if state.get("verdict") == "verified" else "quarantine_outputs"
     if key == "verified_outputs":
         record.pop("_audit", None)
-    return {key: [*state.get(key, []), record], "iteration_count": state.get("iteration_count", 0) + 1, "anchor": None, "mcq": {}, "judge_reports": {}, "quarantine_reason": []}
+    return {key: [*state.get(key, []), record], "iteration_count": state.get("iteration_count", 0) + 1,
+            "anchor": None, "mcq": {}, "judge_reports": {}, "judge_feedback": [],
+            "generation_attempt": 0, "dsm5_safety_docs": [], "quarantine_reason": []}

@@ -12,6 +12,7 @@ from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.judging import quality_gate_node
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.failure_memory import record_judge_failures, retrieve_similar_failures
+from src.mcq.workflow import route_after_quality_gate
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
 
 
@@ -116,6 +117,17 @@ class OutputSchemaTests(unittest.TestCase):
         self.assertEqual(set(output), {"id", "question", "options", "answer", "evidence_refs", "distractor_analysis", "reasoning", "metadata", "split", "validation"})
         self.assertEqual(output["validation"]["evidence_status"], "pass")
         self.assertNotIn("_audit", output)
+
+
+class RegenerationRoutingTests(unittest.TestCase):
+    def test_failed_first_attempt_retries(self) -> None:
+        self.assertEqual(route_after_quality_gate({"verdict": "quarantine", "generation_attempt": 1, "max_generation_retries": 2}), "prepare_regeneration")
+
+    def test_failed_item_quarantines_after_retry_budget(self) -> None:
+        self.assertEqual(route_after_quality_gate({"verdict": "quarantine", "generation_attempt": 3, "max_generation_retries": 2}), "reflect")
+
+    def test_verified_item_never_regenerates(self) -> None:
+        self.assertEqual(route_after_quality_gate({"verdict": "verified", "generation_attempt": 1, "max_generation_retries": 2}), "reflect")
 
 
 if __name__ == "__main__":

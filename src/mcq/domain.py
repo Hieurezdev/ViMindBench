@@ -8,6 +8,8 @@ LEVELS = ("theory", "emotion", "educational_scenario", "clinical_scenario")
 class MCQState(TypedDict, total=False):
     iteration_count: int
     max_iterations: int
+    generation_attempt: int
+    max_generation_retries: int
     curriculum_levels: List[str]
     used_anchor_ids: List[str]
     anchor: Optional[Dict[str, Any]]
@@ -16,6 +18,7 @@ class MCQState(TypedDict, total=False):
     dsm5_safety_docs: List[Document]
     mcq: Dict[str, Any]
     judge_reports: Dict[str, Dict[str, Any]]
+    judge_feedback: List[Dict[str, Any]]
     verdict: str
     quarantine_reason: List[str]
     verified_outputs: List[Dict[str, Any]]

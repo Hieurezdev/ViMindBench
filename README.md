@@ -2,7 +2,8 @@
 
 Pipeline sinh câu hỏi trắc nghiệm tâm lý có evidence gate. LangGraph điều phối
 A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety judge
-→ verified hoặc quarantine → ACE playbook và judge failure memory.
+→ bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
+judge failure memory.
 
 ```mermaid
 flowchart LR
@@ -103,6 +104,7 @@ Valid values: `theory`, `emotion`, `educational_scenario`,
 | `--embedding_base_url URL` | Override `EMBEDDING_BASE_URL`. |
 | `--num_qa_pairs N` | Number of attempted MCQs. Verified count may be lower because failures go to quarantine. |
 | `--output_path PATH` | Verified JSONL path. Sidecars use the same basename. |
+| `--max_generation_retries N` | Retry A03 after a failed judge pass, preserving blueprint and evidence. `0` disables regeneration. |
 | `--levels CSV` | Comma-separated curriculum filter, e.g. `theory,emotion`. |
 
 CLI values override `.env` values for that run.
@@ -128,6 +130,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 adds a playbook bullet. |
+| `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
 | `ALLOW_UNTIERED_EVIDENCE` | `true` initially | Set `false` after all main evidence has explicit Tier 1/2 metadata. |
 | `DATA_DIR`, `SOURCE_TIER` | `data/formated_data`, `tier_2` | Used only by the JSON-to-Mongo import script. |
 | `START_INDEX`, `END_INDEX` | `0` | Legacy-pipeline compatibility only; ignored by the new MCQ workflow. |

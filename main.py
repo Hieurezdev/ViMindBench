@@ -21,6 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--embedding_base_url", type=str, default=None, help="Override EMBEDDING_BASE_URL")
     parser.add_argument("--num_qa_pairs", type=int, default=None, help="Override NUM_QA_PAIRS")
     parser.add_argument("--output_path", type=str, default=None, help="Override OUTPUT_PATH")
+    parser.add_argument("--max_generation_retries", type=int, default=None, help="Override MAX_GENERATION_RETRIES (retries after initial generation)")
     parser.add_argument(
         "--levels",
         type=str,
@@ -136,6 +137,11 @@ def main():
     if args.output_path:
         os.environ["OUTPUT_PATH"] = args.output_path
 
+    if args.max_generation_retries is not None:
+        if args.max_generation_retries < 0:
+            raise SystemExit("error: --max_generation_retries must be >= 0")
+        os.environ["MAX_GENERATION_RETRIES"] = str(args.max_generation_retries)
+
     try:
         curriculum_levels = parse_levels(args.levels)
     except ValueError as exc:
@@ -183,6 +189,8 @@ def main():
     initial_state = {
         "iteration_count": 0,
         "max_iterations": num_qa_pairs,
+        "generation_attempt": 0,
+        "max_generation_retries": int(os.getenv("MAX_GENERATION_RETRIES", "2")),
         "curriculum_levels": curriculum_levels,
         "anchor": None,
         "blueprint": {},
@@ -190,6 +198,7 @@ def main():
         "dsm5_safety_docs": [],
         "mcq": {},
         "judge_reports": {},
+        "judge_feedback": [],
         "verdict": "",
         "quarantine_reason": [],
         "verified_outputs": [],

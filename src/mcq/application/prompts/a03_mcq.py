@@ -3,7 +3,7 @@ import json
 from typing import Any, Dict, List
 
 
-def render(*, blueprint: Dict[str, Any], playbook: str, evidence: List[Dict[str, Any]]) -> str:
+def render(*, blueprint: Dict[str, Any], playbook: str, evidence: List[Dict[str, Any]], judge_feedback: List[Dict[str, Any]]) -> str:
     return f"""You are A03, a Vietnamese psychology MCQ writer. Write one four-option,
 single-best-answer question using ONLY the evidence excerpts below.
 Do not expose chain-of-thought. The rationale must be a concise explanation of
@@ -12,6 +12,9 @@ diagnose, prescribe medication, imply certainty, or stigmatize a person.
 Blueprint: {json.dumps(blueprint, ensure_ascii=False)}
 Relevant ACE playbook bullets: {playbook}
 Evidence: {json.dumps(evidence, ensure_ascii=False)}
+Earlier judge feedback for this same blueprint and evidence: {json.dumps(judge_feedback, ensure_ascii=False)}
+If feedback is present, repair only the identified flaw. Keep the same topic,
+cognitive skill, difficulty, option count, and evidence-grounding requirement.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
