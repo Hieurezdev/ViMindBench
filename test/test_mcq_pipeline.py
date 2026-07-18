@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
+from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids
 from src.mcq.application.nodes.judging import quality_gate_node
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.failure_memory import record_judge_failures, retrieve_similar_failures
@@ -70,6 +71,12 @@ class EvidencePolicyTests(unittest.TestCase):
 
 
 class QualityAndPlaybookTests(unittest.TestCase):
+    def test_generator_normalizes_object_evidence_references(self) -> None:
+        self.assertEqual(
+            _normalize_evidence_ref_ids([{"chunk_id": "chunk-1"}, "chunk-2", {"chunk_id": "chunk-1"}]),
+            ["chunk-1", "chunk-2"],
+        )
+
     def test_quality_gate_accepts_complete_grounded_item(self) -> None:
         state = passing_state()
         self.assertEqual(quality_gate_node(state)["verdict"], "verified")
@@ -85,6 +92,13 @@ class QualityAndPlaybookTests(unittest.TestCase):
         state = passing_state()
         state["evidence_docs"] = [doc(f"chunk-{index}", "Tier 1") for index in range(4)]
         state["mcq"]["evidence_refs"] = [f"chunk-{index}" for index in range(4)]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("invalid_evidence_refs", result["quarantine_reason"])
+
+    def test_quality_gate_quarantines_object_evidence_references_without_crashing(self) -> None:
+        state = passing_state()
+        state["mcq"]["evidence_refs"] = [{"chunk_id": "DSM5-DEP-014"}]
         result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_evidence_refs", result["quarantine_reason"])

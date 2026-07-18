@@ -1,5 +1,5 @@
 """A04–A07 quality-judging nodes."""
-from typing import Any, Dict, Callable
+from typing import Any, Dict, Callable, Set
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
 from ...infrastructure.llm_gateway import request_json
@@ -47,8 +47,11 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     if answer and set(state.get("mcq", {}).get("distractor_analysis", {})) != (set(options) - {answer}): errors.append("incomplete_distractor_analysis")
     if not (1 <= len(state.get("evidence_docs", [])) <= 3): errors.append("evidence_count_not_1_to_3")
     available = {ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))}
-    cited = set(state.get("mcq", {}).get("evidence_refs", []))
-    if not (1 <= len(cited) <= 3) or not cited.issubset(available): errors.append("invalid_evidence_refs")
+    raw_cited = state.get("mcq", {}).get("evidence_refs", [])
+    valid_cited_shape = isinstance(raw_cited, list) and all(isinstance(value, str) for value in raw_cited)
+    cited: Set[str] = set(raw_cited) if valid_cited_shape else set()
+    if not valid_cited_shape or not (1 <= len(cited) <= 3) or not cited.issubset(available):
+        errors.append("invalid_evidence_refs")
     for judge, report in reports.items():
         if not report.get("passed", False): errors.extend(f"{judge}:{issue}" for issue in report.get("issues", ["failed"]))
     return {"verdict": "verified" if not errors else "quarantine", "quarantine_reason": errors}

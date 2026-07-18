@@ -1,14 +1,15 @@
 """A07 outcome collection and train/quarantine record serialization."""
 import os
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Set
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
 
 
 def collect_node(state: MCQState) -> Dict[str, Any]:
     blueprint, mcq, reports = state.get("blueprint", {}), state.get("mcq", {}), state.get("judge_reports", {})
-    cited = set(mcq.get("evidence_refs", []))
+    raw_cited = mcq.get("evidence_refs", [])
+    cited: Set[str] = set(raw_cited) if isinstance(raw_cited, list) and all(isinstance(value, str) for value in raw_cited) else set()
     references = [{"chunk_id": ref["chunk_id"], "relation": "supports_answer", "support_strength": ref["score"]}
                   for ref in evidence_refs(state.get("evidence_docs", [])) if ref["chunk_id"] in cited]
     record = {"id": f"PSY-{state.get('iteration_count', 0) + 1:06d}", "question": mcq.get("question", ""),
