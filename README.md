@@ -5,6 +5,11 @@ A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety
 → bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
 judge failure memory.
 
+Mỗi record verified bắt buộc có `evidence_refs` gồm 1–3 `chunk_id` đã retrieve;
+citation nằm trong metadata/audit, không xuất hiện trong question stem hay options.
+Pipeline không lưu `<think>` tự do. Trường `reasoning.steps` chỉ chứa audit steps
+ngắn, có thể kiểm tra được, không phải chain-of-thought.
+
 ```mermaid
 flowchart LR
     A01["A01 Plan"] --> A02["A02 Retrieve\nTier 1/2"] --> A03["A03 Generate"]

@@ -48,7 +48,7 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     if not (1 <= len(state.get("evidence_docs", [])) <= 3): errors.append("evidence_count_not_1_to_3")
     available = {ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))}
     cited = set(state.get("mcq", {}).get("evidence_refs", []))
-    if not cited or not cited.issubset(available): errors.append("invalid_evidence_refs")
+    if not (1 <= len(cited) <= 3) or not cited.issubset(available): errors.append("invalid_evidence_refs")
     for judge, report in reports.items():
         if not report.get("passed", False): errors.extend(f"{judge}:{issue}" for issue in report.get("issues", ["failed"]))
     return {"verdict": "verified" if not errors else "quarantine", "quarantine_reason": errors}

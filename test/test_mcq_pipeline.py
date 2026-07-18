@@ -81,6 +81,14 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_evidence_refs", result["quarantine_reason"])
 
+    def test_quality_gate_requires_at_most_three_citations(self) -> None:
+        state = passing_state()
+        state["evidence_docs"] = [doc(f"chunk-{index}", "Tier 1") for index in range(4)]
+        state["mcq"]["evidence_refs"] = [f"chunk-{index}" for index in range(4)]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("invalid_evidence_refs", result["quarantine_reason"])
+
     def test_reflector_counter_updates_only_selected_bullet(self) -> None:
         playbook = "## STRATEGIES & INSIGHTS\n[str-00001] helpful=0 harmful=0 :: Rule\n[str-00002] helpful=0 harmful=0 :: Other"
         updated = _update_counters(playbook, ["str-00001"], "helpful")

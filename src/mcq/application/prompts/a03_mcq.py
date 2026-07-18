@@ -15,6 +15,18 @@ Evidence: {json.dumps(evidence, ensure_ascii=False)}
 Earlier judge feedback for this same blueprint and evidence: {json.dumps(judge_feedback, ensure_ascii=False)}
 If feedback is present, repair only the identified flaw. Keep the same topic,
 cognitive skill, difficulty, option count, and evidence-grounding requirement.
+You MUST cite one to three retrieved chunk_id values in evidence_refs. Each cited
+chunk must directly support the keyed option. Do not mention sources, context,
+documents, citations, or chunk IDs in the question stem or options.
+Write the Vietnamese stem and options as if the psychology knowledge is your own
+professional knowledge. Never say or imply that the item comes from supplied
+material. In particular, the question and all four options MUST NOT contain
+"ngữ cảnh", "tài liệu đã cho", "đoạn văn", "dựa vào tài liệu", "theo tài liệu",
+"theo đoạn văn", "nguồn", "trích dẫn", or equivalent wording.
+Return exactly four options, with exactly the keys A, B, C, and D: no extra option,
+no missing option, no combined option, and no "tất cả các đáp án trên" / "cả A và B".
+Exactly one option must be the best answer, and answer must be exactly one of
+A, B, C, or D. Do not add explanatory prose before or after the JSON.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
