@@ -17,7 +17,7 @@ backup.zip
 /data/
 *.json
 *.jsonl
-
+.ruff-cache
 # Environment variables
 .env
 .env.local

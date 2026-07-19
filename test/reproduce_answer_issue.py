@@ -1,5 +1,5 @@
-
 import re
+
 
 def test_answer_parsing():
     # Helper to clean up output
@@ -9,7 +9,7 @@ def test_answer_parsing():
 
     # The NEW Regex from nodes.py
     # Includes: <answer>, (answer), Answer:, (answer>
-    new_regex = r'(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)'
+    new_regex = r"(?:<answer>|\(answer\)|Answer:|\(answer>)\s*(.*?)(?:</answer>|$)"
 
     print(f"Testing Regex: {new_regex}\n")
 
@@ -21,7 +21,8 @@ def test_answer_parsing():
 </answer>"""
     ans1 = parse(new_regex, case1)
     print(f"Case 1 (answer): {'PASS' if ans1.startswith('Câu trả lời') else 'FAIL'}")
-    if not ans1.startswith('Câu trả lời'): print(f"  Got: {ans1}")
+    if not ans1.startswith("Câu trả lời"):
+        print(f"  Got: {ans1}")
 
     # Case 2: Standard <answer> tag
     case2 = """
@@ -40,7 +41,8 @@ Normal answer.
 </answer>"""
     ans3 = parse(new_regex, case3)
     print(f"Case 3 (answer>: {'PASS' if ans3 == 'Đây là câu trả lời mới.' else 'FAIL'}")
-    if ans3 != 'Đây là câu trả lời mới.': print(f"  Got: {ans3}")
+    if ans3 != "Đây là câu trả lời mới.":
+        print(f"  Got: {ans3}")
 
     # Case 4: Answer: variation
     case4 = """
@@ -50,6 +52,7 @@ Final Answer here.
 """
     ans4 = parse(new_regex, case4)
     print(f"Case 4 Answer:: {'PASS' if ans4 == 'Final Answer here.' else 'FAIL'}")
+
 
 if __name__ == "__main__":
     test_answer_parsing()

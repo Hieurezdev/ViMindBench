@@ -1,9 +1,16 @@
 """A03 MCQ Generator prompt."""
+
 import json
 from typing import Any, Dict, List
 
 
-def render(*, blueprint: Dict[str, Any], playbook: str, evidence: List[Dict[str, Any]], judge_feedback: List[Dict[str, Any]]) -> str:
+def render(
+    *,
+    blueprint: Dict[str, Any],
+    playbook: str,
+    evidence: List[Dict[str, Any]],
+    judge_feedback: List[Dict[str, Any]],
+) -> str:
     return f"""You are A03, a Vietnamese psychology MCQ writer. Write one four-option,
 single-best-answer question using ONLY the evidence excerpts below.
 Do not expose chain-of-thought. The rationale must be a concise explanation of

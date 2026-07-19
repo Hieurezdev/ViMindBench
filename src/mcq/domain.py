@@ -1,4 +1,5 @@
 """Domain state and constants; no OpenAI, MongoDB, or LangGraph wiring."""
+
 from typing import Any, Dict, List, Optional, TypedDict
 from langchain_core.documents import Document
 

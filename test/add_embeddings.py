@@ -5,6 +5,7 @@ Use ``--overwrite`` when changing embedding models. Mixing vectors from
 different models in one Atlas vector index makes retrieval invalid even when
 their dimensions are identical.
 """
+
 import argparse
 import os
 from typing import Iterable
@@ -34,10 +35,16 @@ def batched(items: Iterable[dict], size: int):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Create MongoDB embeddings with the configured embedding model")
-    parser.add_argument("--collection", default=os.getenv("MONGO_COLLECTION_NAME", "mental"))
+    parser = argparse.ArgumentParser(
+        description="Create MongoDB embeddings with the configured embedding model"
+    )
+    parser.add_argument(
+        "--collection", default=os.getenv("MONGO_COLLECTION_NAME", "mental")
+    )
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--overwrite", action="store_true", help="Replace existing embedding fields")
+    parser.add_argument(
+        "--overwrite", action="store_true", help="Replace existing embedding fields"
+    )
     args = parser.parse_args()
 
     uri = os.getenv("MONGO_URI")
@@ -50,7 +57,9 @@ def main() -> None:
 
     if use_local:
         if SentenceTransformer is None:
-            raise SystemExit("sentence-transformers is required when USE_LOCAL_EMBEDDING=true")
+            raise SystemExit(
+                "sentence-transformers is required when USE_LOCAL_EMBEDDING=true"
+            )
         print(f"Loading local embedding model: {model_name}")
         encoder = SentenceTransformer(model_name, trust_remote_code=True)
 
@@ -62,22 +71,45 @@ def main() -> None:
         print(f"Using embedding endpoint: {endpoint}; model: {model_name}")
 
         def embed(texts: list[str]) -> list[list[float]]:
-            return [item.embedding for item in client.embeddings.create(model=model_name, input=texts).data]
+            return [
+                item.embedding
+                for item in client.embeddings.create(model=model_name, input=texts).data
+            ]
 
     query = {} if args.overwrite else {"embedding": {"$exists": False}}
     total = collection.count_documents(query)
-    print(f"Collection={args.collection}; candidates={total}; overwrite={args.overwrite}")
+    print(
+        f"Collection={args.collection}; candidates={total}; overwrite={args.overwrite}"
+    )
     updated = 0
     try:
-        for docs in tqdm(batched(collection.find(query, {"content": 1, "summary": 1}).batch_size(args.batch_size), args.batch_size), total=(total + args.batch_size - 1) // args.batch_size):
-            usable = [(doc, doc.get("content") or doc.get("summary") or "") for doc in docs]
+        for docs in tqdm(
+            batched(
+                collection.find(query, {"content": 1, "summary": 1}).batch_size(
+                    args.batch_size
+                ),
+                args.batch_size,
+            ),
+            total=(total + args.batch_size - 1) // args.batch_size,
+        ):
+            usable = [
+                (doc, doc.get("content") or doc.get("summary") or "") for doc in docs
+            ]
             usable = [(doc, text) for doc, text in usable if text.strip()]
             if not usable:
                 continue
             vectors = embed([text for _, text in usable])
             if any(len(vector) != 1024 for vector in vectors):
-                raise RuntimeError("Expected 1024-dimensional BGE-M3 vectors; check EMBEDDING_MODEL and Atlas index configuration")
-            operations = [UpdateOne({"_id": doc["_id"]}, {"$set": {"embedding": vector, "embedding_model": model_name}}) for (doc, _), vector in zip(usable, vectors)]
+                raise RuntimeError(
+                    "Expected 1024-dimensional BGE-M3 vectors; check EMBEDDING_MODEL and Atlas index configuration"
+                )
+            operations = [
+                UpdateOne(
+                    {"_id": doc["_id"]},
+                    {"$set": {"embedding": vector, "embedding_model": model_name}},
+                )
+                for (doc, _), vector in zip(usable, vectors)
+            ]
             collection.bulk_write(operations, ordered=False)
             updated += len(operations)
     finally:
