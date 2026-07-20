@@ -13,4 +13,10 @@ Source summary: {summary}
 ACE playbook (choose only relevant bullet IDs): {playbook}
 Return JSON only: {{"level":"{level}","topic":"...","subtopic":"...","skill":"...",
 "difficulty":"easy|medium|hard","num_options":4,"retrieval_query":"...",
-"requires_emobench":true|false,"clinical_guardrail":"...","playbook_bullet_ids":["str-00001"]}}."""
+"requires_emobench":true|false,"emobench":{{"task":"EU|EA",
+"eu_category":"complex_emotions|emotional_cues|personal_beliefs_experiences|perspective_taking|null",
+"relationship_type":"personal|social|null","problem_owner":"self|others|null",
+"question_type":"response|action|null}},"clinical_guardrail":"...","playbook_bullet_ids":["str-00001"]}}.
+For level emotion, choose exactly one EmoBench task: EU for identifying an
+emotion/cause, or EA for selecting an effective response/action. For every other
+level, set emobench to null."""

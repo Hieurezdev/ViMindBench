@@ -3,6 +3,7 @@ from typing import Any, Dict, Callable, Set
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
 from ...infrastructure.llm_gateway import request_json
+from ..emobench import judge_context, validate_judge_report
 from ..failure_memory import prompt_context, retrieve_similar_failures
 from ..prompts import a04_evidence_judge, a05_single_answer_judge, a06_safety_bias_judge
 
@@ -31,11 +32,13 @@ def single_answer_judge_node(state: MCQState) -> Dict[str, Any]:
 
 
 def safety_bias_judge_node(state: MCQState) -> Dict[str, Any]:
-    return _report(state, "ei_safety_bias", _run_judge(
+    report = _run_judge(
         state, "ei_safety_bias", a06_safety_bias_judge.render,
         level=state["blueprint"].get("level", ""),
         dsm5_safety_context=evidence_refs(state.get("dsm5_safety_docs", [])),
-    ))
+        emobench_context=judge_context(state["blueprint"]),
+    )
+    return _report(state, "ei_safety_bias", validate_judge_report(report, state["blueprint"]))
 
 
 def quality_gate_node(state: MCQState) -> Dict[str, Any]:

@@ -14,11 +14,73 @@ ngắn, có thể kiểm tra được, không phải chain-of-thought.
 flowchart LR
     A01["A01 Plan"] --> A02["A02 Retrieve\nTier 1/2"] --> A03["A03 Generate"]
     A03 --> A04["A04 Evidence"] --> A05["A05 Single answer"]
-    A05 --> DSM["Clinical: DSM-5\nsafety context"] --> A06["A06 EI/Safety/Bias"] --> A07{"A07 Gate"}
+    A05 --> Kind{"Question type"}
+    Kind -->|emotion| EB["EmoBench EU/EA\nstructured rubric"] --> A06["A06 EI/Safety/Bias"]
+    Kind -->|clinical| DSM["DSM-5\nsafety context"] --> A06
+    Kind -->|other| A06
+    A06 --> A07{"A07 Gate"}
     A07 -->|pass| V[("Verified JSONL")]
     A07 -->|fail| Q[("Quarantine JSONL")] --> A08["A08 Reflect"] --> A09["A09 Curate"]
     A09 --> PB[("ACE Playbook")]
 ```
+
+## EmoBench cho câu hỏi cảm xúc
+
+Pipeline dùng EmoBench như **rubric cho agent A06**, không dùng sample EmoBench
+làm nguồn kiến thức hay bằng chứng đáp án.
+
+1. A01 gán blueprint `emobench` cho mọi item `emotion`:
+   - `EU` (*Emotional Understanding*) khi câu hỏi yêu cầu nhận diện cảm xúc hoặc nguyên nhân cảm xúc.
+   - `EA` (*Emotional Application*) khi câu hỏi yêu cầu chọn phản hồi/hành động phù hợp.
+2. A03 nhận blueprint này để giữ đúng loại câu hỏi.
+3. A06 trả một report có cấu trúc, chấm từng criterion `pass` hoặc `fail`.
+4. Thiếu criterion, sai task EU/EA, hoặc có một criterion `fail` đều khiến A07
+   quarantine item và gửi phản hồi cho lần generate lại.
+
+### Rubric EU
+
+EU dùng một category: `complex_emotions`, `emotional_cues`,
+`personal_beliefs_experiences`, hoặc `perspective_taking`. A06 bắt buộc kiểm:
+
+- `emotion_recognition`
+- `emotion_cause_separation`
+- `category_fit`
+- `perspective_taking`
+
+### Rubric EA
+
+EA ghi rõ các chiều `relationship_type` (`personal`/`social`), `problem_owner`
+(`self`/`others`) và `question_type` (`response`/`action`). A06 bắt buộc kiểm:
+
+- `perspective_taking`
+- `context_sensitive_response`
+- `relationship_fit`
+- `problem_owner_fit`
+- `response_action_fit`
+
+Ví dụ phần metadata/validation của một item cảm xúc đã verified:
+
+```json
+{
+  "metadata": {
+    "emobench": {
+      "enabled": true,
+      "task": "EA",
+      "relationship_type": "personal",
+      "problem_owner": "others",
+      "question_type": "response"
+    }
+  },
+  "validation": {
+    "emobench_status": "pass"
+  }
+}
+```
+
+Các ví dụ trong `EmoBench/data/EU.jsonl` và `EmoBench/data/EA.jsonl` chỉ phù hợp
+để regression-test judge hoặc đo chất lượng model judge theo category. Chúng
+không được retrieve, prompt-inject, hay trích dẫn trong `evidence_refs`; evidence
+của MCQ vẫn chỉ là 1–3 chunk Tier 1/2 từ MongoDB.
 
 ## Requirements
 

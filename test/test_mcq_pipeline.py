@@ -12,6 +12,7 @@ from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids
 from src.mcq.application.nodes.judging import quality_gate_node
+from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.failure_memory import record_judge_failures, retrieve_similar_failures
 from src.mcq.workflow import route_after_quality_gate
@@ -68,6 +69,23 @@ class EvidencePolicyTests(unittest.TestCase):
         with patch.dict(os.environ, {"ALLOW_UNTIERED_EVIDENCE": "true"}):
             eligible = select_eligible_documents([doc("legacy", None)])
         self.assertEqual([item.metadata["chunk_id"] for item in eligible], ["legacy"])
+
+
+class EmoBenchIntegrationTests(unittest.TestCase):
+    def test_emotion_blueprint_is_normalized_to_an_eu_task(self) -> None:
+        result = normalize_blueprint_emobench({"task": "EU", "eu_category": "emotional_cues"}, enabled=True)
+        self.assertEqual(result, {"enabled": True, "task": "EU", "eu_category": "emotional_cues"})
+
+    def test_ea_report_requires_every_task_criterion(self) -> None:
+        blueprint = {"emobench": normalize_blueprint_emobench({"task": "EA", "relationship_type": "social", "problem_owner": "others", "question_type": "action"}, enabled=True)}
+        context = judge_context(blueprint)
+        report = {"passed": True, "issues": [], "emobench": {"task": "EA", "criteria": {name: "pass" for name in context["criteria"]}}}
+        self.assertTrue(validate_judge_report(report, blueprint)["passed"])
+
+        report["emobench"]["criteria"].pop("relationship_fit")
+        checked = validate_judge_report(report, blueprint)
+        self.assertFalse(checked["passed"])
+        self.assertIn("emobench_missing_criterion:relationship_fit", checked["issues"])
 
 
 class QualityAndPlaybookTests(unittest.TestCase):

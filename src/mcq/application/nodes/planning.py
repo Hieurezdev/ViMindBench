@@ -5,6 +5,7 @@ from ...domain import LEVELS, MCQState
 from ...infrastructure.evidence import select_eligible_documents
 from ...infrastructure.llm_gateway import request_json
 from ...infrastructure.mongo_anchor_repository import select_unused_anchor
+from ..emobench import normalize_blueprint_emobench
 from ..prompts import a01_curriculum
 
 
@@ -23,6 +24,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     blueprint["level"] = level
     blueprint["num_options"] = 4
     blueprint["requires_emobench"] = level == "emotion"
+    blueprint["emobench"] = normalize_blueprint_emobench(blueprint.get("emobench"), enabled=level == "emotion")
     blueprint["playbook_bullet_ids"] = blueprint.get("playbook_bullet_ids", [])
     return {"blueprint": blueprint}
 
