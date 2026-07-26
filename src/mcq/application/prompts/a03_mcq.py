@@ -11,6 +11,25 @@ def render(
     evidence: List[Dict[str, Any]],
     judge_feedback: List[Dict[str, Any]],
 ) -> str:
+    difficulty_instruction = {
+        "easy": (
+            "The blueprint difficulty is 'easy' (Bloom's 1-2). Test direct recall, definitions, or basic concepts. "
+            "Distractors should be plausible but clearly incorrect to someone who knows the basic facts. "
+            "Avoid overly complex reasoning or tricky wording."
+        ),
+        "medium": (
+            "The blueprint difficulty is 'medium' (Bloom's 3-4). Require applying concepts or analyzing a straightforward vignette. "
+            "The correct answer must require understanding relationships between concepts, not just keyword matching. "
+            "Distractors should represent common misconceptions or plausible but incorrect applications."
+        ),
+        "hard": (
+            "The blueprint difficulty is 'hard' (Bloom's 5-6). Require complex synthesis, differential analysis, or nuanced evaluation. "
+            "The key MUST NOT be identifiable from surface test-taking cues. Balance option length, grammar, specificity, certainty, "
+            "and qualification across A–D. The key must not be the only nuanced, comprehensive, or carefully hedged option. "
+            "Distractors should be highly plausible and represent near-miss clinical or theoretical judgments."
+        )
+    }.get(blueprint.get("difficulty", "medium"), "")
+
     return f"""You are A03, a Vietnamese psychology MCQ writer. Write one four-option,
 single-best-answer question using ONLY the evidence excerpts below.
 Do not expose chain-of-thought. The rationale must be a concise explanation of
@@ -38,11 +57,7 @@ Return exactly four options, with exactly the keys A, B, C, and D: no extra opti
 no missing option, no combined option, and no "tất cả các đáp án trên" / "cả A và B".
 Exactly one option must be the best answer, and answer must be exactly one of
 A, B, C, or D. Do not add explanatory prose before or after the JSON.
-When blueprint difficulty is "hard", the key MUST NOT be identifiable from
-surface test-taking cues. Balance option length, grammar, specificity, certainty,
-and qualification across A–D. The key must require the stated psychological
-reasoning and evidence; it must not be the only nuanced, comprehensive, or
-carefully hedged option.
+{difficulty_instruction}
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
