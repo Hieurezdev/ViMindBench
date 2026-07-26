@@ -6,7 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Simple global context pattern for the retriever to be accessible by nodes
-builtins.RETRIEVER = None
+builtins.RETRIEVER = None  # type: ignore
 
 
 def parse_args() -> argparse.Namespace:
@@ -282,7 +282,7 @@ def main():
     # ── 1. Retriever ──────────────────────────────────────────────────────
     print("Initializing pipeline...")
     retriever = Retriever()
-    builtins.RETRIEVER = retriever
+    builtins.RETRIEVER = retriever  # type: ignore
 
     # ── 2. Graph ──────────────────────────────────────────────────────────
     app = create_mcq_graph()

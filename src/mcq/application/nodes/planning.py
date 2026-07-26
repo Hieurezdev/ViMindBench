@@ -21,7 +21,9 @@ def select_anchor_node(state: MCQState) -> Dict[str, Any]:
 
 
 def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
-    anchor = state["anchor"]
+    anchor = state.get("anchor")
+    if not anchor:
+        raise ValueError("curriculum_planner_node called with anchor=None. Graph should have routed to END.")
     levels = state.get("curriculum_levels", list(LEVELS))
     iteration = state.get("iteration_count", 0)
     level = levels[iteration % len(levels)]

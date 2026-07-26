@@ -26,8 +26,8 @@ logger = logging.getLogger("mcq.workflow")
 
 
 def _trace_node(
-    name: str, node: Callable[[MCQState], Dict[str, Any]]
-) -> Callable[[MCQState], Dict[str, Any]]:
+    name: str, node: Any
+) -> Any:
     """Log node boundaries without serializing prompts, secrets, or full evidence."""
 
     def traced(state: MCQState) -> Dict[str, Any]:
@@ -56,7 +56,7 @@ def _trace_node(
 
 
 def create_mcq_graph():
-    graph = StateGraph(MCQState)
+    graph = StateGraph(MCQState)  # type: ignore
     nodes = (
         ("select_anchor", select_anchor_node),
         ("plan", curriculum_planner_node),
