@@ -7,6 +7,8 @@ from typing import Any, Dict, List
 import json
 from ...domain import MCQState
 from ..failure_memory import record_judge_failures
+from ...infrastructure.llm_gateway import request_insight_json
+from ..prompts import a09_notebook
 
 ACE_BULLET = re.compile(
     r"^\[([^\]]+)\]\s+helpful=(\d+)\s+harmful=(\d+)\s+::\s+(.+)$", re.MULTILINE
@@ -80,6 +82,36 @@ def reflector_node(state: MCQState) -> Dict[str, Any]:
     }
 
 
+def _notebook_rule(
+    *,
+    issue: str,
+    occurrences: int,
+    section: str,
+    sample_feedback: str,
+    fallback: str,
+) -> str:
+    """Ask the dedicated A09 endpoint only for a newly recurring pattern."""
+    if not os.getenv("INSIGHT_OPENAI_BASE_URL"):
+        return fallback
+    try:
+        response = request_insight_json(
+            a09_notebook.render(
+                issue=issue,
+                occurrences=occurrences,
+                section=section,
+                sample_feedback=sample_feedback,
+            )
+        )
+        rule = response.get("rule")
+        if isinstance(rule, str) and 20 <= len(rule.strip()) <= 500:
+            return rule.strip()
+    except Exception:
+        # Playbook curation must not stop the dataset run if the optional
+        # insight model is unavailable or returns malformed JSON.
+        pass
+    return fallback
+
+
 def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
     counts = Counter(item["issue"] for item in state.get("failure_memory", []))
     recurring = [
@@ -94,17 +126,32 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
             continue
 
         is_success = issue.startswith("success:")
+        sample_feedback = next(
+            (
+                item.get("feedback", "")
+                for item in reversed(state.get("failure_memory", []))
+                if item["issue"] == issue
+            ),
+            "",
+        )
         if is_success:
             section = "SUCCESSFUL STRATEGIES TO REPLICATE"
-            sample_feedback = next((item.get("feedback", "") for item in reversed(state.get("failure_memory", [])) if item["issue"] == issue), "")
-            content = f"Get inspiration from the following excellent thinking to apply: {sample_feedback}"
+            fallback = f"Replicate the successful pattern ({counts[issue]} occurrences): {issue}."
         else:
             section = (
                 "EVIDENCE & GROUNDING"
                 if issue.startswith("evidence") or "evidence:" in issue
                 else "COMMON MISTAKES TO AVOID"
             )
-            content = f"Before generation, prevent recurring failure ({counts[issue]} occurrences): {issue}."
+            fallback = f"Before generation, prevent recurring failure ({counts[issue]} occurrences): {issue}."
+
+        content = _notebook_rule(
+            issue=issue,
+            occurrences=counts[issue],
+            section=section,
+            sample_feedback=sample_feedback,
+            fallback=fallback,
+        )
 
         next_id = 1 + max(
             (

@@ -51,6 +51,24 @@ def parse_args() -> argparse.Namespace:
         help="Override JUDGE_OPENAI_API_KEY for A04–A07",
     )
     parser.add_argument(
+        "--insight_base_url",
+        type=str,
+        default=None,
+        help="Override INSIGHT_OPENAI_BASE_URL for A09 Notebook",
+    )
+    parser.add_argument(
+        "--insight_model_name",
+        type=str,
+        default=None,
+        help="Override INSIGHT_MODEL_NAME for A09 Notebook",
+    )
+    parser.add_argument(
+        "--insight_api_key",
+        type=str,
+        default=None,
+        help="Override INSIGHT_OPENAI_API_KEY for A09 Notebook",
+    )
+    parser.add_argument(
         "--embedding_model", type=str, default=None, help="Override EMBEDDING_MODEL"
     )
     parser.add_argument(
@@ -226,6 +244,13 @@ def main():
         os.environ["JUDGE_MODEL_NAME"] = args.judge_model_name
     if args.judge_api_key:
         os.environ["JUDGE_OPENAI_API_KEY"] = args.judge_api_key
+
+    if args.insight_base_url:
+        os.environ["INSIGHT_OPENAI_BASE_URL"] = args.insight_base_url
+    if args.insight_model_name:
+        os.environ["INSIGHT_MODEL_NAME"] = args.insight_model_name
+    if args.insight_api_key:
+        os.environ["INSIGHT_OPENAI_API_KEY"] = args.insight_api_key
 
     if args.num_qa_pairs is not None:
         os.environ["NUM_QA_PAIRS"] = str(args.num_qa_pairs)

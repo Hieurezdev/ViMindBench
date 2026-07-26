@@ -17,6 +17,7 @@ from src.mcq.application.nodes.judging import quality_gate_node
 from src.mcq.application.nodes.planning import context_retriever_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
+from src.mcq.application.nodes import learning
 from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
@@ -147,6 +148,29 @@ class JudgeGatewayTests(unittest.TestCase):
             },
         )
 
+    def test_insight_uses_a09_specific_endpoint(self) -> None:
+        environment = {
+            "OPENAI_BASE_URL": "http://generator.test/v1",
+            "OPENAI_API_KEY": "generator-key",
+            "MODEL_NAME": "generator-model",
+            "INSIGHT_OPENAI_BASE_URL": "http://insight.test/v1",
+            "INSIGHT_OPENAI_API_KEY": "insight-key",
+            "INSIGHT_MODEL_NAME": "insight-model",
+        }
+        with patch.dict(os.environ, environment, clear=False), patch.object(
+            llm_gateway, "_request_json", return_value={}
+        ) as request:
+            llm_gateway.request_insight_json("insight prompt", max_tokens=234)
+        self.assertEqual(
+            request.call_args.kwargs,
+            {
+                "max_tokens": 234,
+                "base_url": "http://insight.test/v1",
+                "api_key": "insight-key",
+                "model": "insight-model",
+            },
+        )
+
 
 class EmoBenchIntegrationTests(unittest.TestCase):
     def test_emotion_blueprint_is_normalized_to_an_eu_task(self) -> None:
@@ -232,10 +256,28 @@ class QualityAndPlaybookTests(unittest.TestCase):
             "playbook": "## EVIDENCE & GROUNDING\n\n## COMMON MISTAKES TO AVOID\n\n## OTHERS",
             "failure_memory": [{"issue": "evidence:unsupported_key"}] * 3,
         }
-        with patch.dict(os.environ, {"PLAYBOOK_REPEAT_THRESHOLD": "3"}):
+        with patch.dict(
+            os.environ,
+            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "INSIGHT_OPENAI_BASE_URL": ""},
+        ):
             result = playbook_curator_node(state)
         self.assertEqual(len(result["playbook_delta"]), 1)
         self.assertIn("evidence:unsupported_key", result["playbook"])
+
+    def test_curator_uses_insight_model_for_a_new_recurring_rule(self) -> None:
+        state = {
+            "playbook": "## EVIDENCE & GROUNDING\n\n## COMMON MISTAKES TO AVOID\n\n## OTHERS",
+            "failure_memory": [{"issue": "evidence:unsupported_key", "feedback": "Answer key is not directly supported."}] * 3,
+        }
+        with patch.dict(
+            os.environ,
+            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "INSIGHT_OPENAI_BASE_URL": "http://insight.test/v1"},
+        ), patch.object(
+            learning, "request_insight_json", return_value={"rule": "Require every answer key to be directly supported by its cited evidence."}
+        ) as request:
+            result = playbook_curator_node(state)
+        self.assertEqual(request.call_count, 1)
+        self.assertIn("Require every answer key", result["playbook"])
 
 
 class JudgeFailureMemoryTests(unittest.TestCase):

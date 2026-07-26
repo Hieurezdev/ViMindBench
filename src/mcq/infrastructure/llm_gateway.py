@@ -53,3 +53,18 @@ def request_judge_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]
         api_key=os.getenv("JUDGE_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "EMPTY"),
         model=os.getenv("JUDGE_MODEL_NAME") or os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507"),
     )
+
+
+def request_insight_json(prompt: str, *, max_tokens: int = 900) -> Dict[str, Any]:
+    """Call the optional A09 Notebook insight endpoint.
+
+    It deliberately falls back to the primary model so the playbook-learning
+    loop remains usable when an insight-only endpoint is not configured.
+    """
+    return _request_json(
+        prompt,
+        max_tokens=max_tokens,
+        base_url=os.getenv("INSIGHT_OPENAI_BASE_URL") or os.getenv("OPENAI_BASE_URL"),
+        api_key=os.getenv("INSIGHT_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "EMPTY"),
+        model=os.getenv("INSIGHT_MODEL_NAME") or os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507"),
+    )

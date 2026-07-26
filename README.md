@@ -106,12 +106,13 @@ do not put secrets in `.env.example`.
 
 ## Run
 
-### Model routing: Generator và Judge tách riêng
+### Model routing: Generator, Judge và Notebook insight tách riêng
 
 | Vai trò | Agent sử dụng | Biến cấu hình | Fallback |
 |---|---|---|---|
 | Generator | A01 Curriculum Planner, A03 MCQ Generator | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `MODEL_NAME` | Không có; đây là model chính. |
 | Judge | A04 Evidence, A05 Single-Answer, A06 EI/Safety/Bias, A07 Adversarial Solver | `JUDGE_OPENAI_BASE_URL`, `JUDGE_OPENAI_API_KEY`, `JUDGE_MODEL_NAME` | Dùng model Generator nếu chưa đặt `JUDGE_*`. |
+| Insight | A09 Notebook tạo rule từ lỗi lặp | `INSIGHT_OPENAI_BASE_URL`, `INSIGHT_OPENAI_API_KEY`, `INSIGHT_MODEL_NAME` | Dùng model Generator nếu chưa đặt `INSIGHT_*`. |
 | Retrieval | A02 và clinical context | `EMBEDDING_MODEL` / `EMBEDDING_BASE_URL` | Không gọi chat model. |
 
 Ví dụ `.env` dùng vLLM làm Generator và `gemini_web2api` làm Judge:
@@ -126,6 +127,11 @@ MODEL_NAME=<served-generator-model-id>
 JUDGE_OPENAI_BASE_URL=http://localhost:8081/v1
 JUDGE_OPENAI_API_KEY=EMPTY
 JUDGE_MODEL_NAME=gemini-3.6-flash
+
+# A09 Notebook: chỉ gọi khi một lỗi mới đạt ngưỡng lặp
+INSIGHT_OPENAI_BASE_URL=http://localhost:8001/v1
+INSIGHT_OPENAI_API_KEY=EMPTY
+INSIGHT_MODEL_NAME=<served-insight-model-id>
 ```
 
 ### 1. Kiểm tra nhanh trước khi sinh data
@@ -146,6 +152,9 @@ curl http://localhost:8000/v1/models
 
 # Judge 
 curl http://localhost:8081/v1/models
+
+# A09 Notebook insight
+curl http://localhost:8001/v1/models
 ```
 
 ### 2. Smoke test pipeline
@@ -206,7 +215,28 @@ uv run python main.py \
 Hoặc lưu ba biến `JUDGE_*` trong `.env`. Nếu không cấu hình `JUDGE_*`, A04–A07
 tự dùng endpoint/model chính.
 
-### 6. Generator hosted hoặc custom endpoint
+### 6. A09 Notebook dùng model ở cổng 8001
+
+A09 chỉ gọi endpoint insight khi một lỗi hoặc chiến lược mới đạt
+`PLAYBOOK_REPEAT_THRESHOLD` (mặc định `3`) và cần thêm rule mới vào playbook.
+Nó không gọi model cho từng MCQ. Đặt `INSIGHT_MODEL_NAME` đúng bằng ID trả về từ
+`curl http://localhost:8001/v1/models`; không đoán tên model từ Hugging Face.
+
+```bash
+uv run python main.py \
+  --model_local \
+  --model_name <served-generator-model-id> \
+  --insight_base_url http://localhost:8001/v1 \
+  --insight_model_name <served-insight-model-id> \
+  --insight_api_key EMPTY \
+  --num_qa_pairs 20 \
+  --output_path data/output/generator_judge_insight.jsonl
+```
+
+Nếu endpoint 8001 không phản hồi hoặc JSON không hợp lệ, A09 dùng rule mẫu cục
+bộ để pipeline không bị dừng.
+
+### 7. Generator hosted hoặc custom endpoint
 
 ```bash
 uv run python main.py \
@@ -224,7 +254,7 @@ uv run python main.py \
 Prefer configuring secrets in `.env`; `--api_key` may be visible in shell
 history.
 
-### 7. Chọn level và difficulty
+### 8. Chọn level và difficulty
 
 ```bash
 # Only clinical MCQs; retrieves DSM-5 safety context before A06
@@ -265,7 +295,7 @@ limit. A02 reads more context for harder items:
 
 A04 still requires every cited chunk to directly support the keyed answer.
 
-### 8. Theo dõi output khi chạy
+### 9. Theo dõi output khi chạy
 
 Pipeline checkpoint verified và quarantine sau mỗi 5 item mặc định. Với output
 path `data/output/clinical_hard.jsonl`, các file liên quan là:
@@ -293,6 +323,9 @@ và used anchors. Dùng một output path mới nếu muốn bắt đầu experi
 | `--judge_base_url URL` | Override `JUDGE_OPENAI_BASE_URL` for A04–A07 only. |
 | `--judge_model_name NAME` | Override `JUDGE_MODEL_NAME` for A04–A07 only. |
 | `--judge_api_key KEY` | Override `JUDGE_OPENAI_API_KEY` for A04–A07 only. |
+| `--insight_base_url URL` | Override `INSIGHT_OPENAI_BASE_URL` for A09 Notebook only. |
+| `--insight_model_name NAME` | Override `INSIGHT_MODEL_NAME` for A09 Notebook only. |
+| `--insight_api_key KEY` | Override `INSIGHT_OPENAI_API_KEY` for A09 Notebook only. |
 | `--embedding_model NAME` | Override `EMBEDDING_MODEL`. |
 | `--embedding_base_url URL` | Override `EMBEDDING_BASE_URL`. |
 | `--num_qa_pairs N` | Number of attempted MCQs. Verified count may be lower because failures go to quarantine. |
@@ -322,6 +355,9 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `JUDGE_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A04–A07. |
 | `JUDGE_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional judge endpoint. |
 | `JUDGE_MODEL_NAME` | empty | Optional model used only by A04–A07; falls back to `MODEL_NAME`. |
+| `INSIGHT_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A09 Notebook. |
+| `INSIGHT_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional A09 insight endpoint. |
+| `INSIGHT_MODEL_NAME` | empty | Optional A09 model; falls back to `MODEL_NAME`. |
 | `USE_LOCAL_EMBEDDING` | `true` | Use local SentenceTransformer instead of embedding API. |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | Local or remote embedding model; BGE-M3 vectors are 1024-dimensional. |
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
