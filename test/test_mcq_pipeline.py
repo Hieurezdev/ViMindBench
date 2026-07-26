@@ -4,6 +4,7 @@ No test in this module opens MongoDB or calls an LLM endpoint.
 """
 
 import os
+import builtins
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -13,6 +14,7 @@ from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids
 from src.mcq.application.nodes.judging import quality_gate_node
+from src.mcq.application.nodes.planning import context_retriever_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.failure_memory import (
@@ -22,6 +24,7 @@ from src.mcq.application.failure_memory import (
 from src.mcq.workflow import route_after_quality_gate
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
+from src.mcq.infrastructure import llm_gateway
 
 
 def doc(chunk_id: str, tier: str | None, score: float = 0.9) -> SimpleNamespace:
@@ -108,6 +111,42 @@ class EvidencePolicyTests(unittest.TestCase):
             eligible = select_eligible_documents([doc("legacy", None)])
         self.assertEqual([item.metadata["chunk_id"] for item in eligible], ["legacy"])
 
+    def test_retrieval_depth_increases_with_difficulty(self) -> None:
+        documents = [doc(f"chunk-{index}", "Tier 2") for index in range(6)]
+        requested_k = []
+        retriever = SimpleNamespace(search=lambda query, k: (requested_k.append(k), documents)[1])
+        with patch.object(builtins, "RETRIEVER", retriever, create=True):
+            medium = context_retriever_node({"blueprint": {"difficulty": "medium", "retrieval_query": "stress"}})
+            hard = context_retriever_node({"blueprint": {"difficulty": "hard", "retrieval_query": "stress"}})
+        self.assertEqual(requested_k, [16, 24])
+        self.assertEqual(len(medium["evidence_docs"]), 4)
+        self.assertEqual(len(hard["evidence_docs"]), 6)
+
+
+class JudgeGatewayTests(unittest.TestCase):
+    def test_judges_use_a_separate_configured_endpoint(self) -> None:
+        environment = {
+            "OPENAI_BASE_URL": "http://generator.test/v1",
+            "OPENAI_API_KEY": "generator-key",
+            "MODEL_NAME": "generator-model",
+            "JUDGE_OPENAI_BASE_URL": "http://judge.test/v1",
+            "JUDGE_OPENAI_API_KEY": "judge-key",
+            "JUDGE_MODEL_NAME": "judge-model",
+        }
+        with patch.dict(os.environ, environment, clear=False), patch.object(
+            llm_gateway, "_request_json", return_value={}
+        ) as request:
+            llm_gateway.request_judge_json("judge prompt", max_tokens=123)
+        self.assertEqual(
+            request.call_args.kwargs,
+            {
+                "max_tokens": 123,
+                "base_url": "http://judge.test/v1",
+                "api_key": "judge-key",
+                "model": "judge-model",
+            },
+        )
+
 
 class EmoBenchIntegrationTests(unittest.TestCase):
     def test_emotion_blueprint_is_normalized_to_an_eu_task(self) -> None:
@@ -146,10 +185,29 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_evidence_refs", result["quarantine_reason"])
 
-    def test_quality_gate_requires_at_most_three_citations(self) -> None:
+    def test_quality_gate_quarantines_chinese_han_characters(self) -> None:
         state = passing_state()
-        state["evidence_docs"] = [doc(f"chunk-{index}", "Tier 1") for index in range(4)]
-        state["mcq"]["evidence_refs"] = [f"chunk-{index}" for index in range(4)]
+        state["mcq"]["question"] = "Một người cảm thấy 焦虑 trong tình huống này?"
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("contains_han_script", result["quarantine_reason"])
+
+    def test_quality_gate_quarantines_hard_item_with_spurious_cues(self) -> None:
+        state = passing_state()
+        state["blueprint"]["difficulty"] = "hard"
+        state["judge_reports"]["adversarial_solver"] = {
+            "passed": False,
+            "issues": ["adversarial:spurious_cues_found"],
+        }
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("adversarial_solver:adversarial:spurious_cues_found", result["quarantine_reason"])
+
+    def test_quality_gate_requires_at_most_the_difficulty_limit_citations(self) -> None:
+        state = passing_state()
+        state["blueprint"]["difficulty"] = "medium"
+        state["evidence_docs"] = [doc(f"chunk-{index}", "Tier 1") for index in range(5)]
+        state["mcq"]["evidence_refs"] = [f"chunk-{index}" for index in range(5)]
         result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_evidence_refs", result["quarantine_reason"])

@@ -33,6 +33,24 @@ def parse_args() -> argparse.Namespace:
         "--api_key", type=str, default=None, help="Override OPENAI_API_KEY"
     )
     parser.add_argument(
+        "--judge_base_url",
+        type=str,
+        default=None,
+        help="Override JUDGE_OPENAI_BASE_URL for A04–A07",
+    )
+    parser.add_argument(
+        "--judge_model_name",
+        type=str,
+        default=None,
+        help="Override JUDGE_MODEL_NAME for A04–A07",
+    )
+    parser.add_argument(
+        "--judge_api_key",
+        type=str,
+        default=None,
+        help="Override JUDGE_OPENAI_API_KEY for A04–A07",
+    )
+    parser.add_argument(
         "--embedding_model", type=str, default=None, help="Override EMBEDDING_MODEL"
     )
     parser.add_argument(
@@ -201,6 +219,13 @@ def main():
 
     if args.api_key:
         os.environ["OPENAI_API_KEY"] = args.api_key
+
+    if args.judge_base_url:
+        os.environ["JUDGE_OPENAI_BASE_URL"] = args.judge_base_url
+    if args.judge_model_name:
+        os.environ["JUDGE_MODEL_NAME"] = args.judge_model_name
+    if args.judge_api_key:
+        os.environ["JUDGE_OPENAI_API_KEY"] = args.judge_api_key
 
     if args.num_qa_pairs is not None:
         os.environ["NUM_QA_PAIRS"] = str(args.num_qa_pairs)

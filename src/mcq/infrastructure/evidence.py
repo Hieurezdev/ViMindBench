@@ -21,11 +21,12 @@ def document_tier(doc: Any) -> str:
     return "Tier 2 (legacy-unclassified)"
 
 
-def select_eligible_documents(candidates: List[Any]) -> List[Any]:
+def select_eligible_documents(candidates: List[Any], *, limit: int = 3) -> List[Any]:
+    """Keep approved evidence in retrieval rank order, up to the requested limit."""
     allowed = {"Tier 1", "Tier 2"}
     if os.getenv("ALLOW_UNTIERED_EVIDENCE", "true").lower() in {"1", "true", "yes"}:
         allowed.add("Tier 2 (legacy-unclassified)")
-    return [doc for doc in candidates if document_tier(doc) in allowed][:3]
+    return [doc for doc in candidates if document_tier(doc) in allowed][:limit]
 
 
 def evidence_refs(docs: List[Any]) -> List[Dict[str, Any]]:

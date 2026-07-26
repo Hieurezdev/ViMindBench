@@ -4,6 +4,11 @@ from typing import Any, Dict, List, Optional, TypedDict
 from langchain_core.documents import Document
 
 LEVELS = ("theory", "emotion", "educational_scenario", "clinical_scenario")
+RETRIEVAL_DEPTH_BY_DIFFICULTY = {
+    "easy": {"candidate_k": 8, "evidence_limit": 2},
+    "medium": {"candidate_k": 16, "evidence_limit": 4},
+    "hard": {"candidate_k": 24, "evidence_limit": 6},
+}
 
 
 class MCQState(TypedDict, total=False):

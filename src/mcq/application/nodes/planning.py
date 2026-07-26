@@ -2,7 +2,7 @@
 
 import builtins
 from typing import Any, Dict
-from ...domain import LEVELS, MCQState
+from ...domain import LEVELS, MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import select_eligible_documents
 from ...infrastructure.llm_gateway import request_json
 from ...infrastructure.mongo_anchor_repository import select_unused_anchor
@@ -41,6 +41,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     )
     blueprint["level"] = level
     blueprint["difficulty"] = difficulty
+    blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]
     blueprint["num_options"] = 4
     blueprint["requires_emobench"] = level == "emotion"
     blueprint["emobench"] = normalize_blueprint_emobench(blueprint.get("emobench"), enabled=level == "emotion")
@@ -52,8 +53,16 @@ def context_retriever_node(state: MCQState) -> Dict[str, Any]:
     retriever = getattr(builtins, "RETRIEVER", None)
     if not retriever:
         return {"evidence_docs": []}
+    difficulty = state.get("blueprint", {}).get("difficulty", "medium")
+    retrieval_depth = RETRIEVAL_DEPTH_BY_DIFFICULTY.get(
+        difficulty, RETRIEVAL_DEPTH_BY_DIFFICULTY["medium"]
+    )
     return {
         "evidence_docs": select_eligible_documents(
-            retriever.search(state["blueprint"]["retrieval_query"], k=8)
+            retriever.search(
+                state["blueprint"]["retrieval_query"],
+                k=retrieval_depth["candidate_k"],
+            ),
+            limit=retrieval_depth["evidence_limit"],
         )
     }

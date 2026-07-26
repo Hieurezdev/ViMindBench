@@ -5,7 +5,8 @@ A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety
 → bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
 judge failure memory.
 
-Mỗi record verified bắt buộc có `evidence_refs` gồm 1–3 `chunk_id` đã retrieve;
+Mỗi record verified bắt buộc có `evidence_refs` gồm các `chunk_id` đã retrieve,
+tối đa theo difficulty: easy=2, medium=4, hard=6;
 citation nằm trong metadata/audit, không xuất hiện trong question stem hay options.
 Pipeline không lưu `<think>` tự do. Trường `reasoning.steps` chỉ chứa audit steps
 ngắn, có thể kiểm tra được, không phải chain-of-thought.
@@ -20,7 +21,7 @@ flowchart LR
     Kind -->|other| A06
     A06 --> A07{"A07 Gate"}
     A07 -->|pass| V[("Verified JSONL")]
-    A07 -->|fail| Q[("Quarantine JSONL")] --> A08["A08 Reflect"] --> A09["A09 Curate"]
+    A07 -->|fail| Q[("Quarantine JSONL")] --> A08["A08 Reflect"] --> A09["A09 Notebook"]
     A09 --> PB[("ACE Playbook")]
 ```
 
@@ -80,7 +81,7 @@ Ví dụ phần metadata/validation của một item cảm xúc đã verified:
 Các ví dụ trong `EmoBench/data/EU.jsonl` và `EmoBench/data/EA.jsonl` chỉ phù hợp
 để regression-test judge hoặc đo chất lượng model judge theo category. Chúng
 không được retrieve, prompt-inject, hay trích dẫn trong `evidence_refs`; evidence
-của MCQ vẫn chỉ là 1–3 chunk Tier 1/2 từ MongoDB.
+của MCQ vẫn chỉ là các chunk Tier 1/2 từ MongoDB trong giới hạn difficulty.
 
 ## Requirements
 
@@ -105,7 +106,62 @@ do not put secrets in `.env.example`.
 
 ## Run
 
-### Default run
+### Model routing: Generator và Judge tách riêng
+
+| Vai trò | Agent sử dụng | Biến cấu hình | Fallback |
+|---|---|---|---|
+| Generator | A01 Curriculum Planner, A03 MCQ Generator | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `MODEL_NAME` | Không có; đây là model chính. |
+| Judge | A04 Evidence, A05 Single-Answer, A06 EI/Safety/Bias, A07 Adversarial Solver | `JUDGE_OPENAI_BASE_URL`, `JUDGE_OPENAI_API_KEY`, `JUDGE_MODEL_NAME` | Dùng model Generator nếu chưa đặt `JUDGE_*`. |
+| Retrieval | A02 và clinical context | `EMBEDDING_MODEL` / `EMBEDDING_BASE_URL` | Không gọi chat model. |
+
+Ví dụ `.env` dùng vLLM làm Generator và `gemini_web2api` làm Judge:
+
+```env
+# Generator: A01/A03
+OPENAI_BASE_URL=http://localhost:8000/v1
+OPENAI_API_KEY=EMPTY
+MODEL_NAME=<served-generator-model-id>
+
+# Judge: A04–A07
+JUDGE_OPENAI_BASE_URL=http://localhost:8081/v1
+JUDGE_OPENAI_API_KEY=EMPTY
+JUDGE_MODEL_NAME=gemini-3.6-flash
+```
+
+### 1. Kiểm tra nhanh trước khi sinh data
+
+Kiểm tra code mà không gọi MongoDB hoặc LLM:
+
+```bash
+uv run python -m unittest discover -s test -p "test_*.py"
+```
+
+Nếu tách model, kiểm tra từng endpoint trước. Generator model ID phải trùng với
+`MODEL_NAME`; không tự suy đoán tên model từ tên Hugging Face để tránh lỗi 404.
+
+```bash
+# Generator
+curl http://localhost:8000/health
+curl http://localhost:8000/v1/models
+
+# Judge 
+curl http://localhost:8081/v1/models
+```
+
+### 2. Smoke test pipeline
+
+Sinh 1 item vào file riêng để kiểm tra MongoDB, embedding, Generator và Judge:
+
+```bash
+uv run python main.py \
+  --model_local \
+  --model_name <served-model-id> \
+  --num_qa_pairs 1 \
+  --output_path data/output/smoke_test.jsonl \
+  --log_level DEBUG
+```
+
+### 3. Chạy mặc định
 
 Uses values from `.env`, all four curriculum levels in this order:
 `theory → emotion → educational_scenario → clinical_scenario`.
@@ -116,12 +172,12 @@ uv run python main.py \
   --output_path data/output/psychology_mcq.jsonl
 ```
 
-### Local LLM
+### 4. Chỉ cấu hình Generator local
 
 ```bash
 uv run python main.py \
   --model_local \
-  --model_name Qwen/Qwen3-30B-A3B-Instruct-2507 \
+  --model_name <served-model-id> \
   --num_qa_pairs 20 \
   --output_path data/output/local_mcq.jsonl
 ```
@@ -130,13 +186,36 @@ uv run python main.py \
 `EMPTY`, and enables local embeddings unless `USE_LOCAL_EMBEDDING` is already
 configured.
 
-### Hosted or custom endpoint
+### 5. Gemini chỉ làm LLM-as-judge
+
+A01/A03 tiếp tục dùng model chính; Gemini chỉ chạy A04 Evidence Judge, A05
+Single-Answer Judge, A06 EI/Safety/Bias Judge và A07 Adversarial Solver. Với
+`gemini_web2api.py` đang nghe ở cổng `8081`:
+
+```bash
+uv run python main.py \
+  --model_local \
+  --model_name <served-generator-model-id> \
+  --judge_base_url http://localhost:8081/v1 \
+  --judge_model_name gemini-3.6-flash \
+  --judge_api_key EMPTY \
+  --num_qa_pairs 20 \
+  --output_path data/output/generator_gemini_judge.jsonl
+```
+
+Hoặc lưu ba biến `JUDGE_*` trong `.env`. Nếu không cấu hình `JUDGE_*`, A04–A07
+tự dùng endpoint/model chính.
+
+### 6. Generator hosted hoặc custom endpoint
 
 ```bash
 uv run python main.py \
   --model_base_url https://<provider>/v1 \
   --model_name <chat-model> \
   --api_key <secret> \
+  --judge_base_url http://localhost:8081/v1 \
+  --judge_model_name gemini-3.6-flash \
+  --judge_api_key EMPTY \
   --embedding_base_url https://<provider>/v1 \
   --embedding_model <embedding-model> \
   --num_qa_pairs 20
@@ -145,7 +224,7 @@ uv run python main.py \
 Prefer configuring secrets in `.env`; `--api_key` may be visible in shell
 history.
 
-### Select curriculum types and difficulties
+### 7. Chọn level và difficulty
 
 ```bash
 # Only clinical MCQs; retrieves DSM-5 safety context before A06
@@ -153,10 +232,54 @@ uv run python main.py --levels clinical_scenario --num_qa_pairs 100
 
 # Alternate only between theory and emotion, and only generate hard questions
 uv run python main.py --levels theory,emotion --difficulties hard --num_qa_pairs 100
+
+# Câu emotion medium: A02 đọc 2 evidence chunks
+uv run python main.py \
+  --levels emotion \
+  --difficulties medium \
+  --num_qa_pairs 20 \
+  --output_path data/output/emotion_medium.jsonl
+
+# Câu clinical hard: A02 đọc 3 evidence chunks, A06 lấy DSM-5 safety context
+# và A07 kiểm key có lộ qua cue bề mặt hay không
+uv run python main.py \
+  --levels clinical_scenario \
+  --difficulties hard \
+  --num_qa_pairs 20 \
+  --output_path data/output/clinical_hard.jsonl
 ```
 
 Valid levels: `theory`, `emotion`, `educational_scenario`, `clinical_scenario`.
 Valid difficulties: `easy`, `medium`, `hard`.
+
+### Retrieval depth by difficulty
+
+The final record cites approved Tier 1/2 chunks up to its difficulty-specific
+limit. A02 reads more context for harder items:
+
+| Difficulty | Vector-search candidates | Approved evidence chunks supplied to A03–A06 |
+|---|---:|---:|
+| `easy` | 8 | 2 |
+| `medium` | 16 | 4 |
+| `hard` | 24 | 6 |
+
+A04 still requires every cited chunk to directly support the keyed answer.
+
+### 8. Theo dõi output khi chạy
+
+Pipeline checkpoint verified và quarantine sau mỗi 5 item mặc định. Với output
+path `data/output/clinical_hard.jsonl`, các file liên quan là:
+
+```text
+data/output/clinical_hard.jsonl                  # verified records
+data/output/clinical_hard.quarantine.jsonl       # failed records + audit
+data/output/clinical_hard.run.log                # node-level logs
+data/output/clinical_hard.playbook.md            # A09 Notebook state
+data/output/clinical_hard.judge_failure_memory.json
+```
+
+Chạy lại với cùng `--output_path` sẽ tái dùng sidecar playbook, failure memory
+và used anchors. Dùng một output path mới nếu muốn bắt đầu experiment độc lập.
 
 ## CLI flags
 
@@ -167,6 +290,9 @@ Valid difficulties: `easy`, `medium`, `hard`.
 | `--model_base_url URL` | Override `OPENAI_BASE_URL`. |
 | `--model_name NAME` | Override `MODEL_NAME`. |
 | `--api_key KEY` | Override `OPENAI_API_KEY`. Prefer `.env` for secrets. |
+| `--judge_base_url URL` | Override `JUDGE_OPENAI_BASE_URL` for A04–A07 only. |
+| `--judge_model_name NAME` | Override `JUDGE_MODEL_NAME` for A04–A07 only. |
+| `--judge_api_key KEY` | Override `JUDGE_OPENAI_API_KEY` for A04–A07 only. |
 | `--embedding_model NAME` | Override `EMBEDDING_MODEL`. |
 | `--embedding_base_url URL` | Override `EMBEDDING_BASE_URL`. |
 | `--num_qa_pairs N` | Number of attempted MCQs. Verified count may be lower because failures go to quarantine. |
@@ -192,7 +318,10 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `MONGO_DSM5_COLLECTION_NAME` | `DSM-5` | DSM-5 collection for clinical safety context. |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat completion endpoint. |
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
-| `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by planner, generator, and judges. |
+| `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by A01 planner and A03 generator. |
+| `JUDGE_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A04–A07. |
+| `JUDGE_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional judge endpoint. |
+| `JUDGE_MODEL_NAME` | empty | Optional model used only by A04–A07; falls back to `MODEL_NAME`. |
 | `USE_LOCAL_EMBEDDING` | `true` | Use local SentenceTransformer instead of embedding API. |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | Local or remote embedding model; BGE-M3 vectors are 1024-dimensional. |
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
@@ -201,7 +330,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `OUTPUT_FLUSH_INTERVAL` | `5` | Persist verified/quarantine records after every five completed items. |
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
-| `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 adds a playbook bullet. |
+| `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
 | `LOG_LEVEL` | `INFO` | Verbosity for structured node-step logging. |
 | `LOG_PATH` | `<output>.run.log` | Optional custom log-file path. |

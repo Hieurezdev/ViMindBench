@@ -1,4 +1,4 @@
-"""A08 Reflection and A09 ACE playbook curation."""
+"""A08 Reflection and A09 Notebook (ACE playbook curation)."""
 
 import os
 import re

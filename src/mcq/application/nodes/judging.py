@@ -1,12 +1,26 @@
 """A04–A07 quality-judging nodes."""
 
+import re
 from typing import Any, Dict, Callable, Set
-from ...domain import MCQState
+from ...domain import MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import evidence_refs
-from ...infrastructure.llm_gateway import request_json
+from ...infrastructure.llm_gateway import request_judge_json
 from ..emobench import judge_context, validate_judge_report
 from ..failure_memory import prompt_context, retrieve_similar_failures
 from ..prompts import a04_evidence_judge, a05_single_answer_judge, a06_safety_bias_judge, a07_adversarial_solver
+
+HAN_CHARACTER = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+
+
+def _contains_han_script(value: Any) -> bool:
+    """Detect Chinese Han characters in text exported by the MCQ generator."""
+    if isinstance(value, str):
+        return bool(HAN_CHARACTER.search(value))
+    if isinstance(value, dict):
+        return any(_contains_han_script(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_contains_han_script(item) for item in value)
+    return False
 
 
 def _run_judge(
@@ -29,7 +43,7 @@ def _run_judge(
             level=state["blueprint"].get("level", ""),
             question=mcq.get("question", ""),
         )
-        return request_json(
+        return request_judge_json(
             prompt_factory(
                 blueprint=state["blueprint"],
                 mcq=mcq,
@@ -83,7 +97,7 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
         return _report(state, "adversarial_solver", {"passed": False, "issues": ["missing_mcq"]})
 
     try:
-        solver_response = request_json(
+        solver_response = request_judge_json(
             a07_adversarial_solver.render(
                 question=mcq.get("question", ""),
                 options=mcq.get("options", {}),
@@ -104,7 +118,7 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
         if selected_option == actual_answer and confidence == "high" and is_hard:
             passed = False
             issues.append("adversarial:spurious_cues_found")
-            feedback = f"The solver easily guessed the correct answer ({selected_option}) without evidence. Reasoning: {solver_response.get('reasoning')}"
+            feedback = "The solver identified the key with high confidence without evidence; rebalance option length, grammar, specificity, certainty, and qualification."
 
         return _report(state, "adversarial_solver", {
             "passed": passed,
@@ -120,6 +134,10 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
 
 def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     reports, errors = state.get("judge_reports", {}), []
+    evidence_limit = RETRIEVAL_DEPTH_BY_DIFFICULTY.get(
+        state.get("blueprint", {}).get("difficulty", "medium"),
+        RETRIEVAL_DEPTH_BY_DIFFICULTY["medium"],
+    )["evidence_limit"]
     options = state.get("mcq", {}).get("options", {})
     answer = state.get("mcq", {}).get("answer")
     if set(options) != {"A", "B", "C", "D"}:
@@ -130,8 +148,14 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
         set(options) - {answer}
     ):
         errors.append("incomplete_distractor_analysis")
-    if not (1 <= len(state.get("evidence_docs", [])) <= 3):
-        errors.append("evidence_count_not_1_to_3")
+    language_fields = {
+        key: state.get("mcq", {}).get(key)
+        for key in ("question", "options", "rationale_short", "distractor_analysis", "audit_steps")
+    }
+    if _contains_han_script(language_fields):
+        errors.append("contains_han_script")
+    if not (1 <= len(state.get("evidence_docs", [])) <= evidence_limit):
+        errors.append(f"evidence_count_not_1_to_{evidence_limit}")
     available = {
         ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))
     }
@@ -142,7 +166,7 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     cited: Set[str] = set(raw_cited) if valid_cited_shape else set()
     if (
         not valid_cited_shape
-        or not (1 <= len(cited) <= 3)
+        or not (1 <= len(cited) <= evidence_limit)
         or not cited.issubset(available)
     ):
         errors.append("invalid_evidence_refs")
