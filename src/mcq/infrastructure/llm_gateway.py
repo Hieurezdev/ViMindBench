@@ -6,6 +6,40 @@ from typing import Any, Dict
 from openai import OpenAI
 
 
+def _parse_json_object(raw: str) -> Dict[str, Any]:
+    """Extract one JSON object while tolerating Markdown fences and prose."""
+    cleaned = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
+    start = cleaned.find("{")
+    if start < 0:
+        raise ValueError(f"Model did not return a JSON object: {cleaned[:240]}")
+    value, _ = json.JSONDecoder().raw_decode(cleaned[start:])
+    if not isinstance(value, dict):
+        raise ValueError("Model returned JSON but the top-level value is not an object")
+    return value
+
+
+def _repair_json(client: OpenAI, *, raw: str, model: str, max_tokens: int) -> str:
+    """Ask once for a syntax-only repair when a local model emits invalid JSON."""
+    response = client.chat.completions.create(
+        model=model,
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    "Convert the following malformed response into one valid JSON object. "
+                    "Preserve its intended fields and values where possible. Return JSON only; "
+                    "do not explain or add Markdown.\n\n"
+                    f"MALFORMED RESPONSE:\n{raw[:12000]}"
+                ),
+            }
+        ],
+        temperature=0,
+        max_tokens=max_tokens,
+        timeout=120,
+    )
+    return (response.choices[0].message.content or "").strip()
+
+
 def _request_json(
     prompt: str,
     *,
@@ -26,11 +60,17 @@ def _request_json(
         timeout=120,
     )
     raw = (response.choices[0].message.content or "").strip()
-    raw = raw.removeprefix("```json").removeprefix("```").removesuffix("```").strip()
-    start, end = raw.find("{"), raw.rfind("}")
-    if start < 0 or end < start:
-        raise ValueError(f"Model did not return JSON: {raw[:240]}")
-    return json.loads(raw[start : end + 1])
+    try:
+        return _parse_json_object(raw)
+    except (json.JSONDecodeError, ValueError) as initial_error:
+        repaired = _repair_json(client, raw=raw, model=model, max_tokens=max_tokens)
+        try:
+            return _parse_json_object(repaired)
+        except (json.JSONDecodeError, ValueError) as repair_error:
+            raise ValueError(
+                "Model returned invalid JSON after one repair attempt; "
+                f"initial={initial_error}; repair={repair_error}; raw={raw[:240]!r}"
+            ) from repair_error
 
 
 def request_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]:

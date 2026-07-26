@@ -125,6 +125,12 @@ class EvidencePolicyTests(unittest.TestCase):
 
 
 class JudgeGatewayTests(unittest.TestCase):
+    def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
+        parsed = llm_gateway._parse_json_object(
+            "Here is the result:\n```json\n{\"answer\": \"B\"}\n```\n"
+        )
+        self.assertEqual(parsed, {"answer": "B"})
+
     def test_judges_use_a_separate_configured_endpoint(self) -> None:
         environment = {
             "OPENAI_BASE_URL": "http://generator.test/v1",
