@@ -30,6 +30,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
 
     difficulties = state.get("curriculum_difficulties", ["easy", "medium", "hard"])
     difficulty = difficulties[(iteration // len(levels)) % len(difficulties)]
+    print(f"[DEBUG] iteration={iteration}, levels={levels}, difficulties={difficulties} -> difficulty={difficulty}")
 
     blueprint = request_json(
         a01_curriculum.render(
