@@ -1,4 +1,5 @@
 """Periodic output checkpoint node."""
+
 import logging
 from typing import Any, Dict
 from ...domain import MCQState
@@ -19,6 +20,13 @@ def flush_outputs_node(state: MCQState) -> Dict[str, Any]:
     quarantined = state.get("quarantine_outputs", [])[quarantine_start:]
     wrote_verified = append_jsonl(state["output_path"], verified)
     wrote_quarantine = append_jsonl(state["quarantine_path"], quarantined)
-    logger.info("Checkpoint flush at completed=%s | verified=%s quarantine=%s", completed, wrote_verified, wrote_quarantine)
-    return {"verified_flushed_count": verified_start + wrote_verified,
-            "quarantine_flushed_count": quarantine_start + wrote_quarantine}
+    logger.info(
+        "Checkpoint flush at completed=%s | verified=%s quarantine=%s",
+        completed,
+        wrote_verified,
+        wrote_quarantine,
+    )
+    return {
+        "verified_flushed_count": verified_start + wrote_verified,
+        "quarantine_flushed_count": quarantine_start + wrote_quarantine,
+    }

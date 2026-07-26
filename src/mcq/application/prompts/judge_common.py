@@ -1,9 +1,19 @@
 """Shared rendering mechanics; individual rubric ownership stays per A04–A06 file."""
+
 import json
 from typing import Any, Dict, List
 
 
-def render_judge(*, name: str, rubric: str, blueprint: Dict[str, Any], mcq: Dict[str, Any], evidence: List[Dict[str, Any]], past_failures: List[Dict[str, Any]], result_schema_suffix: str = "") -> str:
+def render_judge(
+    *,
+    name: str,
+    rubric: str,
+    blueprint: Dict[str, Any],
+    mcq: Dict[str, Any],
+    evidence: List[Dict[str, Any]],
+    past_failures: List[Dict[str, Any]],
+    result_schema_suffix: str = "",
+) -> str:
     return f"""You are {name}, an independent LLM judge for Vietnamese psychology MCQs.
 {rubric}
 Blueprint: {json.dumps(blueprint, ensure_ascii=False)}

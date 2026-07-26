@@ -1,4 +1,5 @@
 """Domain state and constants; no OpenAI, MongoDB, or LangGraph wiring."""
+
 from typing import Any, Dict, List, Optional, TypedDict
 from langchain_core.documents import Document
 
@@ -16,6 +17,7 @@ class MCQState(TypedDict, total=False):
     verified_flushed_count: int
     quarantine_flushed_count: int
     curriculum_levels: List[str]
+    curriculum_difficulties: List[str]
     used_anchor_ids: List[str]
     anchor: Optional[Dict[str, Any]]
     blueprint: Dict[str, Any]

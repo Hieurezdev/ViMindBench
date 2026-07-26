@@ -145,18 +145,18 @@ uv run python main.py \
 Prefer configuring secrets in `.env`; `--api_key` may be visible in shell
 history.
 
-### Select curriculum types
+### Select curriculum types and difficulties
 
 ```bash
 # Only clinical MCQs; retrieves DSM-5 safety context before A06
 uv run python main.py --levels clinical_scenario --num_qa_pairs 100
 
-# Alternate only between theory and emotion
-uv run python main.py --levels theory,emotion --num_qa_pairs 100
+# Alternate only between theory and emotion, and only generate hard questions
+uv run python main.py --levels theory,emotion --difficulties hard --num_qa_pairs 100
 ```
 
-Valid values: `theory`, `emotion`, `educational_scenario`,
-`clinical_scenario`.
+Valid levels: `theory`, `emotion`, `educational_scenario`, `clinical_scenario`.
+Valid difficulties: `easy`, `medium`, `hard`.
 
 ## CLI flags
 
@@ -176,6 +176,7 @@ Valid values: `theory`, `emotion`, `educational_scenario`,
 | `--log_path PATH` | Override the default `<output>.run.log` log file. |
 | `--output_flush_interval N` | Append JSONL checkpoints after every `N` completed items; default `5`. |
 | `--levels CSV` | Comma-separated curriculum filter, e.g. `theory,emotion`. |
+| `--difficulties CSV` | Comma-separated difficulty filter, e.g. `easy,hard`. |
 
 CLI values override `.env` values for that run.
 

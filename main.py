@@ -1,4 +1,3 @@
-
 import os
 import json
 import builtins
@@ -11,25 +10,78 @@ builtins.RETRIEVER = None
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run psychology QA generation pipeline")
-    parser.add_argument("--model_local", action="store_true", help="Use local LLM endpoint at http://localhost:8000/v1")
-    parser.add_argument("--embedding_local", action="store_true", help="Use local sentence-transformers embedding model")
-    parser.add_argument("--model_base_url", type=str, default=None, help="Override OPENAI_BASE_URL")
-    parser.add_argument("--model_name", type=str, default=None, help="Override MODEL_NAME")
-    parser.add_argument("--api_key", type=str, default=None, help="Override OPENAI_API_KEY")
-    parser.add_argument("--embedding_model", type=str, default=None, help="Override EMBEDDING_MODEL")
-    parser.add_argument("--embedding_base_url", type=str, default=None, help="Override EMBEDDING_BASE_URL")
-    parser.add_argument("--num_qa_pairs", type=int, default=None, help="Override NUM_QA_PAIRS")
-    parser.add_argument("--output_path", type=str, default=None, help="Override OUTPUT_PATH")
-    parser.add_argument("--max_generation_retries", type=int, default=None, help="Override MAX_GENERATION_RETRIES (retries after initial generation)")
-    parser.add_argument("--log_level", type=str, default=None, help="Override LOG_LEVEL: DEBUG, INFO, WARNING, ERROR")
-    parser.add_argument("--log_path", type=str, default=None, help="Optional run log path; defaults to <output>.run.log")
-    parser.add_argument("--output_flush_interval", type=int, default=None, help="Override OUTPUT_FLUSH_INTERVAL; defaults to 5 completed items")
+    parser = argparse.ArgumentParser(
+        description="Run psychology QA generation pipeline"
+    )
+    parser.add_argument(
+        "--model_local",
+        action="store_true",
+        help="Use local LLM endpoint at http://localhost:8000/v1",
+    )
+    parser.add_argument(
+        "--embedding_local",
+        action="store_true",
+        help="Use local sentence-transformers embedding model",
+    )
+    parser.add_argument(
+        "--model_base_url", type=str, default=None, help="Override OPENAI_BASE_URL"
+    )
+    parser.add_argument(
+        "--model_name", type=str, default=None, help="Override MODEL_NAME"
+    )
+    parser.add_argument(
+        "--api_key", type=str, default=None, help="Override OPENAI_API_KEY"
+    )
+    parser.add_argument(
+        "--embedding_model", type=str, default=None, help="Override EMBEDDING_MODEL"
+    )
+    parser.add_argument(
+        "--embedding_base_url",
+        type=str,
+        default=None,
+        help="Override EMBEDDING_BASE_URL",
+    )
+    parser.add_argument(
+        "--num_qa_pairs", type=int, default=None, help="Override NUM_QA_PAIRS"
+    )
+    parser.add_argument(
+        "--output_path", type=str, default=None, help="Override OUTPUT_PATH"
+    )
+    parser.add_argument(
+        "--max_generation_retries",
+        type=int,
+        default=None,
+        help="Override MAX_GENERATION_RETRIES (retries after initial generation)",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        default=None,
+        help="Override LOG_LEVEL: DEBUG, INFO, WARNING, ERROR",
+    )
+    parser.add_argument(
+        "--log_path",
+        type=str,
+        default=None,
+        help="Optional run log path; defaults to <output>.run.log",
+    )
+    parser.add_argument(
+        "--output_flush_interval",
+        type=int,
+        default=None,
+        help="Override OUTPUT_FLUSH_INTERVAL; defaults to 5 completed items",
+    )
     parser.add_argument(
         "--levels",
         type=str,
         default=None,
         help="Comma-separated MCQ levels: theory,emotion,educational_scenario,clinical_scenario",
+    )
+    parser.add_argument(
+        "--difficulties",
+        type=str,
+        default=None,
+        help="Comma-separated MCQ difficulties: easy,medium,hard",
     )
     return parser.parse_args()
 
@@ -101,8 +153,24 @@ def parse_levels(raw_levels: str | None) -> list[str]:
     levels = [level.strip() for level in raw_levels.split(",") if level.strip()]
     invalid = sorted(set(levels) - allowed)
     if not levels or invalid:
-        raise ValueError(f"Invalid --levels value. Allowed: {', '.join(sorted(allowed))}; received: {raw_levels}")
+        raise ValueError(
+            f"Invalid --levels value. Allowed: {', '.join(sorted(allowed))}; received: {raw_levels}"
+        )
     return list(dict.fromkeys(levels))
+
+
+def parse_difficulties(raw_diffs: str | None) -> list[str]:
+    """Validate the optional difficulty filter."""
+    allowed = {"easy", "medium", "hard"}
+    if not raw_diffs:
+        return ["easy", "medium", "hard"]
+    diffs = [d.strip() for d in raw_diffs.split(",") if d.strip()]
+    invalid = sorted(set(diffs) - allowed)
+    if not diffs or invalid:
+        raise ValueError(
+            f"Invalid --difficulties value. Allowed: {', '.join(sorted(allowed))}; received: {raw_diffs}"
+        )
+    return list(dict.fromkeys(diffs))
 
 
 def main():
@@ -156,6 +224,7 @@ def main():
 
     try:
         curriculum_levels = parse_levels(args.levels)
+        curriculum_difficulties = parse_difficulties(args.difficulties)
     except ValueError as exc:
         parser_error = argparse.ArgumentTypeError(str(exc))
         raise SystemExit(f"error: {parser_error}") from exc
@@ -165,10 +234,22 @@ def main():
         os.environ["USE_LOCAL_EMBEDDING"] = "true"
         print("Auto-enabling local embedding because local model endpoint is used")
 
-    output_path = os.getenv("OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl")
+    output_path = os.getenv(
+        "OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl"
+    )
     from src.mcq.infrastructure.observability import configure_logging
-    logger = configure_logging(output_path=output_path, level=os.getenv("LOG_LEVEL", "INFO"), log_path=os.getenv("LOG_PATH"))
-    logger.info("Run requested: levels=%s; target_attempts=%s; max_generation_retries=%s", ",".join(curriculum_levels), os.getenv("NUM_QA_PAIRS", "5000"), os.getenv("MAX_GENERATION_RETRIES", "2"))
+
+    logger = configure_logging(
+        output_path=output_path,
+        level=os.getenv("LOG_LEVEL", "INFO"),
+        log_path=os.getenv("LOG_PATH"),
+    )
+    logger.info(
+        "Run requested: levels=%s; target_attempts=%s; max_generation_retries=%s",
+        ",".join(curriculum_levels),
+        os.getenv("NUM_QA_PAIRS", "5000"),
+        os.getenv("MAX_GENERATION_RETRIES", "2"),
+    )
 
     from src.retriever import Retriever
     from src.mcq.workflow import create_mcq_graph
@@ -183,7 +264,9 @@ def main():
 
     # ── 3. Config ─────────────────────────────────────────────────────────
     num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
-    output_path = os.getenv("OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl")
+    output_path = os.getenv(
+        "OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl"
+    )
 
     print(f"Running pipeline to generate {num_qa_pairs} QA pairs...")
     print(f"Curriculum levels: {', '.join(curriculum_levels)}")
@@ -197,7 +280,12 @@ def main():
     playbook_path = os.path.splitext(output_path)[0] + ".playbook.md"
     judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
     quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
-    used_anchor_ids = list(set(load_used_anchor_ids(existing_output_files) + load_anchor_sidecar(anchor_sidecar)))
+    used_anchor_ids = list(
+        set(
+            load_used_anchor_ids(existing_output_files)
+            + load_anchor_sidecar(anchor_sidecar)
+        )
+    )
     print(f"Total used anchor_ids (will be skipped): {len(used_anchor_ids)}")
 
     # ── 5. Initial State ──────────────────────────────────────────────────
@@ -212,6 +300,7 @@ def main():
         "verified_flushed_count": 0,
         "quarantine_flushed_count": 0,
         "curriculum_levels": curriculum_levels,
+        "curriculum_difficulties": curriculum_difficulties,
         "anchor": None,
         "blueprint": {},
         "evidence_docs": [],
@@ -239,20 +328,39 @@ def main():
     verified_items = final_state.get("verified_outputs", [])
     quarantine_items = final_state.get("quarantine_outputs", [])
     from src.mcq.infrastructure.output_writer import append_jsonl
-    final_verified = append_jsonl(output_path, verified_items[final_state.get("verified_flushed_count", 0):])
-    final_quarantine = append_jsonl(quarantine_path, quarantine_items[final_state.get("quarantine_flushed_count", 0):])
+
+    final_verified = append_jsonl(
+        output_path, verified_items[final_state.get("verified_flushed_count", 0) :]
+    )
+    final_quarantine = append_jsonl(
+        quarantine_path,
+        quarantine_items[final_state.get("quarantine_flushed_count", 0) :],
+    )
     if final_verified or final_quarantine:
-        logger.info("Final flush | verified=%s quarantine=%s", final_verified, final_quarantine)
+        logger.info(
+            "Final flush | verified=%s quarantine=%s", final_verified, final_quarantine
+        )
     with open(playbook_path, "w", encoding="utf-8") as f:
         f.write(final_state.get("playbook", ""))
     with open(anchor_sidecar, "w", encoding="utf-8") as f:
-        json.dump(final_state.get("used_anchor_ids", []), f, ensure_ascii=False, indent=2)
+        json.dump(
+            final_state.get("used_anchor_ids", []), f, ensure_ascii=False, indent=2
+        )
     with open(judge_memory_path, "w", encoding="utf-8") as f:
-        json.dump(final_state.get("judge_failure_memory", []), f, ensure_ascii=False, indent=2)
+        json.dump(
+            final_state.get("judge_failure_memory", []), f, ensure_ascii=False, indent=2
+        )
 
     print(f"Done. Verified={len(verified_items)}, quarantined={len(quarantine_items)}.")
-    print(f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; judge memory: {judge_memory_path}")
-    logger.info("Run complete: verified=%s; quarantined=%s; output=%s", len(verified_items), len(quarantine_items), output_path)
+    print(
+        f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; judge memory: {judge_memory_path}"
+    )
+    logger.info(
+        "Run complete: verified=%s; quarantined=%s; output=%s",
+        len(verified_items),
+        len(quarantine_items),
+        output_path,
+    )
 
 
 if __name__ == "__main__":

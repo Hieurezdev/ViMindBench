@@ -1,4 +1,5 @@
 """Append-only JSONL persistence for periodic pipeline checkpoints."""
+
 import json
 from pathlib import Path
 from typing import Any, Iterable

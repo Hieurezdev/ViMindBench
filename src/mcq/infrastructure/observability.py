@@ -1,9 +1,12 @@
 """Safe operational logging for the MCQ generation run."""
+
 import logging
 from pathlib import Path
 
 
-def configure_logging(*, output_path: str, level: str = "INFO", log_path: str | None = None) -> logging.Logger:
+def configure_logging(
+    *, output_path: str, level: str = "INFO", log_path: str | None = None
+) -> logging.Logger:
     path = Path(log_path) if log_path else Path(output_path).with_suffix(".run.log")
     path.parent.mkdir(parents=True, exist_ok=True)
     handlers = [logging.StreamHandler(), logging.FileHandler(path, encoding="utf-8")]
