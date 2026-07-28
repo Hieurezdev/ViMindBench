@@ -290,6 +290,24 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["mcq"]["question"], "Bản sửa")
         self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_preflight")
 
+    def test_generator_refusal_becomes_a_retryable_failure(self) -> None:
+        state = {
+            "blueprint": {"difficulty": "hard", "evidence_limit": 2},
+            "evidence_docs": [doc("chunk-1", "Tier 1")],
+            "playbook": "",
+            "judge_feedback": [],
+            "generation_attempt": 0,
+        }
+        with patch.object(
+            generation,
+            "request_json",
+            side_effect=[{"supported_claims": []}, ValueError("Model did not return a JSON object: I cannot fulfill this request.")],
+        ):
+            result = mcq_generator_node(state)
+        self.assertEqual(result["mcq"], {})
+        self.assertEqual(result["judge_reports"]["generation"]["issues"], ["generator_refusal"])
+        self.assertEqual(result["generation_attempt"], 1)
+
     def test_quality_gate_accepts_complete_grounded_item(self) -> None:
         state = passing_state()
         self.assertEqual(quality_gate_node(state)["verdict"], "verified")

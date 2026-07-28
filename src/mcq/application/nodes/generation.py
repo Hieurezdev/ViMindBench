@@ -105,6 +105,25 @@ def _preflight_report(
         return {"passed": True, "issues": [], "feedback": ""}
 
 
+def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
+    """Turn malformed/refused generator output into a bounded workflow retry."""
+    detail = str(exc).lower()
+    issue = "generator_refusal" if "cannot fulfill" in detail else f"generator_error:{type(exc).__name__}"
+    feedback = {
+        "judge": "generator",
+        "issues": [issue],
+        "feedback": "Return only the requested Vietnamese MCQ JSON. Use the retrieved evidence and educational framing; do not add a refusal or prose.",
+    }
+    return {
+        "mcq": {},
+        "generation_attempt": state.get("generation_attempt", 0) + 1,
+        "judge_reports": {
+            "generation": {"passed": False, "issues": [issue], "severity": "blocking", "feedback": feedback["feedback"]}
+        },
+        "judge_feedback": [*state.get("judge_feedback", []), feedback],
+    }
+
+
 def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     refs = evidence_refs(state.get("evidence_docs", []))
     if not refs:
@@ -116,22 +135,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     evidence_plan = _build_evidence_plan(blueprint, refs)
 
     feedback = list(state.get("judge_feedback", []))
-    mcq = _generate_mcq(
-        blueprint=blueprint,
-        playbook=filtered_playbook,
-        refs=refs,
-        evidence_plan=evidence_plan,
-        judge_feedback=feedback,
-    )
-    preflight = _preflight_report(blueprint=blueprint, mcq=mcq, refs=refs)
-    if not preflight.get("passed", False):
-        feedback.append(
-            {
-                "judge": "a03_preflight",
-                "issues": preflight.get("issues", ["preflight_failed"]),
-                "feedback": preflight.get("feedback", "Repair the cited evidence and option balance."),
-            }
-        )
+    try:
         mcq = _generate_mcq(
             blueprint=blueprint,
             playbook=filtered_playbook,
@@ -139,6 +143,24 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             evidence_plan=evidence_plan,
             judge_feedback=feedback,
         )
+        preflight = _preflight_report(blueprint=blueprint, mcq=mcq, refs=refs)
+        if not preflight.get("passed", False):
+            feedback.append(
+                {
+                    "judge": "a03_preflight",
+                    "issues": preflight.get("issues", ["preflight_failed"]),
+                    "feedback": preflight.get("feedback", "Repair the cited evidence and option balance."),
+                }
+            )
+            mcq = _generate_mcq(
+                blueprint=blueprint,
+                playbook=filtered_playbook,
+                refs=refs,
+                evidence_plan=evidence_plan,
+                judge_feedback=feedback,
+            )
+    except Exception as exc:
+        return _generation_failure(state, exc)
     # A03 requests string IDs, but local models may return
     # [{"chunk_id": "..."}]. Normalize before the judge pipeline.
     mcq["evidence_refs"] = _normalize_evidence_ref_ids(mcq.get("evidence_refs")) or [
