@@ -282,6 +282,16 @@ uv run python main.py \
 Valid levels: `theory`, `emotion`, `educational_scenario`, `clinical_scenario`.
 Valid difficulties: `easy`, `medium`, `hard`.
 
+For `medium`, A03 creates one near-miss distractor: it closely resembles the
+key but differs on one evidence-checkable detail. A05 rejects the item if that
+option is equally defensible or if no near-miss distractor is present; the two
+remaining distractors may be more clearly wrong while still plausible.
+
+For `hard`, all four options must be highly similar in mechanism, topic, and
+response frame. The three distractors are near-misses, each wrong at a small,
+evidence-checkable distinction. A05/A07 reject an item with an irrelevant or
+easy-to-eliminate option, surface answer cues, or more than one defensible key.
+
 ### Retrieval depth by difficulty
 
 The final record cites approved Tier 1/2 chunks up to its difficulty-specific

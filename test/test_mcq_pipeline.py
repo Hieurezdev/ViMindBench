@@ -18,6 +18,7 @@ from src.mcq.application.nodes.planning import context_retriever_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.nodes import learning
+from src.mcq.application.prompts import a03_mcq, a05_single_answer_judge
 from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
@@ -125,6 +126,40 @@ class EvidencePolicyTests(unittest.TestCase):
 
 
 class JudgeGatewayTests(unittest.TestCase):
+    def test_medium_prompts_require_one_near_miss_distractor(self) -> None:
+        blueprint = {"difficulty": "medium"}
+        generator_prompt = a03_mcq.render(
+            blueprint=blueprint,
+            playbook="",
+            evidence=[],
+            judge_feedback=[],
+        )
+        judge_prompt = a05_single_answer_judge.render(
+            blueprint=blueprint,
+            mcq={},
+            evidence=[],
+            past_failures=[],
+        )
+        self.assertIn("one near-miss distractor", generator_prompt)
+        self.assertIn("one near-miss distractor", judge_prompt)
+
+    def test_hard_prompts_require_four_similar_options(self) -> None:
+        blueprint = {"difficulty": "hard"}
+        generator_prompt = a03_mcq.render(
+            blueprint=blueprint,
+            playbook="",
+            evidence=[],
+            judge_feedback=[],
+        )
+        judge_prompt = a05_single_answer_judge.render(
+            blueprint=blueprint,
+            mcq={},
+            evidence=[],
+            past_failures=[],
+        )
+        self.assertIn("All four options must be highly similar", generator_prompt)
+        self.assertIn("all four options to be highly similar", judge_prompt)
+
     def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
         parsed = llm_gateway._parse_json_object(
             "Here is the result:\n```json\n{\"answer\": \"B\"}\n```\n"

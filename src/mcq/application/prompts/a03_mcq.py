@@ -38,11 +38,20 @@ Return exactly four options, with exactly the keys A, B, C, and D: no extra opti
 no missing option, no combined option, and no "tất cả các đáp án trên" / "cả A và B".
 Exactly one option must be the best answer, and answer must be exactly one of
 A, B, C, or D. Do not add explanatory prose before or after the JSON.
+When blueprint difficulty is "medium", design one near-miss distractor that is
+highly similar to the key in mechanism, topic, or wording, but is wrong because
+of one precise and evidence-checkable distinction. The remaining two distractors
+may be more clearly wrong, but must still be plausible. Do not make the near-miss
+also correct or equally defensible: there must still be exactly one best answer.
 When blueprint difficulty is "hard", the key MUST NOT be identifiable from
 surface test-taking cues. Balance option length, grammar, specificity, certainty,
-and qualification across A–D. The key must require the stated psychological
+and qualification across A–D. All four options must be highly similar in the
+same psychological mechanism, topic, and response frame. Each distractor must
+be a plausible near-miss that differs from the key by a small, precise,
+evidence-checkable distinction. The key must require the stated psychological
 reasoning and evidence; it must not be the only nuanced, comprehensive, or
-carefully hedged option.
+carefully hedged option. Despite this similarity, exactly one option must remain
+directly supported and best; do not create two defensible answers.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
