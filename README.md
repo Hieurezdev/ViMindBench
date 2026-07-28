@@ -5,8 +5,9 @@ A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety
 → bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
 judge failure memory.
 
-Mỗi record verified bắt buộc có `evidence_refs` gồm các `chunk_id` đã retrieve,
-tối đa theo difficulty: easy=2, medium=4, hard=6;
+Mỗi record verified bắt buộc có `evidence_refs` gồm các `chunk_id` đã retrieve:
+easy=1–2, medium=1–4, hard=2–6. Câu hard phải tổng hợp các claim được hỗ trợ
+trực tiếp từ ít nhất hai chunk khác nhau;
 citation nằm trong metadata/audit, không xuất hiện trong question stem hay options.
 Pipeline không lưu `<think>` tự do. Trường `reasoning.steps` chỉ chứa audit steps
 ngắn, có thể kiểm tra được, không phải chain-of-thought.
@@ -292,16 +293,21 @@ A05 also exports an explicit per-option audit: the declared key must be judged
 ambiguous, or conflicting assessment fails the quality gate and regenerates the
 item within the retry budget.
 
+For `hard`, all four options must target the same mechanism or decision and be
+plausible near-misses. Each distractor differs from the key by a small,
+evidence-checkable detail; the key alone synthesizes direct support from at
+least two cited chunks. This is checked by A03 preflight, A05, and Quality Gate.
+
 ### Retrieval depth by difficulty
 
 The final record cites approved Tier 1/2 chunks up to its difficulty-specific
 limit. A02 reads more context for harder items:
 
-| Difficulty | Vector-search candidates | Approved evidence chunks supplied to A03–A06 |
+| Difficulty | Vector-search candidates | Approved evidence chunks supplied to A03–A06 | Required final citations |
 |---|---:|---:|
-| `easy` | 8 | 2 |
-| `medium` | 16 | 4 |
-| `hard` | 24 | 6 |
+| `easy` | 8 | 2 | 1–2 |
+| `medium` | 16 | 4 | 1–4 |
+| `hard` | 24 | 6 | 2–6 |
 
 A04 still requires every cited chunk to directly support the keyed answer.
 

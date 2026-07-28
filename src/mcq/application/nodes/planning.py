@@ -65,6 +65,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     blueprint["level"] = level
     blueprint["difficulty"] = difficulty
     blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]
+    blueprint["min_evidence_refs"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["min_evidence_refs"]
     blueprint["num_options"] = 4
     blueprint["requires_emobench"] = level == "emotion"
     blueprint["emobench"] = normalize_blueprint_emobench(blueprint.get("emobench"), enabled=level == "emotion")

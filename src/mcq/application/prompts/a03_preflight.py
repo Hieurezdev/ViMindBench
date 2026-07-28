@@ -11,7 +11,9 @@ Check only these release blockers before the item reaches the full judge chain:
    added mechanism or claim.
 2. There is exactly one best answer and three incorrect distractors.
 3. For difficulty=hard, no answer is discoverable solely from length, absolute
-   wording, unique nuance, or qualification; all four options are balanced.
+   wording, unique nuance, or qualification; all four options are balanced,
+   address the same mechanism, and are plausible near-misses. The key must cite
+   at least two chunks and synthesize only directly supported claims.
 
 Blueprint: {json.dumps(blueprint, ensure_ascii=False)}
 MCQ: {json.dumps(mcq, ensure_ascii=False)}

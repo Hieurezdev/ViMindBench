@@ -14,7 +14,8 @@ from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids, mcq_generator_node
 from src.mcq.application.nodes import generation
-from src.mcq.application.nodes.judging import _validate_single_answer_report, quality_gate_node
+from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, quality_gate_node
+from src.mcq.application.nodes import judging
 from src.mcq.application.nodes.planning import context_retriever_node, curriculum_planner_node
 from src.mcq.application.nodes import planning
 from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
@@ -178,6 +179,26 @@ class JudgeGatewayTests(unittest.TestCase):
         )
         self.assertIn("one near-miss distractor", generator_prompt)
         self.assertIn("one near-miss distractor", judge_prompt)
+        self.assertIn("Avoid emphatic or absolute wording", generator_prompt)
+
+    def test_hard_prompts_require_similar_options_and_multiple_sources(self) -> None:
+        blueprint = {"difficulty": "hard", "min_evidence_refs": 2, "evidence_limit": 6}
+        generator_prompt = a03_mcq.render(
+            blueprint=blueprint,
+            playbook="",
+            evidence=[],
+            evidence_plan={},
+            judge_feedback=[],
+        )
+        judge_prompt = a05_single_answer_judge.render(
+            blueprint=blueprint,
+            mcq={},
+            evidence=[],
+            past_failures=[],
+        )
+        self.assertIn("2 to 6", generator_prompt)
+        self.assertIn("All four\noptions must address the same core mechanism", generator_prompt)
+        self.assertIn("at least two cited chunks", judge_prompt)
 
     def test_single_answer_audit_requires_key_and_three_incorrect_distractors(self) -> None:
         mcq = {"answer": "B", "options": {"A": "a", "B": "b", "C": "c", "D": "d"}}
@@ -201,6 +222,27 @@ class JudgeGatewayTests(unittest.TestCase):
         )
         self.assertFalse(ambiguous["passed"])
         self.assertIn("distractor_not_judged_incorrect", ambiguous["issues"])
+
+    def test_adversarial_solver_requires_a_concrete_surface_cue(self) -> None:
+        state = {
+            "blueprint": {"difficulty": "hard"},
+            "mcq": {"question": "Q", "options": {"A": "a", "B": "b", "C": "c", "D": "d"}, "answer": "B"},
+        }
+        with patch.object(
+            judging,
+            "request_judge_json",
+            return_value={"selected_option": "B", "confidence": "high", "surface_cue_type": "none", "surface_cue_evidence": ""},
+        ):
+            no_cue = adversarial_solver_node(state)
+        self.assertTrue(no_cue["judge_reports"]["adversarial_solver"]["passed"])
+
+        with patch.object(
+            judging,
+            "request_judge_json",
+            return_value={"selected_option": "B", "confidence": "high", "surface_cue_type": "absolute_wording", "surface_cue_evidence": "A/C/D use only absolute wording"},
+        ):
+            cue = adversarial_solver_node(state)
+        self.assertFalse(cue["judge_reports"]["adversarial_solver"]["passed"])
 
     def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
         parsed = llm_gateway._parse_json_object(
@@ -364,6 +406,14 @@ class QualityAndPlaybookTests(unittest.TestCase):
         state["blueprint"]["difficulty"] = "medium"
         state["evidence_docs"] = [doc(f"chunk-{index}", "Tier 1") for index in range(5)]
         state["mcq"]["evidence_refs"] = [f"chunk-{index}" for index in range(5)]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("invalid_evidence_refs", result["quarantine_reason"])
+
+    def test_quality_gate_requires_two_citations_for_hard_items(self) -> None:
+        state = passing_state()
+        state["blueprint"]["difficulty"] = "hard"
+        state["mcq"]["evidence_refs"] = ["DSM5-DEP-014"]
         result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_evidence_refs", result["quarantine_reason"])

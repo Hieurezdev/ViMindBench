@@ -136,6 +136,8 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
 
         selected_option = solver_response.get("selected_option")
         confidence = solver_response.get("confidence")
+        cue_type = solver_response.get("surface_cue_type")
+        cue_evidence = solver_response.get("surface_cue_evidence")
         actual_answer = mcq.get("answer")
         is_hard = state.get("blueprint", {}).get("difficulty") == "hard"
 
@@ -143,10 +145,16 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
         issues = []
         feedback = ""
 
-        if selected_option == actual_answer and confidence == "high" and is_hard:
+        concrete_cue = (
+            isinstance(cue_type, str)
+            and cue_type in {"length", "absolute_wording", "unique_qualification", "grammar", "detail_imbalance", "other"}
+            and isinstance(cue_evidence, str)
+            and bool(cue_evidence.strip())
+        )
+        if selected_option == actual_answer and confidence == "high" and is_hard and concrete_cue:
             passed = False
             issues.append("adversarial:spurious_cues_found")
-            feedback = "The solver identified the key with high confidence without evidence; rebalance option length, grammar, specificity, certainty, and qualification."
+            feedback = f"The solver identified a concrete {cue_type} cue: {cue_evidence.strip()}. Rebalance option length, grammar, specificity, certainty, and qualification."
 
         return _report(state, "adversarial_solver", {
             "passed": passed,
@@ -162,10 +170,12 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
 
 def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     reports, errors = state.get("judge_reports", {}), []
-    evidence_limit = RETRIEVAL_DEPTH_BY_DIFFICULTY.get(
+    evidence_policy = RETRIEVAL_DEPTH_BY_DIFFICULTY.get(
         state.get("blueprint", {}).get("difficulty", "medium"),
         RETRIEVAL_DEPTH_BY_DIFFICULTY["medium"],
-    )["evidence_limit"]
+    )
+    evidence_limit = evidence_policy["evidence_limit"]
+    min_evidence_refs = evidence_policy["min_evidence_refs"]
     options = state.get("mcq", {}).get("options", {})
     answer = state.get("mcq", {}).get("answer")
     if set(options) != {"A", "B", "C", "D"}:
@@ -196,7 +206,7 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     cited: Set[str] = set(raw_cited) if valid_cited_shape else set()
     if (
         not valid_cited_shape
-        or not (1 <= len(cited) <= evidence_limit)
+        or not (min_evidence_refs <= len(cited) <= evidence_limit)
         or not cited.issubset(available)
     ):
         errors.append("invalid_evidence_refs")

@@ -16,7 +16,7 @@ Question (Target difficulty: {difficulty}):
 Options:
 {options_text}
 
-Return JSON only: {{"selected_option": "A|B|C|D", "confidence": "high|low", "reasoning": "..."}}
-If you can confidently guess the correct answer due to obvious clues, spurious correlations, or bad distractor design, set confidence to "high".
-If you are completely guessing randomly because the options are well-balanced and require specific knowledge, set confidence to "low".
+Return JSON only: {{"selected_option": "A|B|C|D", "confidence": "high|low", "surface_cue_type":"none|length|absolute_wording|unique_qualification|grammar|detail_imbalance|other", "surface_cue_evidence":"short quoted or comparative cue", "reasoning": "..."}}.
+Set confidence="high" because of bad item design only when you can name a concrete surface cue in the options. If your confidence comes from psychology knowledge, the question's meaning, or a genuine evidence-based distinction rather than a surface cue, set surface_cue_type="none" even if you select an answer. Do not invent a cue.
+If the options are well-balanced and require specific knowledge, set surface_cue_type="none" and confidence="low" unless a real surface cue is present.
 """

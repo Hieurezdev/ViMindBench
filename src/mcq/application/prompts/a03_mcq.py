@@ -28,7 +28,7 @@ The keyed option MUST express only one or more claims in Allowed keyed claims.
 Do not combine a supported claim with a plausible but unlisted mechanism,
 diagnosis, treatment effect, or causal explanation. If there is not enough
 support for a precise claim, write a narrower question instead.
-You MUST cite one to {blueprint.get("evidence_limit", 4)} retrieved chunk_id values in evidence_refs. Each cited
+You MUST cite {blueprint.get("min_evidence_refs", 1)} to {blueprint.get("evidence_limit", 4)} retrieved chunk_id values in evidence_refs. Each cited
 chunk must directly support the keyed option. Do not mention sources, context,
 documents, citations, or chunk IDs in the question stem or options.
 Write the Vietnamese stem and options as if the psychology knowledge is your own
@@ -44,6 +44,11 @@ Return exactly four options, with exactly the keys A, B, C, and D: no extra opti
 no missing option, no combined option, and no "tất cả các đáp án trên" / "cả A và B".
 Exactly one option must be the best answer, and answer must be exactly one of
 A, B, C, or D. Do not add explanatory prose before or after the JSON.
+Avoid emphatic or absolute wording in all answer options, including "hoàn toàn",
+"tuyệt đối", "luôn luôn", "không bao giờ", "duy nhất", "chắc chắn", "triệt để",
+"tất cả", and "chỉ". Do not use such language to make distractors obviously
+wrong. Use it only when directly required by evidence and keep certainty balanced
+across all four options.
 When blueprint difficulty is "medium", design one near-miss distractor that is
 highly similar to the key in mechanism, topic, or wording, but is wrong because
 of one precise and evidence-checkable distinction. The remaining two distractors
@@ -57,7 +62,12 @@ carefully hedged option. Use the same grammatical frame for all four options and
 do not make only distractors use giveaway absolutes such as "hoàn toàn", "tuyệt
 đối", "duy nhất", "luôn luôn", "không bao giờ", or "không đáng kể". Before
 returning, silently compare all four options for length, certainty, and detail;
-rewrite any option that makes the key obvious without subject knowledge.
+rewrite any option that makes the key obvious without subject knowledge. All four
+options must address the same core mechanism or decision and be plausible
+near-misses; each wrong option must differ from the key by a small,
+evidence-checkable distinction. Build the key by synthesizing at least two
+directly supported claims from distinct cited chunks, never by adding outside
+knowledge. Exactly one option may be fully supported by that synthesis.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
