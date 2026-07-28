@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
-from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids, mcq_generator_node
+from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, mcq_generator_node
 from src.mcq.application.nodes import generation
 from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, quality_gate_node
 from src.mcq.application.nodes import judging
@@ -322,6 +322,22 @@ class QualityAndPlaybookTests(unittest.TestCase):
             ),
             ["chunk-1", "chunk-2"],
         )
+
+    def test_hard_guard_rejects_emphatic_wording_and_length_imbalance(self) -> None:
+        report = _hard_guard_report(
+            {"difficulty": "hard"},
+            {
+                "options": {
+                    "A": "Một lựa chọn có nhiều chi tiết để mô tả cơ chế tâm lý được đề cập.",
+                    "B": "Hoàn toàn sai.",
+                    "C": "Một lựa chọn khác.",
+                    "D": "Một lựa chọn cuối.",
+                }
+            },
+        )
+        self.assertFalse(report["passed"])
+        self.assertIn("hard_guard:emphatic_wording", report["issues"])
+        self.assertIn("hard_guard:option_length_imbalance", report["issues"])
 
     def test_generator_repairs_once_after_preflight_failure(self) -> None:
         first = {"question": "Bản nháp", "options": {}, "evidence_refs": ["chunk-1"]}

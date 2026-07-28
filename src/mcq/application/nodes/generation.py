@@ -9,6 +9,11 @@ from ...infrastructure.evidence import evidence_refs
 from ...infrastructure.llm_gateway import request_json, request_judge_json
 from ..prompts import a03_evidence_plan, a03_mcq, a03_preflight
 
+HARD_EMPHATIC_WORDING = re.compile(
+    r"\b(hoàn\s+toàn|tuyệt\s+đối|luôn\s+luôn|không\s+bao\s+giờ|duy\s+nhất|chắc\s+chắn|triệt\s+để|ngay\s+lập\s+tức|tự\s+ý|tất\s+cả)\b",
+    re.IGNORECASE,
+)
+
 
 def _normalize_evidence_ref_ids(value: Any) -> List[str]:
     """Accept common LLM citation shapes, but keep state as chunk_id strings."""
@@ -87,22 +92,70 @@ def _generate_mcq(
     )
 
 
+def _hard_guard_report(blueprint: Dict[str, Any], mcq: Dict[str, Any]) -> Dict[str, Any]:
+    """Deterministically reject common hard-item cues before LLM judging."""
+    if blueprint.get("difficulty") != "hard" or os.getenv("A03_HARD_GUARD_ENABLED", "true").lower() not in {"1", "true", "yes"}:
+        return {"passed": True, "issues": [], "feedback": ""}
+
+    options = mcq.get("options")
+    if not isinstance(options, dict) or set(options) != {"A", "B", "C", "D"} or not all(isinstance(text, str) and text.strip() for text in options.values()):
+        return {
+            "passed": False,
+            "issues": ["hard_guard:invalid_option_shape"],
+            "feedback": "Return four non-empty string options A–D in the same grammatical frame.",
+        }
+
+    issues: List[str] = []
+    details: List[str] = []
+    counts = {key: len(re.findall(r"\w+", text, re.UNICODE)) for key, text in options.items()}
+    max_gap = int(os.getenv("A03_HARD_MAX_OPTION_WORD_GAP", "5"))
+    if max(counts.values()) - min(counts.values()) > max_gap:
+        issues.append("hard_guard:option_length_imbalance")
+        details.append(f"word counts are {counts}; keep the gap at most {max_gap}")
+
+    emphatic = {
+        key: sorted({match.group(0).lower() for match in HARD_EMPHATIC_WORDING.finditer(text)})
+        for key, text in options.items()
+    }
+    emphatic = {key: words for key, words in emphatic.items() if words}
+    if emphatic:
+        issues.append("hard_guard:emphatic_wording")
+        details.append(f"remove emphatic wording from options: {emphatic}")
+
+    if not issues:
+        return {"passed": True, "issues": [], "feedback": ""}
+    return {
+        "passed": False,
+        "issues": issues,
+        "feedback": "Hard rewrite required: " + "; ".join(details) + ". Keep all options plausible near-misses of the same mechanism.",
+    }
+
+
 def _preflight_report(
     *, blueprint: Dict[str, Any], mcq: Dict[str, Any], refs: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
     """Use the judge model for one cheap repair opportunity before A04–A07."""
+    hard_guard = _hard_guard_report(blueprint, mcq)
     if os.getenv("A03_PREFLIGHT_ENABLED", "true").lower() not in {"1", "true", "yes"}:
-        return {"passed": True, "issues": [], "feedback": ""}
+        return hard_guard
     try:
         report = request_judge_json(
             a03_preflight.render(blueprint=blueprint, mcq=mcq, evidence=refs),
             max_tokens=450,
         )
-        return report if isinstance(report, dict) else {"passed": False, "issues": ["preflight_invalid_report"]}
+        if not isinstance(report, dict):
+            report = {"passed": False, "issues": ["preflight_invalid_report"], "feedback": "Return a valid preflight JSON report."}
+        if hard_guard.get("passed", False):
+            return report
+        return {
+            "passed": False,
+            "issues": [*hard_guard["issues"], *report.get("issues", [])],
+            "feedback": " ".join(part for part in (hard_guard.get("feedback", ""), report.get("feedback", "")) if part),
+        }
     except Exception:
         # The full A04–A07 chain remains authoritative if this optional early
         # review endpoint is unavailable.
-        return {"passed": True, "issues": [], "feedback": ""}
+        return hard_guard
 
 
 def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
