@@ -143,23 +143,6 @@ class JudgeGatewayTests(unittest.TestCase):
         self.assertIn("one near-miss distractor", generator_prompt)
         self.assertIn("one near-miss distractor", judge_prompt)
 
-    def test_hard_prompts_require_four_similar_options(self) -> None:
-        blueprint = {"difficulty": "hard"}
-        generator_prompt = a03_mcq.render(
-            blueprint=blueprint,
-            playbook="",
-            evidence=[],
-            judge_feedback=[],
-        )
-        judge_prompt = a05_single_answer_judge.render(
-            blueprint=blueprint,
-            mcq={},
-            evidence=[],
-            past_failures=[],
-        )
-        self.assertIn("All four options must be highly similar", generator_prompt)
-        self.assertIn("all four options to be highly similar", judge_prompt)
-
     def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
         parsed = llm_gateway._parse_json_object(
             "Here is the result:\n```json\n{\"answer\": \"B\"}\n```\n"

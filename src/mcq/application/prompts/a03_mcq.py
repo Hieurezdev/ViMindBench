@@ -45,13 +45,9 @@ may be more clearly wrong, but must still be plausible. Do not make the near-mis
 also correct or equally defensible: there must still be exactly one best answer.
 When blueprint difficulty is "hard", the key MUST NOT be identifiable from
 surface test-taking cues. Balance option length, grammar, specificity, certainty,
-and qualification across A–D. All four options must be highly similar in the
-same psychological mechanism, topic, and response frame. Each distractor must
-be a plausible near-miss that differs from the key by a small, precise,
-evidence-checkable distinction. The key must require the stated psychological
+and qualification across A–D. The key must require the stated psychological
 reasoning and evidence; it must not be the only nuanced, comprehensive, or
-carefully hedged option. Despite this similarity, exactly one option must remain
-directly supported and best; do not create two defensible answers.
+carefully hedged option.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
