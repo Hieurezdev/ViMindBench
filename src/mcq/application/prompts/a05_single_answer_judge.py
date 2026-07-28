@@ -13,6 +13,7 @@ def render(**kwargs: object) -> str:
         hard_rule = " For difficulty=hard, fail if the key can be found through surface cues alone: it must not be uniquely longer, more nuanced, more qualified, more precise, or less absolute than every distractor."
     return render_judge(
         name="A05 Single-Answer Judge",
-        rubric="Pass only if exactly one option is clearly best. Distractors must be plausible but demonstrably worse, mutually distinct, and must not reveal the key by length, absolutes, or wording." + medium_rule + hard_rule,
+        rubric="Pass only if exactly one option is clearly best. Independently classify every option: the MCQ's declared answer must be correct, and each of the other exactly three options must be incorrect. Distractors must be plausible but demonstrably worse, mutually distinct, and must not reveal the key by length, absolutes, or wording." + medium_rule + hard_rule,
+        result_schema_suffix=',"option_assessment":{"A":"correct|incorrect|ambiguous","B":"correct|incorrect|ambiguous","C":"correct|incorrect|ambiguous","D":"correct|incorrect|ambiguous"}',
         **kwargs,
     )

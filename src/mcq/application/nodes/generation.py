@@ -1,12 +1,13 @@
 """A03 MCQ generation node."""
 
+import os
 import random
 import re
 from typing import Any, Dict, List
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
-from ...infrastructure.llm_gateway import request_json
-from ..prompts import a03_mcq
+from ...infrastructure.llm_gateway import request_json, request_judge_json
+from ..prompts import a03_evidence_plan, a03_mcq, a03_preflight
 
 
 def _normalize_evidence_ref_ids(value: Any) -> List[str]:
@@ -56,6 +57,54 @@ def _sample_successful_strategies(playbook: str, sample_size: int = 3) -> str:
     return before_section + section_header + new_success_section + after_section
 
 
+def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Keep the key within explicitly extracted evidence claims when possible."""
+    try:
+        plan = request_json(a03_evidence_plan.render(blueprint=blueprint, evidence=refs), max_tokens=700)
+        if isinstance(plan, dict):
+            return plan
+    except Exception:
+        pass
+    return {"supported_claims": [], "prohibited_inferences": []}
+
+
+def _generate_mcq(
+    *,
+    blueprint: Dict[str, Any],
+    playbook: str,
+    refs: List[Dict[str, Any]],
+    evidence_plan: Dict[str, Any],
+    judge_feedback: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    return request_json(
+        a03_mcq.render(
+            blueprint=blueprint,
+            playbook=playbook[:7000],
+            evidence=refs,
+            evidence_plan=evidence_plan,
+            judge_feedback=judge_feedback,
+        )
+    )
+
+
+def _preflight_report(
+    *, blueprint: Dict[str, Any], mcq: Dict[str, Any], refs: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """Use the judge model for one cheap repair opportunity before A04–A07."""
+    if os.getenv("A03_PREFLIGHT_ENABLED", "true").lower() not in {"1", "true", "yes"}:
+        return {"passed": True, "issues": [], "feedback": ""}
+    try:
+        report = request_judge_json(
+            a03_preflight.render(blueprint=blueprint, mcq=mcq, evidence=refs),
+            max_tokens=450,
+        )
+        return report if isinstance(report, dict) else {"passed": False, "issues": ["preflight_invalid_report"]}
+    except Exception:
+        # The full A04–A07 chain remains authoritative if this optional early
+        # review endpoint is unavailable.
+        return {"passed": True, "issues": [], "feedback": ""}
+
+
 def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     refs = evidence_refs(state.get("evidence_docs", []))
     if not refs:
@@ -63,15 +112,33 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
     full_playbook = state.get("playbook", "")
     filtered_playbook = _sample_successful_strategies(full_playbook, sample_size=3)
+    blueprint = state["blueprint"]
+    evidence_plan = _build_evidence_plan(blueprint, refs)
 
-    mcq = request_json(
-        a03_mcq.render(
-            blueprint=state["blueprint"],
-            playbook=filtered_playbook[:7000],
-            evidence=refs,
-            judge_feedback=state.get("judge_feedback", []),
-        )
+    feedback = list(state.get("judge_feedback", []))
+    mcq = _generate_mcq(
+        blueprint=blueprint,
+        playbook=filtered_playbook,
+        refs=refs,
+        evidence_plan=evidence_plan,
+        judge_feedback=feedback,
     )
+    preflight = _preflight_report(blueprint=blueprint, mcq=mcq, refs=refs)
+    if not preflight.get("passed", False):
+        feedback.append(
+            {
+                "judge": "a03_preflight",
+                "issues": preflight.get("issues", ["preflight_failed"]),
+                "feedback": preflight.get("feedback", "Repair the cited evidence and option balance."),
+            }
+        )
+        mcq = _generate_mcq(
+            blueprint=blueprint,
+            playbook=filtered_playbook,
+            refs=refs,
+            evidence_plan=evidence_plan,
+            judge_feedback=feedback,
+        )
     # A03 requests string IDs, but local models may return
     # [{"chunk_id": "..."}]. Normalize before the judge pipeline.
     mcq["evidence_refs"] = _normalize_evidence_ref_ids(mcq.get("evidence_refs")) or [
@@ -81,6 +148,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
         "mcq": mcq,
         "generation_attempt": state.get("generation_attempt", 0) + 1,
         "judge_reports": {},
+        "judge_feedback": feedback,
     }
 
 

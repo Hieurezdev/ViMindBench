@@ -12,9 +12,11 @@ from unittest.mock import patch
 
 from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
-from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids
-from src.mcq.application.nodes.judging import quality_gate_node
+from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids, mcq_generator_node
+from src.mcq.application.nodes import generation
+from src.mcq.application.nodes.judging import _validate_single_answer_report, quality_gate_node
 from src.mcq.application.nodes.planning import context_retriever_node
+from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.nodes import learning
@@ -124,6 +126,24 @@ class EvidencePolicyTests(unittest.TestCase):
         self.assertEqual(len(medium["evidence_docs"]), 4)
         self.assertEqual(len(hard["evidence_docs"]), 6)
 
+    def test_dsm5_query_tolerates_list_valued_option(self) -> None:
+        queries = []
+        retriever = SimpleNamespace(
+            generate_embedding=lambda query: queries.append(query) or [0.1],
+            search_dsm5=lambda embedding, k: [],
+        )
+        state = {
+            "blueprint": {"level": "clinical_scenario", "topic": "stress"},
+            "mcq": {
+                "question": "Câu hỏi lâm sàng",
+                "options": {"A": "a", "B": ["b", "bổ sung"], "C": "c", "D": "d"},
+            },
+        }
+        with patch.object(builtins, "RETRIEVER", retriever, create=True):
+            result = dsm5_safety_context_node(state)
+        self.assertEqual(result["dsm5_safety_docs"], [])
+        self.assertIn("bổ sung", queries[0])
+
 
 class JudgeGatewayTests(unittest.TestCase):
     def test_medium_prompts_require_one_near_miss_distractor(self) -> None:
@@ -132,6 +152,7 @@ class JudgeGatewayTests(unittest.TestCase):
             blueprint=blueprint,
             playbook="",
             evidence=[],
+            evidence_plan={},
             judge_feedback=[],
         )
         judge_prompt = a05_single_answer_judge.render(
@@ -142,6 +163,29 @@ class JudgeGatewayTests(unittest.TestCase):
         )
         self.assertIn("one near-miss distractor", generator_prompt)
         self.assertIn("one near-miss distractor", judge_prompt)
+
+    def test_single_answer_audit_requires_key_and_three_incorrect_distractors(self) -> None:
+        mcq = {"answer": "B", "options": {"A": "a", "B": "b", "C": "c", "D": "d"}}
+        passing = _validate_single_answer_report(
+            {
+                "passed": True,
+                "issues": [],
+                "option_assessment": {"A": "incorrect", "B": "correct", "C": "incorrect", "D": "incorrect"},
+            },
+            mcq,
+        )
+        self.assertTrue(passing["passed"])
+
+        ambiguous = _validate_single_answer_report(
+            {
+                "passed": True,
+                "issues": [],
+                "option_assessment": {"A": "incorrect", "B": "correct", "C": "ambiguous", "D": "incorrect"},
+            },
+            mcq,
+        )
+        self.assertFalse(ambiguous["passed"])
+        self.assertIn("distractor_not_judged_incorrect", ambiguous["issues"])
 
     def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
         parsed = llm_gateway._parse_json_object(
@@ -222,6 +266,30 @@ class QualityAndPlaybookTests(unittest.TestCase):
             ["chunk-1", "chunk-2"],
         )
 
+    def test_generator_repairs_once_after_preflight_failure(self) -> None:
+        first = {"question": "Bản nháp", "options": {}, "evidence_refs": ["chunk-1"]}
+        repaired = {"question": "Bản sửa", "options": {}, "evidence_refs": ["chunk-1"]}
+        state = {
+            "blueprint": {"difficulty": "hard", "evidence_limit": 2},
+            "evidence_docs": [doc("chunk-1", "Tier 1")],
+            "playbook": "",
+            "judge_feedback": [],
+            "generation_attempt": 0,
+        }
+        with patch.dict(os.environ, {"A03_PREFLIGHT_ENABLED": "true"}), patch.object(
+            generation,
+            "request_json",
+            side_effect=[{"supported_claims": [], "prohibited_inferences": []}, first, repaired],
+        ) as generate, patch.object(
+            generation,
+            "request_judge_json",
+            return_value={"passed": False, "issues": ["surface_cue:absolute_distractors"], "feedback": "Balance the options."},
+        ):
+            result = mcq_generator_node(state)
+        self.assertEqual(generate.call_count, 3)
+        self.assertEqual(result["mcq"]["question"], "Bản sửa")
+        self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_preflight")
+
     def test_quality_gate_accepts_complete_grounded_item(self) -> None:
         state = passing_state()
         self.assertEqual(quality_gate_node(state)["verdict"], "verified")
@@ -239,6 +307,13 @@ class QualityAndPlaybookTests(unittest.TestCase):
         result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("contains_han_script", result["quarantine_reason"])
+
+    def test_quality_gate_quarantines_non_string_option(self) -> None:
+        state = passing_state()
+        state["mcq"]["options"]["B"] = ["b"]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("invalid_option_text", result["quarantine_reason"])
 
     def test_quality_gate_quarantines_hard_item_with_spurious_cues(self) -> None:
         state = passing_state()

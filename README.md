@@ -287,6 +287,11 @@ key but differs on one evidence-checkable detail. A05 rejects the item if that
 option is equally defensible or if no near-miss distractor is present; the two
 remaining distractors may be more clearly wrong while still plausible.
 
+A05 also exports an explicit per-option audit: the declared key must be judged
+`correct` and the other exactly three options `incorrect`. Any missing,
+ambiguous, or conflicting assessment fails the quality gate and regenerates the
+item within the retry budget.
+
 ### Retrieval depth by difficulty
 
 The final record cites approved Tier 1/2 chunks up to its difficulty-specific
@@ -373,6 +378,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
+| `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `LOG_LEVEL` | `INFO` | Verbosity for structured node-step logging. |
 | `LOG_PATH` | `<output>.run.log` | Optional custom log-file path. |
 | `ALLOW_UNTIERED_EVIDENCE` | `true` initially | Set `false` after all main evidence has explicit Tier 1/2 metadata. |

@@ -71,11 +71,39 @@ def evidence_judge_node(state: MCQState) -> Dict[str, Any]:
     )
 
 
+def _validate_single_answer_report(report: Dict[str, Any], mcq: Dict[str, Any]) -> Dict[str, Any]:
+    """Require an explicit key-correct / three-distractor-incorrect audit."""
+    checked = dict(report)
+    answer = mcq.get("answer")
+    options = mcq.get("options", {})
+    assessments = report.get("option_assessment")
+    issues = list(report.get("issues", []))
+
+    expected_keys = set(options) if isinstance(options, dict) else set()
+    if not isinstance(assessments, dict) or set(assessments) != expected_keys:
+        issues.append("option_assessment_incomplete")
+    elif answer not in options or assessments.get(answer) != "correct":
+        issues.append("declared_answer_not_judged_correct")
+    elif any(
+        assessments.get(option) != "incorrect"
+        for option in options
+        if option != answer
+    ):
+        issues.append("distractor_not_judged_incorrect")
+
+    if issues:
+        checked["passed"] = False
+        checked["severity"] = "blocking"
+    checked["issues"] = list(dict.fromkeys(issues))
+    return checked
+
+
 def single_answer_judge_node(state: MCQState) -> Dict[str, Any]:
+    report = _run_judge(state, "single_answer", a05_single_answer_judge.render)
     return _report(
         state,
         "single_answer",
-        _run_judge(state, "single_answer", a05_single_answer_judge.render),
+        _validate_single_answer_report(report, state.get("mcq", {})),
     )
 
 
@@ -142,6 +170,8 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     answer = state.get("mcq", {}).get("answer")
     if set(options) != {"A", "B", "C", "D"}:
         errors.append("invalid_options")
+    elif not all(isinstance(option, str) and option.strip() for option in options.values()):
+        errors.append("invalid_option_text")
     if answer not in options:
         errors.append("invalid_answer")
     if answer and set(state.get("mcq", {}).get("distractor_analysis", {})) != (
