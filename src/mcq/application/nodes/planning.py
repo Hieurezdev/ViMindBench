@@ -1,6 +1,7 @@
 """A01 and A02 nodes."""
 
 import builtins
+import logging
 from typing import Any, Dict
 from ...domain import LEVELS, MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import select_eligible_documents
@@ -8,6 +9,8 @@ from ...infrastructure.llm_gateway import request_json
 from ...infrastructure.mongo_anchor_repository import select_unused_anchor
 from ..emobench import normalize_blueprint_emobench
 from ..prompts import a01_curriculum
+
+logger = logging.getLogger("mcq.planning")
 
 
 def select_anchor_node(state: MCQState) -> Dict[str, Any]:
@@ -20,6 +23,20 @@ def select_anchor_node(state: MCQState) -> Dict[str, Any]:
     }
 
 
+def _fallback_blueprint(anchor: Dict[str, Any], *, level: str, difficulty: str) -> Dict[str, Any]:
+    """Keep retrieval running when an optional A01 chat response is empty."""
+    title = str(anchor.get("title") or "tâm lý học")
+    summary = str(anchor.get("summary") or "")
+    return {
+        "topic": title[:180],
+        "subtopic": "khái niệm và ứng dụng tâm lý học",
+        "skill": "evidence_grounded_reasoning",
+        "retrieval_query": f"{title} {summary}".strip()[:1000],
+        "clinical_guardrail": "Ask for a safe educational or supportive next step; do not diagnose or prescribe.",
+        "playbook_bullet_ids": [],
+    }
+
+
 def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     anchor = state["anchor"]
     levels = state.get("curriculum_levels", list(LEVELS))
@@ -29,16 +46,22 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     difficulties = state.get("curriculum_difficulties", ["easy", "medium", "hard"])
     difficulty = difficulties[(iteration // len(levels)) % len(difficulties)]
 
-    blueprint = request_json(
-        a01_curriculum.render(
-            level=level,
-            difficulty=difficulty,
-            title=anchor["title"],
-            summary=anchor["summary"],
-            playbook=state.get("playbook", "")[:7000],
-        ),
-        max_tokens=700,
-    )
+    try:
+        blueprint = request_json(
+            a01_curriculum.render(
+                level=level,
+                difficulty=difficulty,
+                title=anchor["title"],
+                summary=anchor["summary"],
+                playbook=state.get("playbook", "")[:7000],
+            ),
+            max_tokens=700,
+        )
+        if not isinstance(blueprint, dict):
+            raise ValueError("planner did not return an object")
+    except Exception as exc:
+        logger.warning("A01 fallback blueprint after %s", type(exc).__name__)
+        blueprint = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
     blueprint["level"] = level
     blueprint["difficulty"] = difficulty
     blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]

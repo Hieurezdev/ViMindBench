@@ -69,7 +69,8 @@ def _request_json(
         except (json.JSONDecodeError, ValueError) as repair_error:
             raise ValueError(
                 "Model returned invalid JSON after one repair attempt; "
-                f"initial={initial_error}; repair={repair_error}; raw={raw[:240]!r}"
+                f"endpoint={base_url!r}; model={model!r}; initial={initial_error}; "
+                f"repair={repair_error}; raw={raw[:240]!r}"
             ) from repair_error
 
 

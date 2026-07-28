@@ -15,7 +15,8 @@ from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _normalize_evidence_ref_ids, mcq_generator_node
 from src.mcq.application.nodes import generation
 from src.mcq.application.nodes.judging import _validate_single_answer_report, quality_gate_node
-from src.mcq.application.nodes.planning import context_retriever_node
+from src.mcq.application.nodes.planning import context_retriever_node, curriculum_planner_node
+from src.mcq.application.nodes import planning
 from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
@@ -92,6 +93,20 @@ class CurriculumLevelTests(unittest.TestCase):
     def test_invalid_level_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             parse_levels("diagnosis")
+
+    def test_planner_uses_fallback_blueprint_when_model_returns_empty(self) -> None:
+        state = {
+            "anchor": {"title": "Lo âu xã hội", "summary": "Né tránh các tình huống xã hội."},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["medium"],
+            "iteration_count": 0,
+            "playbook": "",
+        }
+        with patch.object(planning, "request_json", side_effect=ValueError("empty response")):
+            result = curriculum_planner_node(state)
+        self.assertEqual(result["blueprint"]["topic"], "Lo âu xã hội")
+        self.assertEqual(result["blueprint"]["retrieval_query"], "Lo âu xã hội Né tránh các tình huống xã hội.")
+        self.assertEqual(result["blueprint"]["difficulty"], "medium")
 
 
 class EvidencePolicyTests(unittest.TestCase):
