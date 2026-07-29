@@ -53,7 +53,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
                 difficulty=difficulty,
                 title=anchor["title"],
                 summary=anchor["summary"],
-                playbook=state.get("playbook", "")[:7000],
+                playbook=state.get("playbook", ""),
             ),
             max_tokens=700,
         )

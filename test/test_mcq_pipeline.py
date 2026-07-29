@@ -113,6 +113,24 @@ class CurriculumLevelTests(unittest.TestCase):
         self.assertEqual(result["blueprint"]["retrieval_query"], "Lo âu xã hội Né tránh các tình huống xã hội.")
         self.assertEqual(result["blueprint"]["difficulty"], "medium")
 
+    def test_planner_receives_the_full_playbook(self) -> None:
+        playbook = "x" * 7_000 + " FULL-PLAYBOOK-TAIL"
+        state = {
+            "anchor": {"title": "Lo âu", "summary": "Tóm tắt"},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+            "playbook": playbook,
+        }
+        captured = []
+        with patch.object(
+            planning,
+            "request_json",
+            side_effect=lambda prompt, **_: captured.append(prompt) or {},
+        ):
+            curriculum_planner_node(state)
+        self.assertIn("FULL-PLAYBOOK-TAIL", captured[0])
+
 
 class EvidencePolicyTests(unittest.TestCase):
     @staticmethod
@@ -465,6 +483,29 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["judge_reports"]["generation"]["issues"], ["generator_refusal"])
         self.assertEqual(result["generation_attempt"], 1)
 
+    def test_generator_receives_the_full_playbook(self) -> None:
+        playbook = "## SUCCESSFUL STRATEGIES TO REPLICATE\n" + "x" * 200 + " FULL-PLAYBOOK-TAIL"
+        state = {
+            "blueprint": {"difficulty": "easy", "evidence_limit": 2},
+            "evidence_docs": [doc("chunk-1", "Tier 1")],
+            "playbook": playbook,
+            "judge_feedback": [],
+            "generation_attempt": 0,
+        }
+        captured = []
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation,
+            "_generate_mcq",
+            side_effect=lambda **kwargs: captured.append(kwargs["playbook"]) or {
+                "question": "Câu hỏi",
+                "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
+                "answer": "A",
+                "evidence_refs": ["chunk-1"],
+            },
+        ), patch.object(generation, "_preflight_report", return_value={"passed": True}):
+            mcq_generator_node(state)
+        self.assertEqual(captured, [playbook])
+
     def test_quality_gate_accepts_complete_grounded_item(self) -> None:
         state = passing_state()
         self.assertEqual(quality_gate_node(state)["verdict"], "verified")
@@ -489,6 +530,16 @@ class QualityAndPlaybookTests(unittest.TestCase):
         result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_option_text", result["quarantine_reason"])
+
+    def test_quality_gate_quarantines_list_of_option_objects_without_crashing(self) -> None:
+        state = passing_state()
+        state["mcq"]["options"] = [
+            {"label": "A", "text": "a"},
+            {"label": "B", "text": "b"},
+        ]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("invalid_options", result["quarantine_reason"])
 
     def test_quality_gate_quarantines_hard_item_with_spurious_cues(self) -> None:
         state = passing_state()

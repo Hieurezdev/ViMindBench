@@ -220,16 +220,28 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     min_evidence_refs = evidence_policy["min_evidence_refs"]
     options = state.get("mcq", {}).get("options", {})
     answer = state.get("mcq", {}).get("answer")
-    if set(options) != {"A", "B", "C", "D"}:
+    valid_options_mapping = isinstance(options, dict) and set(options) == {
+        "A",
+        "B",
+        "C",
+        "D",
+    }
+    if not valid_options_mapping:
         errors.append("invalid_options")
     elif not all(isinstance(option, str) and option.strip() for option in options.values()):
         errors.append("invalid_option_text")
-    if answer not in options:
-        errors.append("invalid_answer")
-    if answer and set(state.get("mcq", {}).get("distractor_analysis", {})) != (
-        set(options) - {answer}
-    ):
-        errors.append("incomplete_distractor_analysis")
+    if valid_options_mapping:
+        if answer not in options:
+            errors.append("invalid_answer")
+        distractor_analysis = state.get("mcq", {}).get("distractor_analysis", {})
+        if (
+            answer
+            and (
+                not isinstance(distractor_analysis, dict)
+                or set(distractor_analysis) != (set(options) - {answer})
+            )
+        ):
+            errors.append("incomplete_distractor_analysis")
     language_fields = {
         key: state.get("mcq", {}).get(key)
         for key in ("question", "options", "rationale_short", "distractor_analysis", "audit_steps")

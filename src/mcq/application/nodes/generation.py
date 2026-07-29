@@ -1,7 +1,6 @@
 """A03 MCQ generation node."""
 
 import os
-import random
 import re
 from typing import Any, Dict, List
 from ...domain import MCQState
@@ -31,35 +30,6 @@ def _normalize_evidence_ref_ids(value: Any) -> List[str]:
         if isinstance(chunk_id, str) and chunk_id and chunk_id not in ids:
             ids.append(chunk_id)
     return ids
-
-
-def _sample_successful_strategies(playbook: str, sample_size: int = 3) -> str:
-    """Randomly sample successful strategies to prevent mode collapse."""
-    section_header = "## SUCCESSFUL STRATEGIES TO REPLICATE"
-    if section_header not in playbook:
-        return playbook
-
-    parts = playbook.split(section_header)
-    before_section = parts[0]
-    success_section = parts[1]
-
-    next_section_match = re.search(r'\n## ', success_section)
-    if next_section_match:
-        success_content = success_section[:next_section_match.start()]
-        after_section = success_section[next_section_match.start():]
-    else:
-        success_content = success_section
-        after_section = ""
-
-    bullets = re.findall(r"^\[suc-[^\]]+\]\s+.*?(?=\n\[suc-|\Z)", success_content, re.MULTILINE | re.DOTALL)
-
-    if len(bullets) <= sample_size:
-        return playbook
-
-    sampled_bullets = random.sample(bullets, sample_size)
-    new_success_section = "\n" + "\n".join(b.strip() for b in sampled_bullets) + "\n"
-
-    return before_section + section_header + new_success_section + after_section
 
 
 def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -201,7 +171,6 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
         return {"mcq": {}}
 
     full_playbook = state.get("playbook", "")
-    filtered_playbook = _sample_successful_strategies(full_playbook, sample_size=3)
     blueprint = state["blueprint"]
     evidence_plan = _build_evidence_plan(blueprint, refs)
 
@@ -209,7 +178,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     try:
         mcq = _generate_mcq(
             blueprint=blueprint,
-            playbook=filtered_playbook,
+            playbook=full_playbook,
             refs=refs,
             evidence_plan=evidence_plan,
             judge_feedback=feedback,
@@ -225,7 +194,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             )
             mcq = _generate_mcq(
                 blueprint=blueprint,
-                playbook=filtered_playbook,
+                playbook=full_playbook,
                 refs=refs,
                 evidence_plan=evidence_plan,
                 judge_feedback=feedback,
