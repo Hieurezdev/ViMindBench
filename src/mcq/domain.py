@@ -19,8 +19,13 @@ class MCQState(TypedDict, total=False):
     output_path: str
     quarantine_path: str
     output_flush_interval: int
+    learning_checkpoint_interval: int
+    playbook_path: str
+    failure_memory_path: str
+    judge_memory_path: str
     verified_flushed_count: int
     quarantine_flushed_count: int
+    learning_checkpoint_count: int
     curriculum_levels: List[str]
     curriculum_difficulties: List[str]
     used_anchor_ids: List[str]

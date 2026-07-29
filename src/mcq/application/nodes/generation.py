@@ -65,12 +65,28 @@ def _sample_successful_strategies(playbook: str, sample_size: int = 3) -> str:
 def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Keep the key within explicitly extracted evidence claims when possible."""
     try:
-        plan = request_json(a03_evidence_plan.render(blueprint=blueprint, evidence=refs), max_tokens=700)
+        plan = _request_generation_json(
+            blueprint,
+            a03_evidence_plan.render(blueprint=blueprint, evidence=refs),
+            max_tokens=700,
+        )
         if isinstance(plan, dict):
             return plan
     except Exception:
         pass
     return {"supported_claims": [], "prohibited_inferences": []}
+
+
+def _request_generation_json(
+    blueprint: Dict[str, Any], prompt: str, *, max_tokens: int
+) -> Dict[str, Any]:
+    """Route hard-item generation to the stronger judge endpoint when enabled."""
+    use_judge_for_hard = os.getenv("HARD_GENERATION_USE_JUDGE", "false").lower() in {"1", "true", "yes"}
+    if blueprint.get("difficulty") == "hard" and use_judge_for_hard:
+        # request_judge_json falls back to the primary generator endpoint if
+        # the separate judge endpoint is unavailable.
+        return request_judge_json(prompt, max_tokens=max_tokens)
+    return request_json(prompt, max_tokens=max_tokens)
 
 
 def _generate_mcq(
@@ -81,14 +97,16 @@ def _generate_mcq(
     evidence_plan: Dict[str, Any],
     judge_feedback: List[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    return request_json(
+    return _request_generation_json(
+        blueprint,
         a03_mcq.render(
             blueprint=blueprint,
             playbook=playbook[:7000],
             evidence=refs,
             evidence_plan=evidence_plan,
             judge_feedback=judge_feedback,
-        )
+        ),
+        max_tokens=1800,
     )
 
 

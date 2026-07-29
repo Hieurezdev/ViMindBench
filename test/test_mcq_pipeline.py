@@ -14,7 +14,7 @@ from unittest.mock import patch
 
 from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
-from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, mcq_generator_node
+from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, mcq_generator_node
 from src.mcq.application.nodes import generation
 from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, consolidate_judge_reports_node, quality_gate_node
 from src.mcq.application.nodes import judging
@@ -387,6 +387,15 @@ class EmoBenchIntegrationTests(unittest.TestCase):
 
 
 class QualityAndPlaybookTests(unittest.TestCase):
+    def test_hard_generation_can_use_judge_endpoint(self) -> None:
+        with patch.dict(os.environ, {"HARD_GENERATION_USE_JUDGE": "true"}), patch.object(
+            generation, "request_judge_json", return_value={"question": "hard"}
+        ) as judge, patch.object(generation, "request_json") as primary:
+            result = _request_generation_json({"difficulty": "hard"}, "prompt", max_tokens=321)
+        self.assertEqual(result, {"question": "hard"})
+        judge.assert_called_once_with("prompt", max_tokens=321)
+        primary.assert_not_called()
+
     def test_generator_normalizes_object_evidence_references(self) -> None:
         self.assertEqual(
             _normalize_evidence_ref_ids(
@@ -681,6 +690,34 @@ class OutputCheckpointTests(unittest.TestCase):
             )
             with open(output_path, encoding="utf-8") as handle:
                 self.assertEqual(len(handle.readlines()), 1)
+
+    def test_checkpoints_learning_state_every_ten_items(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            playbook_path = os.path.join(directory, "run.playbook.md")
+            failure_memory_path = os.path.join(directory, "run.failure_memory.json")
+            judge_memory_path = os.path.join(
+                directory, "run.judge_failure_memory.json"
+            )
+            result = flush_outputs_node(
+                {
+                    "iteration_count": 10,
+                    "output_flush_interval": 100,
+                    "learning_checkpoint_interval": 10,
+                    "playbook_path": playbook_path,
+                    "failure_memory_path": failure_memory_path,
+                    "judge_memory_path": judge_memory_path,
+                    "playbook": "# Checkpointed playbook\n",
+                    "failure_memory": [{"issue": "evidence:unsupported_key"}],
+                    "judge_failure_memory": [{"judge": "A04"}],
+                }
+            )
+            self.assertEqual(result, {"learning_checkpoint_count": 1})
+            with open(playbook_path, encoding="utf-8") as handle:
+                self.assertEqual(handle.read(), "# Checkpointed playbook\n")
+            with open(failure_memory_path, encoding="utf-8") as handle:
+                self.assertIn("unsupported_key", handle.read())
+            with open(judge_memory_path, encoding="utf-8") as handle:
+                self.assertIn('"A04"', handle.read())
 
 
 if __name__ == "__main__":

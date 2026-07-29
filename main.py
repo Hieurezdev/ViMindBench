@@ -108,6 +108,12 @@ def parse_args() -> argparse.Namespace:
         help="Override OUTPUT_FLUSH_INTERVAL; defaults to 5 completed items",
     )
     parser.add_argument(
+        "--learning_checkpoint_interval",
+        type=int,
+        default=None,
+        help="Override LEARNING_CHECKPOINT_INTERVAL; defaults to 10 completed items",
+    )
+    parser.add_argument(
         "--levels",
         type=str,
         default=None,
@@ -271,6 +277,12 @@ def main():
         if args.output_flush_interval < 1:
             raise SystemExit("error: --output_flush_interval must be >= 1")
         os.environ["OUTPUT_FLUSH_INTERVAL"] = str(args.output_flush_interval)
+    if args.learning_checkpoint_interval is not None:
+        if args.learning_checkpoint_interval < 1:
+            raise SystemExit("error: --learning_checkpoint_interval must be >= 1")
+        os.environ["LEARNING_CHECKPOINT_INTERVAL"] = str(
+            args.learning_checkpoint_interval
+        )
 
     try:
         curriculum_levels = parse_levels(args.levels)
@@ -328,6 +340,7 @@ def main():
     ]
     anchor_sidecar = os.path.splitext(output_path)[0] + ".anchors.json"
     playbook_path = os.path.splitext(output_path)[0] + ".playbook.md"
+    failure_memory_path = os.path.splitext(output_path)[0] + ".failure_memory.json"
     judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
     quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
     used_anchor_ids = list(
@@ -347,8 +360,15 @@ def main():
         "output_path": output_path,
         "quarantine_path": quarantine_path,
         "output_flush_interval": int(os.getenv("OUTPUT_FLUSH_INTERVAL", "5")),
+        "learning_checkpoint_interval": int(
+            os.getenv("LEARNING_CHECKPOINT_INTERVAL", "10")
+        ),
+        "playbook_path": playbook_path,
+        "failure_memory_path": failure_memory_path,
+        "judge_memory_path": judge_memory_path,
         "verified_flushed_count": 0,
         "quarantine_flushed_count": 0,
+        "learning_checkpoint_count": 0,
         "curriculum_levels": curriculum_levels,
         "curriculum_difficulties": curriculum_difficulties,
         "anchor": None,
@@ -366,7 +386,7 @@ def main():
         "quarantine_reason": [],
         "verified_outputs": [],
         "quarantine_outputs": [],
-        "failure_memory": [],
+        "failure_memory": load_json_list(failure_memory_path),
         "judge_failure_memory": load_json_list(judge_memory_path),
         "playbook": load_playbook(playbook_path),
         "playbook_delta": [],
@@ -402,6 +422,8 @@ def main():
         )
     with open(playbook_path, "w", encoding="utf-8") as f:
         f.write(final_state.get("playbook", ""))
+    with open(failure_memory_path, "w", encoding="utf-8") as f:
+        json.dump(final_state.get("failure_memory", []), f, ensure_ascii=False, indent=2)
     with open(anchor_sidecar, "w", encoding="utf-8") as f:
         json.dump(
             final_state.get("used_anchor_ids", []), f, ensure_ascii=False, indent=2
@@ -413,7 +435,7 @@ def main():
 
     print(f"Done. Verified={len(verified_items)}, quarantined={len(quarantine_items)}.")
     print(
-        f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; judge memory: {judge_memory_path}"
+        f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; failure memory: {failure_memory_path}; judge memory: {judge_memory_path}"
     )
     logger.info(
         "Run complete: verified=%s; quarantined=%s; output=%s",

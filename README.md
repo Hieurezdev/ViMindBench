@@ -323,11 +323,14 @@ data/output/clinical_hard.jsonl                  # verified records
 data/output/clinical_hard.quarantine.jsonl       # failed records + audit
 data/output/clinical_hard.run.log                # node-level logs
 data/output/clinical_hard.playbook.md            # A09 Notebook state
+data/output/clinical_hard.failure_memory.json    # A08/A09 repeated-failure history
 data/output/clinical_hard.judge_failure_memory.json
 ```
 
-Chạy lại với cùng `--output_path` sẽ tái dùng sidecar playbook, failure memory
-và used anchors. Dùng một output path mới nếu muốn bắt đầu experiment độc lập.
+Mỗi 10 item hoàn tất (mặc định), pipeline ghi atomically playbook, failure
+memory và judge failure memory. Chạy lại với cùng `--output_path` sẽ tái dùng
+các sidecar này và used anchors. Dùng một output path mới nếu muốn bắt đầu
+experiment độc lập.
 
 ## CLI flags
 
@@ -352,6 +355,7 @@ và used anchors. Dùng một output path mới nếu muốn bắt đầu experi
 | `--log_level LEVEL` | Console/file level: `DEBUG`, `INFO`, `WARNING`, or `ERROR`. |
 | `--log_path PATH` | Override the default `<output>.run.log` log file. |
 | `--output_flush_interval N` | Append JSONL checkpoints after every `N` completed items; default `5`. |
+| `--learning_checkpoint_interval N` | Persist playbook, failure memory, and judge memory after every `N` completed items; default `10`. |
 | `--levels CSV` | Comma-separated curriculum filter, e.g. `theory,emotion`. |
 | `--difficulties CSV` | Comma-separated difficulty filter, e.g. `easy,hard`. |
 
@@ -383,6 +387,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `NUM_QA_PAIRS` | `100` | Default attempt count. |
 | `OUTPUT_PATH` | `data/output/psychology_mcq.jsonl` | Default verified-output path. |
 | `OUTPUT_FLUSH_INTERVAL` | `5` | Persist verified/quarantine records after every five completed items. |
+| `LEARNING_CHECKPOINT_INTERVAL` | `10` | Persist playbook, failure memory, and judge failure memory after every ten completed items. |
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
@@ -390,6 +395,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |
 | `A03_HARD_MAX_OPTION_WORD_GAP` | `5` | Maximum allowed difference in word count between the longest and shortest hard-item option. |
+| `HARD_GENERATION_USE_JUDGE` | `false` | When `true`, A03 evidence planning and MCQ generation for `hard` use `JUDGE_*`; errors automatically fall back to the primary Generator endpoint. |
 | `LANGGRAPH_MAX_CONCURRENCY` | `4` | Concurrent-node limit; A04, A05, A07, and DSM-5 retrieval use this fan-out capacity. |
 | `LOG_LEVEL` | `INFO` | Verbosity for structured node-step logging. |
 | `LOG_PATH` | `<output>.run.log` | Optional custom log-file path. |
@@ -462,12 +468,13 @@ For `data/output/psychology_mcq.jsonl`, the pipeline writes:
 | `psychology_mcq.jsonl` | Verified training records only. |
 | `psychology_mcq.quarantine.jsonl` | Rejected records and judge audit reports. |
 | `psychology_mcq.playbook.md` | ACE-format playbook: section, bullet ID, helpful/harmful counts. |
+| `psychology_mcq.failure_memory.json` | A08 repeated-failure history used by A09 Notebook; reloaded on the next run. |
 | `psychology_mcq.anchors.json` | Used source chunk IDs for de-duplication. |
 | `psychology_mcq.judge_failure_memory.json` | Past A04/A05/A06 failures retrieved as future judge checklists; never included in train records. |
 
 The first run loads [`config/initial_playbook.md`](config/initial_playbook.md).
-Later runs with the same output basename reload the playbook, used-anchor IDs,
-and judge failure memory.
+Later runs with the same output basename reload the playbook, both failure
+memories, and used-anchor IDs.
 
 ## Run logging
 
@@ -477,8 +484,9 @@ summary. Prompts, API keys, and full evidence excerpts are intentionally not
 logged.
 
 Verified and quarantined records are checkpointed every five completed items by
-default. The final partial batch is flushed when the run ends; no previously
-checkpointed record is written twice.
+default. Playbook plus both failure memories are checkpointed every ten items.
+The final partial batch and learning state are saved when the run ends; no
+previously checkpointed record is written twice.
 
 ```bash
 uv run python main.py \
