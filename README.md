@@ -7,8 +7,10 @@ judge failure memory.
 
 Mỗi record verified bắt buộc có `evidence_refs` gồm các `chunk_id` đã retrieve:
 easy=1–2, medium=1–4, hard=2–6. Câu hard phải tổng hợp các claim được hỗ trợ
-trực tiếp từ ít nhất hai chunk khác nhau;
-citation nằm trong metadata/audit, không xuất hiện trong question stem hay options.
+trực tiếp từ ít nhất hai chunk khác nhau. Ở mọi độ khó, mọi chi tiết thực tế
+trong stem/ví dụ phải được hỗ trợ bởi một chunk trong `evidence_refs`. Nếu muốn
+quy dẫn trong câu hỏi, A03 dùng văn phong tự nhiên như “Theo quan điểm của
+chuyên gia tâm lý, ...”, không bao giờ hiện `chunk_id` hay mã trích dẫn.
 Pipeline không lưu `<think>` tự do. Trường `reasoning.steps` chỉ chứa audit steps
 ngắn, có thể kiểm tra được, không phải chain-of-thought.
 
@@ -299,6 +301,12 @@ For `hard`, all four options must target the same mechanism or decision and be
 plausible near-misses. Each distractor differs from the key by a small,
 evidence-checkable detail; the key alone synthesizes direct support from at
 least two cited chunks. This is checked by A03 preflight, A05, and Quality Gate.
+
+Stem grounding applies to `easy`, `medium`, and `hard`: A03 first extracts
+`stem_safe_claims`, then A03 preflight and A04 reject an invented or uncited
+factual detail. A natural-language attribution may appear in the stem, but only
+with a verified named expert or a generic professional phrase; database IDs and
+bracketed citation markers are forbidden.
 
 ### Retrieval depth by difficulty
 

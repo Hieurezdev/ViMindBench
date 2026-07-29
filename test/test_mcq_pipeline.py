@@ -246,6 +246,8 @@ class JudgeGatewayTests(unittest.TestCase):
         )
         self.assertIn("2 to 6", generator_prompt)
         self.assertIn("All four\noptions must address the same core mechanism", generator_prompt)
+        self.assertIn("Every factual detail in the question stem", generator_prompt)
+        self.assertIn("Theo quan điểm của chuyên gia tâm lý", generator_prompt)
         self.assertIn("at least two cited chunks", judge_prompt)
 
     def test_single_answer_audit_requires_key_and_three_incorrect_distractors(self) -> None:

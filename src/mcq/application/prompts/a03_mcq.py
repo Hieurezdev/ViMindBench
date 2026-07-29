@@ -28,14 +28,23 @@ The keyed option MUST express only one or more claims in Allowed keyed claims.
 Do not combine a supported claim with a plausible but unlisted mechanism,
 diagnosis, treatment effect, or causal explanation. If there is not enough
 support for a precise claim, write a narrower question instead.
+Every factual detail in the question stem, vignette, or illustrative example
+MUST come only from `stem_safe_claims` (or be neutral, non-factual framing).
+Never invent a person characteristic, timeline, symptom, event, mechanism,
+outcome, or cultural detail merely to make the question sound realistic.
 You MUST cite {blueprint.get("min_evidence_refs", 1)} to {blueprint.get("evidence_limit", 4)} retrieved chunk_id values in evidence_refs. Each cited
-chunk must directly support the keyed option. Do not mention sources, context,
-documents, citations, or chunk IDs in the question stem or options.
+chunk must directly support the keyed option or a factual stem detail. Include
+every chunk that supports a factual detail used in the stem, vignette, or
+example. Never show a chunk_id, database ID, raw citation key, or bracketed
+reference marker to the learner.
 Write the Vietnamese stem and options as if the psychology knowledge is your own
-professional knowledge. Never say or imply that the item comes from supplied
-material. In particular, the question and all four options MUST NOT contain
+professional knowledge. If an attribution makes the stem clearer, write it as
+natural Vietnamese, for example "Theo quan điểm của chuyên gia tâm lý, ..." or
+"Theo [tên chuyên gia/tác giả có trong metadata], ...". Never invent a named
+expert or author; use a generic professional attribution when no verified name
+is available. In particular, the question and all four options MUST NOT contain
 "ngữ cảnh", "tài liệu đã cho", "đoạn văn", "dựa vào tài liệu", "theo tài liệu",
-"theo đoạn văn", "nguồn", "trích dẫn", or equivalent wording.
+"theo đoạn văn", "chunk_id", or equivalent database-reference wording.
 All public text (question, A–D options, rationale_short, and distractor_analysis)
 MUST be natural Vietnamese. Never output Chinese/Han characters, Chinese words,
 Chinese punctuation, or mixed Vietnamese-Chinese text. Translate any multilingual
@@ -68,6 +77,10 @@ near-misses; each wrong option must differ from the key by a small,
 evidence-checkable distinction. Build the key by synthesizing at least two
 directly supported claims from distinct cited chunks, never by adding outside
 knowledge. Exactly one option may be fully supported by that synthesis.
+The same stem-grounding rule applies to hard items: an example based on one
+chunk must include that chunk in `evidence_refs`; do not add uncited details
+from another chunk. The required second hard citation must support the keyed
+synthesis, not be decorative.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
 "answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
 "distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
