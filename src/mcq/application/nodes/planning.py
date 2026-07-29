@@ -20,6 +20,11 @@ _REQUIRED_BLUEPRINT_FIELDS = (
     "clinical_guardrail",
     "playbook_bullet_ids",
 )
+_BLUEPRINT_WRAPPER_KEYS = (
+    "curriculum_planning_blueprint",
+    "blueprint",
+    "planning_blueprint",
+)
 
 
 def select_anchor_node(state: MCQState) -> Dict[str, Any]:
@@ -58,6 +63,16 @@ def _missing_blueprint_fields(blueprint: Dict[str, Any]) -> list[str]:
     return missing
 
 
+def _unwrap_blueprint(blueprint: Dict[str, Any]) -> Dict[str, Any]:
+    """Accept known model wrappers while preserving a strict inner schema."""
+    for key in _BLUEPRINT_WRAPPER_KEYS:
+        nested = blueprint.get(key)
+        if isinstance(nested, dict):
+            logger.info("A01 unwrapped planner response from key=%s", key)
+            return nested
+    return blueprint
+
+
 def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     anchor = state["anchor"]
     levels = state.get("curriculum_levels", list(LEVELS))
@@ -78,6 +93,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
         blueprint = request_json(prompt, max_tokens=1_000)
         if not isinstance(blueprint, dict):
             raise ValueError("planner did not return an object")
+        blueprint = _unwrap_blueprint(blueprint)
     except Exception as exc:
         logger.warning("A01 fallback blueprint after %s", type(exc).__name__)
         blueprint = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
@@ -102,6 +118,7 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
             )
             if not isinstance(retried, dict):
                 raise ValueError("planner retry did not return an object")
+            retried = _unwrap_blueprint(retried)
             retry_missing = _missing_blueprint_fields(retried)
             if retry_missing:
                 logger.warning(
