@@ -62,6 +62,15 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     except Exception as exc:
         logger.warning("A01 fallback blueprint after %s", type(exc).__name__)
         blueprint = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
+    fallback = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
+    for field in ("topic", "subtopic", "skill", "retrieval_query", "clinical_guardrail"):
+        fallback_value = fallback[field]
+        if not isinstance(blueprint.get(field), str) or not blueprint[field].strip():
+            logger.warning("A01 missing/invalid %s; using fallback value", field)
+            blueprint[field] = fallback_value
+    if not isinstance(blueprint.get("playbook_bullet_ids"), list):
+        logger.warning("A01 missing/invalid playbook_bullet_ids; using fallback value")
+        blueprint["playbook_bullet_ids"] = fallback["playbook_bullet_ids"]
     blueprint["level"] = level
     blueprint["difficulty"] = difficulty
     blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]
@@ -81,10 +90,17 @@ def context_retriever_node(state: MCQState) -> Dict[str, Any]:
     retrieval_depth = RETRIEVAL_DEPTH_BY_DIFFICULTY.get(
         difficulty, RETRIEVAL_DEPTH_BY_DIFFICULTY["medium"]
     )
+    query = state.get("blueprint", {}).get("retrieval_query")
+    if not isinstance(query, str) or not query.strip():
+        anchor = state.get("anchor", {}) or {}
+        query = f"{anchor.get('title', '')} {anchor.get('summary', '')}".strip()
+        logger.warning("A02 received no retrieval_query; using anchor fallback query")
+    if not query:
+        return {"evidence_docs": []}
     return {
         "evidence_docs": select_eligible_documents(
             retriever.search(
-                state["blueprint"]["retrieval_query"],
+                query,
                 k=retrieval_depth["candidate_k"],
             ),
             limit=retrieval_depth["evidence_limit"],

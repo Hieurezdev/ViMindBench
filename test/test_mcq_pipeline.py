@@ -131,6 +131,55 @@ class CurriculumLevelTests(unittest.TestCase):
             curriculum_planner_node(state)
         self.assertIn("FULL-PLAYBOOK-TAIL", captured[0])
 
+    def test_planner_fills_a_missing_retrieval_query(self) -> None:
+        state = {
+            "anchor": {"title": "Lo âu xã hội", "summary": "Né tránh xã hội."},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+            "playbook": "",
+        }
+        with patch.object(planning, "request_json", return_value={"topic": "Lo âu"}):
+            result = curriculum_planner_node(state)
+        self.assertEqual(
+            result["blueprint"]["retrieval_query"],
+            "Lo âu xã hội Né tránh xã hội.",
+        )
+
+    def test_planner_preserves_valid_playbook_bullet_ids(self) -> None:
+        state = {
+            "anchor": {"title": "Lo âu", "summary": "Tóm tắt"},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+            "playbook": "",
+        }
+        response = {
+            "topic": "Lo âu",
+            "subtopic": "Né tránh",
+            "skill": "so sánh",
+            "retrieval_query": "lo âu né tránh",
+            "clinical_guardrail": "Không chẩn đoán.",
+            "playbook_bullet_ids": ["evi-00002"],
+        }
+        with patch.object(planning, "request_json", return_value=response):
+            result = curriculum_planner_node(state)
+        self.assertEqual(result["blueprint"]["playbook_bullet_ids"], ["evi-00002"])
+
+    def test_retriever_falls_back_to_anchor_when_query_is_missing(self) -> None:
+        requested_queries = []
+        retriever = SimpleNamespace(
+            search=lambda query, k: requested_queries.append((query, k)) or []
+        )
+        state = {
+            "anchor": {"title": "Lo âu", "summary": "Né tránh"},
+            "blueprint": {"difficulty": "easy"},
+        }
+        with patch.object(builtins, "RETRIEVER", retriever, create=True):
+            result = context_retriever_node(state)
+        self.assertEqual(result["evidence_docs"], [])
+        self.assertEqual(requested_queries, [("Lo âu Né tránh", 8)])
+
 
 class EvidencePolicyTests(unittest.TestCase):
     @staticmethod
