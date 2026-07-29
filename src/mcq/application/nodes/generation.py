@@ -223,6 +223,10 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
         "mcq": mcq,
         "generation_attempt": state.get("generation_attempt", 0) + 1,
         "judge_reports": {},
+        "evidence_report": {},
+        "single_answer_report": {},
+        "ei_safety_bias_report": {},
+        "adversarial_solver_report": {},
         "judge_feedback": feedback,
     }
 

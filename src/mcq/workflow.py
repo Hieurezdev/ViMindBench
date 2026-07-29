@@ -11,11 +11,12 @@ from .application.nodes.planning import (
 )
 from .application.nodes.generation import mcq_generator_node, prepare_regeneration_node
 from .application.nodes.judging import (
-    evidence_judge_node,
-    single_answer_judge_node,
-    safety_bias_judge_node,
-    adversarial_solver_node,
+    adversarial_solver_parallel_node,
+    consolidate_judge_reports_node,
+    evidence_judge_parallel_node,
     quality_gate_node,
+    safety_bias_judge_parallel_node,
+    single_answer_judge_parallel_node,
 )
 from .application.nodes.clinical_context import dsm5_safety_context_node
 from .application.nodes.learning import reflector_node, playbook_curator_node
@@ -63,11 +64,12 @@ def create_mcq_graph():
         ("retrieve", context_retriever_node),
         ("generate", mcq_generator_node),
         ("prepare_regeneration", prepare_regeneration_node),
-        ("evidence_judge", evidence_judge_node),
-        ("single_answer_judge", single_answer_judge_node),
+        ("evidence_judge", evidence_judge_parallel_node),
+        ("single_answer_judge", single_answer_judge_parallel_node),
         ("dsm5_safety_context", dsm5_safety_context_node),
-        ("safety_bias_judge", safety_bias_judge_node),
-        ("adversarial_solver", adversarial_solver_node),
+        ("safety_bias_judge", safety_bias_judge_parallel_node),
+        ("adversarial_solver", adversarial_solver_parallel_node),
+        ("consolidate_judge_reports", consolidate_judge_reports_node),
         ("quality_gate", quality_gate_node),
         ("reflect", reflector_node),
         ("curate", playbook_curator_node),
@@ -86,16 +88,20 @@ def create_mcq_graph():
         ("plan", "retrieve"),
         ("retrieve", "generate"),
         ("generate", "evidence_judge"),
-        ("evidence_judge", "single_answer_judge"),
-        ("single_answer_judge", "dsm5_safety_context"),
+        ("generate", "single_answer_judge"),
+        ("generate", "dsm5_safety_context"),
+        ("generate", "adversarial_solver"),
         ("dsm5_safety_context", "safety_bias_judge"),
-        ("safety_bias_judge", "adversarial_solver"),
-        ("adversarial_solver", "quality_gate"),
+        ("consolidate_judge_reports", "quality_gate"),
         ("reflect", "curate"),
         ("curate", "collect"),
         ("collect", "flush_outputs"),
     ):
         graph.add_edge(source, target)
+    graph.add_edge(
+        ["evidence_judge", "single_answer_judge", "safety_bias_judge", "adversarial_solver"],
+        "consolidate_judge_reports",
+    )
     graph.add_conditional_edges(
         "quality_gate",
         route_after_quality_gate,

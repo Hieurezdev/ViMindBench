@@ -30,6 +30,10 @@ class MCQState(TypedDict, total=False):
     dsm5_safety_docs: List[Document]
     mcq: Dict[str, Any]
     judge_reports: Dict[str, Dict[str, Any]]
+    evidence_report: Dict[str, Any]
+    single_answer_report: Dict[str, Any]
+    ei_safety_bias_report: Dict[str, Any]
+    adversarial_solver_report: Dict[str, Any]
     judge_feedback: List[Dict[str, Any]]
     verdict: str
     quarantine_reason: List[str]

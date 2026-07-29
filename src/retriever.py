@@ -1,3 +1,5 @@
+from collections import OrderedDict
+from threading import RLock
 from typing import List, Dict, Any
 import os
 from pymongo import MongoClient
@@ -66,6 +68,11 @@ class MongoDBRetriever:
 
         self.local_model = None
         self.embedding_client = None
+        self.cache_size = max(0, int(os.getenv("RETRIEVER_CACHE_SIZE", "512")))
+        self._cache_lock = RLock()
+        self._embedding_cache: OrderedDict[str, List[float]] = OrderedDict()
+        self._search_cache: OrderedDict[tuple[str, int], List[Document]] = OrderedDict()
+        self._dsm5_search_cache: OrderedDict[tuple[str, int], List[Document]] = OrderedDict()
 
         if self.use_local_embedding:
             if SentenceTransformer is None:
@@ -84,6 +91,29 @@ class MongoDBRetriever:
             print(
                 f"✓ Using API embedding model: {self.embedding_model} at {self.embedding_base_url}"
             )
+
+    @staticmethod
+    def _cache_key(text: str) -> str:
+        """Normalize semantically identical whitespace-only query variants."""
+        return " ".join(text.lower().split())
+
+    def _cache_get(self, cache: OrderedDict, key: Any) -> Any:
+        if not self.cache_size:
+            return None
+        with self._cache_lock:
+            value = cache.get(key)
+            if value is not None:
+                cache.move_to_end(key)
+            return value
+
+    def _cache_set(self, cache: OrderedDict, key: Any, value: Any) -> None:
+        if not self.cache_size:
+            return
+        with self._cache_lock:
+            cache[key] = value
+            cache.move_to_end(key)
+            while len(cache) > self.cache_size:
+                cache.popitem(last=False)
 
     def _generate_embedding(self, text: str) -> List[float]:
         """Generate embedding vector using local model or API."""
@@ -106,7 +136,13 @@ class MongoDBRetriever:
         Public method to generate embedding for a given text.
         Same as _generate_embedding but accessible from outside.
         """
-        return self._generate_embedding(text)
+        key = self._cache_key(text)
+        cached = self._cache_get(self._embedding_cache, key)
+        if cached is not None:
+            return list(cached)
+        vector = self._generate_embedding(text)
+        self._cache_set(self._embedding_cache, key, list(vector))
+        return vector
 
     def add_documents(self, chunks: List[Dict[str, Any]]):
         """
@@ -175,6 +211,16 @@ class MongoDBRetriever:
             print(f"DSM-5 vector search failed: {e}")
             return []
 
+    def search_dsm5_by_query(self, query: str, k: int = 5) -> List[Document]:
+        """Cache DSM-5 retrieval by query while reusing the embedding cache."""
+        key = (self._cache_key(query), k)
+        cached = self._cache_get(self._dsm5_search_cache, key)
+        if cached is not None:
+            return list(cached)
+        results = self.search_dsm5(self.generate_embedding(query), k=k)
+        self._cache_set(self._dsm5_search_cache, key, list(results))
+        return results
+
     def search(self, query: str, k: int = 5) -> List[Document]:
         """
         Search MongoDB for relevant documents.
@@ -199,18 +245,25 @@ class MongoDBRetriever:
             print("Error: Local embedding model not initialized. Cannot search.")
             return []
 
+        cache_key = (self._cache_key(query), k)
+        cached = self._cache_get(self._search_cache, cache_key)
+        if cached is not None:
+            return list(cached)
+
         try:
             # Strategy 1: Try Atlas Vector Search (requires atlas_vector_search index)
-            return self._vector_search(query, k)
+            results = self._vector_search(query, k)
         except Exception as e:
             print(f"Vector search failed: {e}, falling back to text search")
             try:
                 # Strategy 2: MongoDB text search (requires text index)
-                return self._text_search(query, k)
+                results = self._text_search(query, k)
             except Exception as e2:
                 print(f"Text search failed: {e2}, falling back to keyword search")
                 # Strategy 3: Simple keyword search
-                return self._keyword_search(query, k)
+                results = self._keyword_search(query, k)
+        self._cache_set(self._search_cache, cache_key, list(results))
+        return results
 
     def _vector_search(self, query: str, k: int) -> List[Document]:
         """
@@ -221,7 +274,7 @@ class MongoDBRetriever:
         if self.collection is None:
             return []
 
-        query_embedding = self._generate_embedding(query)
+        query_embedding = self.generate_embedding(query)
 
         pipeline = [
             {

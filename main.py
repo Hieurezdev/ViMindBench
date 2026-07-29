@@ -357,6 +357,10 @@ def main():
         "dsm5_safety_docs": [],
         "mcq": {},
         "judge_reports": {},
+        "evidence_report": {},
+        "single_answer_report": {},
+        "ei_safety_bias_report": {},
+        "adversarial_solver_report": {},
         "judge_feedback": [],
         "verdict": "",
         "quarantine_reason": [],
@@ -371,7 +375,13 @@ def main():
     }
 
     # ── 6. Run ────────────────────────────────────────────────────────────
-    final_state = app.invoke(initial_state, {"recursion_limit": 50000})
+    final_state = app.invoke(
+        initial_state,
+        {
+            "recursion_limit": 1_000_000,
+            "max_concurrency": int(os.getenv("LANGGRAPH_MAX_CONCURRENCY", "4")),
+        },
+    )
 
     # ── 7. Save verified data and a separate quarantine audit trail ───────
     os.makedirs(os.path.dirname(output_path), exist_ok=True)

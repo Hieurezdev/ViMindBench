@@ -7,6 +7,8 @@ import os
 import builtins
 import tempfile
 import unittest
+from collections import OrderedDict
+from threading import RLock
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -14,7 +16,7 @@ from main import parse_levels
 from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, mcq_generator_node
 from src.mcq.application.nodes import generation
-from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, quality_gate_node
+from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, consolidate_judge_reports_node, quality_gate_node
 from src.mcq.application.nodes import judging
 from src.mcq.application.nodes.planning import context_retriever_node, curriculum_planner_node
 from src.mcq.application.nodes import planning
@@ -27,10 +29,11 @@ from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
 )
-from src.mcq.workflow import route_after_quality_gate
+from src.mcq.workflow import create_mcq_graph, route_after_quality_gate
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
 from src.mcq.infrastructure import llm_gateway
+from src.retriever import MongoDBRetriever
 
 
 def doc(chunk_id: str, tier: str | None, score: float = 0.9) -> SimpleNamespace:
@@ -111,6 +114,36 @@ class CurriculumLevelTests(unittest.TestCase):
 
 
 class EvidencePolicyTests(unittest.TestCase):
+    @staticmethod
+    def _cache_ready_retriever() -> MongoDBRetriever:
+        retriever = MongoDBRetriever.__new__(MongoDBRetriever)
+        retriever.cache_size = 4
+        retriever._cache_lock = RLock()
+        retriever._embedding_cache = OrderedDict()
+        retriever._search_cache = OrderedDict()
+        retriever._dsm5_search_cache = OrderedDict()
+        return retriever
+
+    def test_embedding_cache_reuses_normalized_query(self) -> None:
+        retriever = self._cache_ready_retriever()
+        calls = []
+        retriever._generate_embedding = lambda query: calls.append(query) or [0.1, 0.2]
+        self.assertEqual(retriever.generate_embedding("Stress   học tập"), [0.1, 0.2])
+        self.assertEqual(retriever.generate_embedding(" stress học tập "), [0.1, 0.2])
+        self.assertEqual(calls, ["Stress   học tập"])
+
+    def test_retrieval_cache_reuses_query_and_k(self) -> None:
+        retriever = self._cache_ready_retriever()
+        retriever.collection = object()
+        retriever.use_local_embedding = True
+        retriever.local_model = object()
+        calls = []
+        expected = [doc("cached", "Tier 1")]
+        retriever._vector_search = lambda query, k: calls.append((query, k)) or expected
+        self.assertEqual(retriever.search("lo âu", k=8), expected)
+        self.assertEqual(retriever.search("  LO ÂU ", k=8), expected)
+        self.assertEqual(calls, [("lo âu", 8)])
+
     def test_explicit_tier_three_is_never_treated_as_legacy(self) -> None:
         self.assertEqual(document_tier(doc("t3", "Tier 3")), "Tier 3")
 
@@ -162,6 +195,21 @@ class EvidencePolicyTests(unittest.TestCase):
 
 
 class JudgeGatewayTests(unittest.TestCase):
+    def test_parallel_judge_reports_are_consolidated_without_losing_generation_failures(self) -> None:
+        result = consolidate_judge_reports_node(
+            {
+                "judge_reports": {"generation": {"passed": False}},
+                "evidence_report": {"passed": True},
+                "single_answer_report": {"passed": True},
+                "ei_safety_bias_report": {"passed": True},
+                "adversarial_solver_report": {"passed": True},
+            }
+        )
+        self.assertEqual(set(result["judge_reports"]), {"generation", "evidence", "single_answer", "ei_safety_bias", "adversarial_solver"})
+
+    def test_parallel_judge_graph_compiles(self) -> None:
+        self.assertIsNotNone(create_mcq_graph())
+
     def test_medium_prompts_require_one_near_miss_distractor(self) -> None:
         blueprint = {"difficulty": "medium"}
         generator_prompt = a03_mcq.render(

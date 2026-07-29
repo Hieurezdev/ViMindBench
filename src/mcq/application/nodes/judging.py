@@ -65,10 +65,18 @@ def _report(state: MCQState, name: str, report: Dict[str, Any]) -> Dict[str, Any
     return {"judge_reports": {**state.get("judge_reports", {}), name: report}}
 
 
+def _evidence_report(state: MCQState) -> Dict[str, Any]:
+    return _run_judge(state, "evidence", a04_evidence_judge.render)
+
+
 def evidence_judge_node(state: MCQState) -> Dict[str, Any]:
-    return _report(
-        state, "evidence", _run_judge(state, "evidence", a04_evidence_judge.render)
-    )
+    """Compatibility wrapper for callers that execute this judge in isolation."""
+    return _report(state, "evidence", _evidence_report(state))
+
+
+def evidence_judge_parallel_node(state: MCQState) -> Dict[str, Any]:
+    """Parallel-safe A04 update; consolidation happens after the fan-in barrier."""
+    return {"evidence_report": _evidence_report(state)}
 
 
 def _validate_single_answer_report(report: Dict[str, Any], mcq: Dict[str, Any]) -> Dict[str, Any]:
@@ -98,16 +106,20 @@ def _validate_single_answer_report(report: Dict[str, Any], mcq: Dict[str, Any]) 
     return checked
 
 
-def single_answer_judge_node(state: MCQState) -> Dict[str, Any]:
+def _single_answer_report(state: MCQState) -> Dict[str, Any]:
     report = _run_judge(state, "single_answer", a05_single_answer_judge.render)
-    return _report(
-        state,
-        "single_answer",
-        _validate_single_answer_report(report, state.get("mcq", {})),
-    )
+    return _validate_single_answer_report(report, state.get("mcq", {}))
 
 
-def safety_bias_judge_node(state: MCQState) -> Dict[str, Any]:
+def single_answer_judge_node(state: MCQState) -> Dict[str, Any]:
+    return _report(state, "single_answer", _single_answer_report(state))
+
+
+def single_answer_judge_parallel_node(state: MCQState) -> Dict[str, Any]:
+    return {"single_answer_report": _single_answer_report(state)}
+
+
+def _safety_bias_report(state: MCQState) -> Dict[str, Any]:
     report = _run_judge(
         state,
         "ei_safety_bias",
@@ -116,13 +128,21 @@ def safety_bias_judge_node(state: MCQState) -> Dict[str, Any]:
         dsm5_safety_context=evidence_refs(state.get("dsm5_safety_docs", [])),
         emobench_context=judge_context(state["blueprint"]),
     )
-    return _report(state, "ei_safety_bias", validate_judge_report(report, state["blueprint"]))
+    return validate_judge_report(report, state["blueprint"])
 
 
-def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
+def safety_bias_judge_node(state: MCQState) -> Dict[str, Any]:
+    return _report(state, "ei_safety_bias", _safety_bias_report(state))
+
+
+def safety_bias_judge_parallel_node(state: MCQState) -> Dict[str, Any]:
+    return {"ei_safety_bias_report": _safety_bias_report(state)}
+
+
+def _adversarial_solver_report(state: MCQState) -> Dict[str, Any]:
     mcq = state.get("mcq", {})
     if not mcq:
-        return _report(state, "adversarial_solver", {"passed": False, "issues": ["missing_mcq"]})
+        return {"passed": False, "issues": ["missing_mcq"]}
 
     try:
         solver_response = request_judge_json(
@@ -156,16 +176,38 @@ def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
             issues.append("adversarial:spurious_cues_found")
             feedback = f"The solver identified a concrete {cue_type} cue: {cue_evidence.strip()}. Rebalance option length, grammar, specificity, certainty, and qualification."
 
-        return _report(state, "adversarial_solver", {
+        return {
             "passed": passed,
             "issues": issues,
             "feedback": feedback
-        })
+        }
     except Exception as exc:
-        return _report(state, "adversarial_solver", {
+        return {
             "passed": False,
             "issues": [f"solver_error:{type(exc).__name__}"],
-        })
+        }
+
+
+def adversarial_solver_node(state: MCQState) -> Dict[str, Any]:
+    return _report(state, "adversarial_solver", _adversarial_solver_report(state))
+
+
+def adversarial_solver_parallel_node(state: MCQState) -> Dict[str, Any]:
+    return {"adversarial_solver_report": _adversarial_solver_report(state)}
+
+
+def consolidate_judge_reports_node(state: MCQState) -> Dict[str, Any]:
+    """Fan-in reports written by independent parallel judge nodes."""
+    reports = dict(state.get("judge_reports", {}))
+    reports.update(
+        {
+            "evidence": state.get("evidence_report", {}),
+            "single_answer": state.get("single_answer_report", {}),
+            "ei_safety_bias": state.get("ei_safety_bias_report", {}),
+            "adversarial_solver": state.get("adversarial_solver_report", {}),
+        }
+    )
+    return {"judge_reports": reports}
 
 
 def quality_gate_node(state: MCQState) -> Dict[str, Any]:

@@ -15,14 +15,16 @@ ngắn, có thể kiểm tra được, không phải chain-of-thought.
 ```mermaid
 flowchart LR
     A01["A01 Plan"] --> A02["A02 Retrieve\nTier 1/2"] --> A03["A03 Generate"]
-    A03 --> A04["A04 Evidence"] --> A05["A05 Single answer"]
-    A05 --> Kind{"Question type"}
-    Kind -->|emotion| EB["EmoBench EU/EA\nstructured rubric"] --> A06["A06 EI/Safety/Bias"]
-    Kind -->|clinical| DSM["DSM-5\nsafety context"] --> A06
-    Kind -->|other| A06
-    A06 --> A07{"A07 Gate"}
-    A07 -->|pass| V[("Verified JSONL")]
-    A07 -->|fail| Q[("Quarantine JSONL")] --> A08["A08 Reflect"] --> A09["A09 Notebook"]
+    A03 --> A04["A04 Evidence"]
+    A03 --> A05["A05 Single answer"]
+    A03 --> Solver["A07 Adversarial solver"]
+    A03 --> DSM["DSM-5 safety context"] --> A06["A06 EI/Safety/Bias"]
+    A04 --> Join["Fan-in judge reports"]
+    A05 --> Join
+    A06 --> Join
+    Solver --> Join --> Gate{"Quality Gate"}
+    Gate -->|pass| V[("Verified JSONL")]
+    Gate -->|fail| Q[("Quarantine JSONL")] --> A08["A08 Reflect"] --> A09["A09 Notebook"]
     A09 --> PB[("ACE Playbook")]
 ```
 
@@ -377,6 +379,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `USE_LOCAL_EMBEDDING` | `true` | Use local SentenceTransformer instead of embedding API. |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | Local or remote embedding model; BGE-M3 vectors are 1024-dimensional. |
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
+| `RETRIEVER_CACHE_SIZE` | `512` | In-memory LRU cache size for normalized embedding queries, primary retrieval, and DSM-5 retrieval during one run. Set `0` to disable. |
 | `NUM_QA_PAIRS` | `100` | Default attempt count. |
 | `OUTPUT_PATH` | `data/output/psychology_mcq.jsonl` | Default verified-output path. |
 | `OUTPUT_FLUSH_INTERVAL` | `5` | Persist verified/quarantine records after every five completed items. |
@@ -387,6 +390,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |
 | `A03_HARD_MAX_OPTION_WORD_GAP` | `5` | Maximum allowed difference in word count between the longest and shortest hard-item option. |
+| `LANGGRAPH_MAX_CONCURRENCY` | `4` | Concurrent-node limit; A04, A05, A07, and DSM-5 retrieval use this fan-out capacity. |
 | `LOG_LEVEL` | `INFO` | Verbosity for structured node-step logging. |
 | `LOG_PATH` | `<output>.run.log` | Optional custom log-file path. |
 | `ALLOW_UNTIERED_EVIDENCE` | `true` initially | Set `false` after all main evidence has explicit Tier 1/2 metadata. |

@@ -34,6 +34,8 @@ def dsm5_safety_context_node(state: MCQState) -> Dict[str, Any]:
         if isinstance(part, str) and part
     )
     try:
+        if hasattr(retriever, "search_dsm5_by_query"):
+            return {"dsm5_safety_docs": retriever.search_dsm5_by_query(query, k=3)}
         return {
             "dsm5_safety_docs": retriever.search_dsm5(
                 retriever.generate_embedding(query), k=3
