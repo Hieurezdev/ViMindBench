@@ -114,7 +114,7 @@ do not put secrets in `.env.example`.
 | Vai trò | Agent sử dụng | Biến cấu hình | Fallback |
 |---|---|---|---|
 | Generator | A01 Curriculum Planner, A03 MCQ Generator | `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `MODEL_NAME` | Không có; đây là model chính. |
-| Judge | A04 Evidence, A05 Single-Answer, A06 EI/Safety/Bias, A07 Adversarial Solver | `JUDGE_OPENAI_BASE_URL`, `JUDGE_OPENAI_API_KEY`, `JUDGE_MODEL_NAME` | Dùng model Generator nếu chưa đặt `JUDGE_*`. |
+| Judge | A04 Evidence, A05 Single-Answer, A06 EI/Safety/Bias, A07 Adversarial Solver | `JUDGE_OPENAI_BASE_URL`, `JUDGE_OPENAI_API_KEY`, `JUDGE_MODEL_NAME` | Dùng model Generator nếu chưa đặt `JUDGE_*`, hoặc nếu judge endpoint lỗi/không phản hồi. |
 | Insight | A09 Notebook tạo rule từ lỗi lặp | `INSIGHT_OPENAI_BASE_URL`, `INSIGHT_OPENAI_API_KEY`, `INSIGHT_MODEL_NAME` | Dùng model Generator nếu chưa đặt `INSIGHT_*`. |
 | Retrieval | A02 và clinical context | `EMBEDDING_MODEL` / `EMBEDDING_BASE_URL` | Không gọi chat model. |
 
@@ -372,7 +372,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by A01 planner and A03 generator. |
 | `JUDGE_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A04–A07. |
 | `JUDGE_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional judge endpoint. |
-| `JUDGE_MODEL_NAME` | empty | Optional model used only by A04–A07; falls back to `MODEL_NAME`. |
+| `JUDGE_MODEL_NAME` | empty | Optional model used only by A04–A07; falls back to `MODEL_NAME` when unset or when the separate judge endpoint fails. |
 | `INSIGHT_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A09 Notebook. |
 | `INSIGHT_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional A09 insight endpoint. |
 | `INSIGHT_MODEL_NAME` | empty | Optional A09 model; falls back to `MODEL_NAME`. |

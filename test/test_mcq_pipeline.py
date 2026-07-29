@@ -321,6 +321,30 @@ class JudgeGatewayTests(unittest.TestCase):
             },
         )
 
+    def test_judge_endpoint_failure_falls_back_to_primary_model(self) -> None:
+        environment = {
+            "OPENAI_BASE_URL": "http://generator.test/v1",
+            "OPENAI_API_KEY": "generator-key",
+            "MODEL_NAME": "generator-model",
+            "JUDGE_OPENAI_BASE_URL": "http://judge.test/v1",
+            "JUDGE_OPENAI_API_KEY": "judge-key",
+            "JUDGE_MODEL_NAME": "judge-model",
+        }
+        with patch.dict(os.environ, environment, clear=False), patch.object(
+            llm_gateway,
+            "_request_json",
+            side_effect=[ConnectionError("judge unavailable"), {"passed": True}],
+        ) as request:
+            result = llm_gateway.request_judge_json("judge prompt", max_tokens=123)
+        self.assertEqual(result, {"passed": True})
+        self.assertEqual(request.call_count, 2)
+        self.assertEqual(request.call_args_list[1].kwargs, {
+            "max_tokens": 123,
+            "base_url": "http://generator.test/v1",
+            "api_key": "generator-key",
+            "model": "generator-model",
+        })
+
     def test_insight_uses_a09_specific_endpoint(self) -> None:
         environment = {
             "OPENAI_BASE_URL": "http://generator.test/v1",

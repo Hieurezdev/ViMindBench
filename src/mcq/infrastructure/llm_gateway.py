@@ -1,9 +1,12 @@
 """OpenAI-compatible LLM adapter."""
 
 import json
+import logging
 import os
 from typing import Any, Dict
 from openai import OpenAI
+
+logger = logging.getLogger("mcq.llm_gateway")
 
 
 def _parse_json_object(raw: str) -> Dict[str, Any]:
@@ -86,14 +89,39 @@ def request_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]:
 
 
 def request_judge_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]:
-    """Call the optional judge-only endpoint, falling back to the primary LLM."""
-    return _request_json(
-        prompt,
-        max_tokens=max_tokens,
-        base_url=os.getenv("JUDGE_OPENAI_BASE_URL") or os.getenv("OPENAI_BASE_URL"),
-        api_key=os.getenv("JUDGE_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "EMPTY"),
-        model=os.getenv("JUDGE_MODEL_NAME") or os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507"),
-    )
+    """Use the judge endpoint, then the primary endpoint if the judge is down."""
+    primary_base_url = os.getenv("OPENAI_BASE_URL")
+    primary_api_key = os.getenv("OPENAI_API_KEY", "EMPTY")
+    primary_model = os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507")
+    judge_base_url = os.getenv("JUDGE_OPENAI_BASE_URL") or primary_base_url
+    judge_api_key = os.getenv("JUDGE_OPENAI_API_KEY") or primary_api_key
+    judge_model = os.getenv("JUDGE_MODEL_NAME") or primary_model
+
+    try:
+        return _request_json(
+            prompt,
+            max_tokens=max_tokens,
+            base_url=judge_base_url,
+            api_key=judge_api_key,
+            model=judge_model,
+        )
+    except Exception as judge_error:
+        configured_separately = (
+            judge_base_url != primary_base_url or judge_model != primary_model
+        )
+        if not configured_separately:
+            raise
+        logger.warning(
+            "Judge endpoint failed (%s); retrying with the primary model endpoint.",
+            type(judge_error).__name__,
+        )
+        return _request_json(
+            prompt,
+            max_tokens=max_tokens,
+            base_url=primary_base_url,
+            api_key=primary_api_key,
+            model=primary_model,
+        )
 
 
 def request_insight_json(prompt: str, *, max_tokens: int = 900) -> Dict[str, Any]:
