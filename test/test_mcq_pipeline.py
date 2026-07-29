@@ -146,6 +146,28 @@ class CurriculumLevelTests(unittest.TestCase):
             "Lo âu xã hội Né tránh xã hội.",
         )
 
+    def test_planner_retries_an_incomplete_blueprint_once(self) -> None:
+        state = {
+            "anchor": {"title": "Lo âu", "summary": "Tóm tắt"},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+            "playbook": "",
+        }
+        complete = {
+            "topic": "Lo âu",
+            "subtopic": "Né tránh",
+            "skill": "phân tích",
+            "retrieval_query": "lo âu né tránh",
+            "clinical_guardrail": "Không chẩn đoán.",
+            "playbook_bullet_ids": [],
+        }
+        with patch.object(planning, "request_json", side_effect=[{}, complete]) as request:
+            result = curriculum_planner_node(state)
+        self.assertEqual(request.call_count, 2)
+        self.assertEqual(result["blueprint"]["topic"], "Lo âu")
+        self.assertEqual(result["blueprint"]["retrieval_query"], "lo âu né tránh")
+
     def test_planner_preserves_valid_playbook_bullet_ids(self) -> None:
         state = {
             "anchor": {"title": "Lo âu", "summary": "Tóm tắt"},

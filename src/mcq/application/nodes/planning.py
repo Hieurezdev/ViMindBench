@@ -12,6 +12,15 @@ from ..prompts import a01_curriculum
 
 logger = logging.getLogger("mcq.planning")
 
+_REQUIRED_BLUEPRINT_FIELDS = (
+    "topic",
+    "subtopic",
+    "skill",
+    "retrieval_query",
+    "clinical_guardrail",
+    "playbook_bullet_ids",
+)
+
 
 def select_anchor_node(state: MCQState) -> Dict[str, Any]:
     anchor = select_unused_anchor(state.get("used_anchor_ids", []))
@@ -37,6 +46,18 @@ def _fallback_blueprint(anchor: Dict[str, Any], *, level: str, difficulty: str) 
     }
 
 
+def _missing_blueprint_fields(blueprint: Dict[str, Any]) -> list[str]:
+    """Return required A01 fields absent from a usable planner response."""
+    missing = [
+        field
+        for field in _REQUIRED_BLUEPRINT_FIELDS[:-1]
+        if not isinstance(blueprint.get(field), str) or not blueprint[field].strip()
+    ]
+    if not isinstance(blueprint.get("playbook_bullet_ids"), list):
+        missing.append("playbook_bullet_ids")
+    return missing
+
+
 def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     anchor = state["anchor"]
     levels = state.get("curriculum_levels", list(LEVELS))
@@ -46,22 +67,53 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     difficulties = state.get("curriculum_difficulties", ["easy", "medium", "hard"])
     difficulty = difficulties[(iteration // len(levels)) % len(difficulties)]
 
+    prompt = a01_curriculum.render(
+        level=level,
+        difficulty=difficulty,
+        title=anchor["title"],
+        summary=anchor["summary"],
+        playbook=state.get("playbook", ""),
+    )
     try:
-        blueprint = request_json(
-            a01_curriculum.render(
-                level=level,
-                difficulty=difficulty,
-                title=anchor["title"],
-                summary=anchor["summary"],
-                playbook=state.get("playbook", ""),
-            ),
-            max_tokens=700,
-        )
+        blueprint = request_json(prompt, max_tokens=1_000)
         if not isinstance(blueprint, dict):
             raise ValueError("planner did not return an object")
     except Exception as exc:
         logger.warning("A01 fallback blueprint after %s", type(exc).__name__)
         blueprint = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
+
+    missing_fields = _missing_blueprint_fields(blueprint)
+    if missing_fields:
+        # A syntactically valid but incomplete object (often `{}` from an
+        # OpenAI-compatible bridge) is not a usable plan. Retry once before
+        # degrading to deterministic fields derived from the anchor.
+        logger.warning(
+            "A01 returned incomplete blueprint; keys=%s missing=%s; retrying once",
+            sorted(str(key) for key in blueprint),
+            missing_fields,
+        )
+        try:
+            retried = request_json(
+                f"{prompt}\n\nIMPORTANT: Your previous response was incomplete. "
+                f"Return one JSON object only and include every required field: "
+                f"{', '.join(_REQUIRED_BLUEPRINT_FIELDS)}. "
+                "Use [] when no playbook bullet applies.",
+                max_tokens=1_000,
+            )
+            if not isinstance(retried, dict):
+                raise ValueError("planner retry did not return an object")
+            retry_missing = _missing_blueprint_fields(retried)
+            if retry_missing:
+                logger.warning(
+                    "A01 retry still incomplete; keys=%s missing=%s",
+                    sorted(str(key) for key in retried),
+                    retry_missing,
+                )
+            else:
+                blueprint = retried
+        except Exception as exc:
+            logger.warning("A01 retry failed after %s", type(exc).__name__)
+
     fallback = _fallback_blueprint(anchor, level=level, difficulty=difficulty)
     for field in ("topic", "subtopic", "skill", "retrieval_query", "clinical_guardrail"):
         fallback_value = fallback[field]
