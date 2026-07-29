@@ -340,6 +340,10 @@ memory và judge failure memory. Chạy lại với cùng `--output_path` sẽ t
 các sidecar này và used anchors. Dùng một output path mới nếu muốn bắt đầu
 experiment độc lập.
 
+Khi chạy tiếp với cùng output basename, pipeline quét cả file verified và
+quarantine, tìm ID `PSY-<số>` lớn nhất rồi cấp ID kế tiếp. Vì vậy record mới
+không trùng ID với record đã verified hoặc quarantined ở các lần chạy trước.
+
 ## CLI flags
 
 | Flag | Effect |

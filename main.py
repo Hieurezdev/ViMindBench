@@ -2,6 +2,7 @@ import os
 import json
 import builtins
 import argparse
+import re
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -152,6 +153,25 @@ def load_used_anchor_ids(output_files: list[str]) -> list[str]:
                     pass
         print(f"  → {len(used)} unique anchor_ids loaded so far.")
     return used
+
+
+def load_next_record_id(output_files: list[str]) -> int:
+    """Return one greater than the largest PSY ID in verified/quarantine JSONL."""
+    highest = 0
+    pattern = re.compile(r"^PSY-(\d+)$")
+    for path in output_files:
+        if not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    record_id = json.loads(line).get("id", "")
+                except json.JSONDecodeError:
+                    continue
+                match = pattern.match(record_id) if isinstance(record_id, str) else None
+                if match:
+                    highest = max(highest, int(match.group(1)))
+    return highest + 1
 
 
 def load_anchor_sidecar(path: str) -> list[str]:
@@ -343,6 +363,7 @@ def main():
     failure_memory_path = os.path.splitext(output_path)[0] + ".failure_memory.json"
     judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
     quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
+    next_record_id = load_next_record_id([output_path, quarantine_path])
     used_anchor_ids = list(
         set(
             load_used_anchor_ids(existing_output_files)
@@ -350,6 +371,7 @@ def main():
         )
     )
     print(f"Total used anchor_ids (will be skipped): {len(used_anchor_ids)}")
+    print(f"Next MCQ ID: PSY-{next_record_id:06d}")
 
     # ── 5. Initial State ──────────────────────────────────────────────────
     initial_state = {
@@ -369,6 +391,7 @@ def main():
         "verified_flushed_count": 0,
         "quarantine_flushed_count": 0,
         "learning_checkpoint_count": 0,
+        "next_record_id": next_record_id,
         "curriculum_levels": curriculum_levels,
         "curriculum_difficulties": curriculum_difficulties,
         "anchor": None,

@@ -13,6 +13,7 @@ RETRIEVAL_DEPTH_BY_DIFFICULTY = {
 
 class MCQState(TypedDict, total=False):
     iteration_count: int
+    next_record_id: int
     max_iterations: int
     generation_attempt: int
     max_generation_retries: int

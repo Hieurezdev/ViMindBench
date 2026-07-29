@@ -3,6 +3,7 @@
 No test in this module opens MongoDB or calls an LLM endpoint.
 """
 
+import json
 import os
 import builtins
 import tempfile
@@ -12,7 +13,7 @@ from threading import RLock
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from main import parse_levels
+from main import load_next_record_id, parse_levels
 from src.mcq.application.nodes.collection import collect_node
 from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, mcq_generator_node
 from src.mcq.application.nodes import generation
@@ -629,6 +630,26 @@ class OutputSchemaTests(unittest.TestCase):
         )
         self.assertEqual(output["validation"]["evidence_status"], "pass")
         self.assertNotIn("_audit", output)
+
+    def test_collection_uses_the_persisted_next_record_id(self) -> None:
+        state = passing_state()
+        state["next_record_id"] = 42
+        result = collect_node(state)
+        self.assertEqual(result["verified_outputs"][0]["id"], "PSY-000042")
+        self.assertEqual(result["next_record_id"], 43)
+
+
+class RecordIdContinuationTests(unittest.TestCase):
+    def test_next_id_uses_the_largest_id_across_verified_and_quarantine(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            verified_path = os.path.join(directory, "items.jsonl")
+            quarantine_path = os.path.join(directory, "items.quarantine.jsonl")
+            with open(verified_path, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps({"id": "PSY-000007"}) + "\n")
+                handle.write("not-json\n")
+            with open(quarantine_path, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps({"id": "PSY-000021"}) + "\n")
+            self.assertEqual(load_next_record_id([verified_path, quarantine_path]), 22)
 
 
 class RegenerationRoutingTests(unittest.TestCase):

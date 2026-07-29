@@ -29,8 +29,9 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         for ref in evidence_refs(state.get("evidence_docs", []))
         if ref["chunk_id"] in cited
     ]
+    record_number = state.get("next_record_id", state.get("iteration_count", 0) + 1)
     record = {
-        "id": f"PSY-{state.get('iteration_count', 0) + 1:06d}",
+        "id": f"PSY-{record_number:06d}",
         "question": mcq.get("question", ""),
         "options": mcq.get("options", {}),
         "answer": mcq.get("answer", ""),
@@ -99,6 +100,7 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
     return {
         key: [*state.get(key, []), record],
         "iteration_count": state.get("iteration_count", 0) + 1,
+        "next_record_id": record_number + 1,
         "anchor": None,
         "mcq": {},
         "judge_reports": {},
