@@ -90,7 +90,12 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
         playbook=state.get("playbook", ""),
     )
     try:
-        blueprint = request_json(prompt, max_tokens=1_000)
+        blueprint = request_json(
+            prompt,
+            max_tokens=1_000,
+            system_instruction=a01_curriculum.SYSTEM_INSTRUCTION,
+            response_format=a01_curriculum.response_schema(level=level, difficulty=difficulty),
+        )
         if not isinstance(blueprint, dict):
             raise ValueError("planner did not return an object")
         blueprint = _unwrap_blueprint(blueprint)
@@ -115,6 +120,8 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
                 f"{', '.join(_REQUIRED_BLUEPRINT_FIELDS)}. "
                 "Use [] when no playbook bullet applies.",
                 max_tokens=1_000,
+                system_instruction=a01_curriculum.SYSTEM_INSTRUCTION,
+                response_format=a01_curriculum.response_schema(level=level, difficulty=difficulty),
             )
             if not isinstance(retried, dict):
                 raise ValueError("planner retry did not return an object")

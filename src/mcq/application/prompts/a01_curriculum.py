@@ -1,5 +1,45 @@
 """A01 Curriculum Planner prompt."""
 
+from typing import Any, Dict
+
+
+SYSTEM_INSTRUCTION = """You are A01 only. Return one valid JSON object that conforms
+exactly to the supplied JSON Schema. You are not an MCQ generator. Never add
+wrapper objects, markdown, explanations, or fields not defined by the schema."""
+
+
+def response_schema(*, level: str, difficulty: str) -> Dict[str, Any]:
+    """OpenAI-compatible strict schema for A01 structured output."""
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "a01_curriculum_blueprint",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "level", "topic", "subtopic", "skill", "difficulty", "num_options",
+                    "retrieval_query", "requires_emobench", "emobench",
+                    "clinical_guardrail", "playbook_bullet_ids",
+                ],
+                "properties": {
+                    "level": {"type": "string", "const": level},
+                    "topic": {"type": "string", "minLength": 1},
+                    "subtopic": {"type": "string", "minLength": 1},
+                    "skill": {"type": "string", "minLength": 1},
+                    "difficulty": {"type": "string", "const": difficulty},
+                    "num_options": {"type": "integer", "const": 4},
+                    "retrieval_query": {"type": "string", "minLength": 1},
+                    "requires_emobench": {"type": "boolean"},
+                    "emobench": {"type": ["object", "null"]},
+                    "clinical_guardrail": {"type": "string", "minLength": 1},
+                    "playbook_bullet_ids": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+        },
+    }
+
 
 def render(*, level: str, difficulty: str, title: str, summary: str, playbook: str) -> str:
     """Render the A01-only contract.

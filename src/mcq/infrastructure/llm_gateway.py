@@ -50,18 +50,27 @@ def _request_json(
     base_url: str | None,
     api_key: str,
     model: str,
+    system_instruction: str | None = None,
+    response_format: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     client = OpenAI(
         base_url=base_url,
         api_key=api_key,
     )
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.15,
-        max_tokens=max_tokens,
-        timeout=120,
-    )
+    messages = []
+    if system_instruction:
+        messages.append({"role": "system", "content": system_instruction})
+    messages.append({"role": "user", "content": prompt})
+    request_kwargs: Dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "temperature": 0.15,
+        "max_tokens": max_tokens,
+        "timeout": 120,
+    }
+    if response_format is not None:
+        request_kwargs["response_format"] = response_format
+    response = client.chat.completions.create(**request_kwargs)
     raw = (response.choices[0].message.content or "").strip()
     try:
         return _parse_json_object(raw)
@@ -77,7 +86,13 @@ def _request_json(
             ) from repair_error
 
 
-def request_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]:
+def request_json(
+    prompt: str,
+    *,
+    max_tokens: int = 1800,
+    system_instruction: str | None = None,
+    response_format: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     """Call the primary LLM used by planning and MCQ generation."""
     return _request_json(
         prompt,
@@ -85,6 +100,8 @@ def request_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]:
         base_url=os.getenv("OPENAI_BASE_URL"),
         api_key=os.getenv("OPENAI_API_KEY", "EMPTY"),
         model=os.getenv("MODEL_NAME", "Qwen/Qwen3-30B-A3B-Instruct-2507"),
+        system_instruction=system_instruction,
+        response_format=response_format,
     )
 
 

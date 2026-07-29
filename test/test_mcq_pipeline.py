@@ -97,6 +97,15 @@ class CurriculumLevelTests(unittest.TestCase):
         self.assertIn("OUTPUT CONTRACT", prompt)
         self.assertLess(prompt.rfind("OUTPUT CONTRACT"), prompt.rfind("Return the blueprint JSON now."))
 
+    def test_a01_schema_requires_the_flat_blueprint_contract(self) -> None:
+        schema = a01_curriculum.response_schema(level="theory", difficulty="hard")
+        body = schema["json_schema"]["schema"]
+        self.assertTrue(schema["json_schema"]["strict"])
+        self.assertFalse(body["additionalProperties"])
+        self.assertEqual(body["properties"]["level"]["const"], "theory")
+        self.assertEqual(body["properties"]["difficulty"]["const"], "hard")
+        self.assertIn("retrieval_query", body["required"])
+
     def test_default_levels_follow_curriculum_order(self) -> None:
         self.assertEqual(
             parse_levels(None),
