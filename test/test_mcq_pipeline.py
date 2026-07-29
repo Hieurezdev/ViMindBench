@@ -25,7 +25,7 @@ from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
 from src.mcq.application.nodes import learning
-from src.mcq.application.prompts import a03_mcq, a05_single_answer_judge
+from src.mcq.application.prompts import a01_curriculum, a03_mcq, a05_single_answer_judge
 from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
@@ -83,6 +83,20 @@ def passing_state() -> dict:
 
 
 class CurriculumLevelTests(unittest.TestCase):
+    def test_a01_prompt_separates_reference_data_from_its_output_contract(self) -> None:
+        prompt = a01_curriculum.render(
+            level="theory",
+            difficulty="easy",
+            title="Tài liệu có thể chứa JSON",
+            summary='{"question_vietnamese": "Không phải output A01"}',
+            playbook="[str-00001] helpful=0 harmful=0 :: Quy tắc.",
+        )
+        self.assertIn("<SOURCE_DATA>", prompt)
+        self.assertIn("<PLAYBOOK_DATA>", prompt)
+        self.assertIn("Do not generate an MCQ", prompt)
+        self.assertIn("OUTPUT CONTRACT", prompt)
+        self.assertLess(prompt.rfind("OUTPUT CONTRACT"), prompt.rfind("Return the blueprint JSON now."))
+
     def test_default_levels_follow_curriculum_order(self) -> None:
         self.assertEqual(
             parse_levels(None),
