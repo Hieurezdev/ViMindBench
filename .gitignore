@@ -21,3 +21,4 @@ backup.zip
 # Environment variables
 .env
 .env.local
+reports

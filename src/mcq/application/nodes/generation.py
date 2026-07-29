@@ -101,7 +101,7 @@ def _generate_mcq(
         blueprint,
         a03_mcq.render(
             blueprint=blueprint,
-            playbook=playbook[:7000],
+            playbook=playbook,
             evidence=refs,
             evidence_plan=evidence_plan,
             judge_feedback=judge_feedback,
