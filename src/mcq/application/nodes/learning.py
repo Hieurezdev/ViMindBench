@@ -1,5 +1,8 @@
 """A08 Reflection and A09 Notebook (ACE playbook curation)."""
 
+import builtins
+import logging
+import math
 import os
 import re
 from collections import Counter
@@ -10,6 +13,8 @@ from ..failure_memory import record_judge_failures
 from ...infrastructure.llm_gateway import request_insight_json
 from ..prompts import a09_notebook
 
+logger = logging.getLogger("mcq.learning")
+
 ACE_BULLET = re.compile(
     r"^\[([^\]]+)\]\s+helpful=(\d+)\s+harmful=(\d+)\s+::\s+(.+)$", re.MULTILINE
 )
@@ -18,6 +23,72 @@ SECTION_SLUGS = {
     "COMMON MISTAKES TO AVOID": "err",
     "SUCCESSFUL STRATEGIES TO REPLICATE": "suc"
 }
+
+
+def _section_bullet_contents(playbook: str, section: str) -> List[str]:
+    """Return ACE bullet text from one Markdown section, without its metadata."""
+    current_section = ""
+    contents = []
+    for line in playbook.splitlines():
+        if line.startswith("## "):
+            current_section = line[3:].strip()
+            continue
+        match = ACE_BULLET.match(line)
+        if match and current_section == section:
+            contents.append(match.group(4))
+    return contents
+
+
+def _cosine_similarity(left: List[float], right: List[float]) -> float | None:
+    """Return cosine similarity, or None for unusable embedding vectors."""
+    if not left or len(left) != len(right):
+        return None
+    left_norm = math.sqrt(sum(value * value for value in left))
+    right_norm = math.sqrt(sum(value * value for value in right))
+    if not left_norm or not right_norm:
+        return None
+    return sum(a * b for a, b in zip(left, right)) / (left_norm * right_norm)
+
+
+def _duplicates_common_mistake(playbook: str, content: str) -> bool:
+    """Use the configured retriever embeddings to avoid duplicate error rules.
+
+    The retriever is initialized once by the composition root and shares the
+    embedding model/cache used by retrieval. If it is unavailable (notably in
+    offline tests), preserve the existing curation behaviour instead of making
+    learning fail closed.
+    """
+    existing = _section_bullet_contents(playbook, "COMMON MISTAKES TO AVOID")
+    if not existing:
+        return False
+
+    retriever = getattr(builtins, "RETRIEVER", None)
+    embed = getattr(retriever, "generate_embedding", None)
+    if not callable(embed):
+        logger.warning("Skipping playbook duplicate filter: embedding retriever unavailable")
+        return False
+
+    try:
+        candidate = embed(content)
+        threshold = float(os.getenv("PLAYBOOK_SIMILARITY_THRESHOLD", "0.8"))
+        similarities = [
+            similarity
+            for rule in existing
+            if (similarity := _cosine_similarity(candidate, embed(rule))) is not None
+        ]
+    except Exception as exc:
+        logger.warning("Skipping playbook duplicate filter after embedding error: %s", exc)
+        return False
+
+    highest = max(similarities, default=None)
+    if highest is not None and highest >= threshold:
+        logger.info(
+            "Skipped duplicate common-mistake rule: similarity=%.3f threshold=%.3f",
+            highest,
+            threshold,
+        )
+        return True
+    return False
 
 
 def _update_counters(playbook: str, bullet_ids: List[str], tag: str) -> str:
@@ -152,6 +223,11 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
             sample_feedback=sample_feedback,
             fallback=fallback,
         )
+
+        if section == "COMMON MISTAKES TO AVOID" and _duplicates_common_mistake(
+            playbook, content
+        ):
+            continue
 
         next_id = 1 + max(
             (

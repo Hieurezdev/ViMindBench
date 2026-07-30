@@ -406,6 +406,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
+| `PLAYBOOK_SIMILARITY_THRESHOLD` | `0.8` | Cosine-similarity threshold for skipping a duplicate A09 rule in `COMMON MISTAKES TO AVOID`. Uses the configured retrieval embedder. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |

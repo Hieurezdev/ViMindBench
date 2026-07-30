@@ -729,6 +729,26 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(request.call_count, 1)
         self.assertIn("Require every answer key", result["playbook"])
 
+    def test_curator_skips_embedding_duplicate_common_mistake(self) -> None:
+        state = {
+            "playbook": (
+                "## COMMON MISTAKES TO AVOID\n"
+                "[err-00001] helpful=0 harmful=0 :: Avoid ambiguous answer keys.\n\n"
+                "## OTHERS"
+            ),
+            "failure_memory": [{"issue": "single_answer:overlap"}] * 3,
+        }
+        retriever = SimpleNamespace(generate_embedding=lambda _: [1.0, 0.0])
+        with patch.dict(
+            os.environ,
+            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "PLAYBOOK_SIMILARITY_THRESHOLD": "0.8"},
+        ), patch.object(learning, "_notebook_rule", return_value="Check answer ambiguity before generation."), patch.object(
+            builtins, "RETRIEVER", retriever, create=True
+        ):
+            result = playbook_curator_node(state)
+        self.assertEqual(result["playbook_delta"], [])
+        self.assertNotIn("Check answer ambiguity", result["playbook"])
+
 
 class JudgeFailureMemoryTests(unittest.TestCase):
     def test_retrieval_is_scoped_to_the_same_judge(self) -> None:
