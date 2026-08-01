@@ -172,7 +172,14 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
     full_playbook = state.get("playbook", "")
     blueprint = state["blueprint"]
-    evidence_plan = _build_evidence_plan(blueprint, refs)
+    method = state.get("experiment_method", "full")
+    # Direct is the source-only control. It must not receive an additional
+    # evidence-planning call or any LLM-as-judge preflight signal.
+    evidence_plan = (
+        {"supported_claims": [], "prohibited_inferences": []}
+        if method == "direct"
+        else _build_evidence_plan(blueprint, refs)
+    )
 
     feedback = list(state.get("judge_feedback", []))
     try:
@@ -183,7 +190,11 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             evidence_plan=evidence_plan,
             judge_feedback=feedback,
         )
-        preflight = _preflight_report(blueprint=blueprint, mcq=mcq, refs=refs)
+        preflight = (
+            {"passed": True, "issues": [], "feedback": ""}
+            if method in {"direct", "rag_only"}
+            else _preflight_report(blueprint=blueprint, mcq=mcq, refs=refs)
+        )
         if not preflight.get("passed", False):
             feedback.append(
                 {

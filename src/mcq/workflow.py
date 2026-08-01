@@ -3,7 +3,7 @@
 import logging
 from typing import Any, Callable, Dict
 from langgraph.graph import END, StateGraph
-from .domain import MCQState
+from .domain import EXPERIMENT_METHODS, MCQState
 from .application.nodes.planning import (
     select_anchor_node,
     curriculum_planner_node,
@@ -22,6 +22,11 @@ from .application.nodes.clinical_context import dsm5_safety_context_node
 from .application.nodes.learning import reflector_node, playbook_curator_node
 from .application.nodes.collection import collect_node
 from .application.nodes.persistence import flush_outputs_node
+from .application.nodes.baseline import (
+    baseline_accept_node,
+    direct_blueprint_node,
+    direct_context_node,
+)
 
 logger = logging.getLogger("mcq.workflow")
 
@@ -56,13 +61,23 @@ def _trace_node(
     return traced
 
 
-def create_mcq_graph():
+def create_mcq_graph(experiment_method: str = "full"):
+    """Build one controlled RQ2 condition.
+
+    The controls intentionally keep raw output for blind external audit. Only
+    ``full`` updates playbook/failure memory; this prevents treatment leakage.
+    """
+    if experiment_method not in EXPERIMENT_METHODS:
+        raise ValueError(f"Unknown experiment method: {experiment_method}")
     graph = StateGraph(MCQState)
     nodes = (
         ("select_anchor", select_anchor_node),
         ("plan", curriculum_planner_node),
+        ("direct_plan", direct_blueprint_node),
         ("retrieve", context_retriever_node),
+        ("direct_context", direct_context_node),
         ("generate", mcq_generator_node),
+        ("baseline_accept", baseline_accept_node),
         ("prepare_regeneration", prepare_regeneration_node),
         ("evidence_judge", evidence_judge_parallel_node),
         ("single_answer_judge", single_answer_judge_parallel_node),
@@ -79,35 +94,60 @@ def create_mcq_graph():
     for name, node in nodes:
         graph.add_node(name, _trace_node(name, node))
     graph.set_entry_point("select_anchor")
+    first_node = "direct_plan" if experiment_method == "direct" else "plan"
     graph.add_conditional_edges(
         "select_anchor",
-        lambda state: "plan" if state.get("anchor") else END,
-        {"plan": "plan", END: END},
+        lambda state: first_node if state.get("anchor") else END,
+        {first_node: first_node, END: END},
     )
-    for source, target in (
-        ("plan", "retrieve"),
-        ("retrieve", "generate"),
-        ("generate", "evidence_judge"),
-        ("generate", "single_answer_judge"),
-        ("generate", "dsm5_safety_context"),
-        ("generate", "adversarial_solver"),
-        ("dsm5_safety_context", "safety_bias_judge"),
-        ("consolidate_judge_reports", "quality_gate"),
-        ("reflect", "curate"),
-        ("curate", "collect"),
-        ("collect", "flush_outputs"),
-    ):
+    common_edges = [("collect", "flush_outputs")]
+    if experiment_method == "direct":
+        common_edges += [
+            ("direct_plan", "direct_context"),
+            ("direct_context", "generate"),
+            ("generate", "baseline_accept"),
+            ("baseline_accept", "collect"),
+        ]
+    elif experiment_method == "rag_only":
+        common_edges += [
+            ("plan", "retrieve"),
+            ("retrieve", "generate"),
+            ("generate", "baseline_accept"),
+            ("baseline_accept", "collect"),
+        ]
+    else:
+        common_edges += [
+            ("plan", "retrieve"),
+            ("retrieve", "generate"),
+            ("generate", "evidence_judge"),
+            ("generate", "single_answer_judge"),
+            ("generate", "dsm5_safety_context"),
+            ("generate", "adversarial_solver"),
+            ("dsm5_safety_context", "safety_bias_judge"),
+            ("consolidate_judge_reports", "quality_gate"),
+        ]
+        if experiment_method == "full":
+            common_edges += [("reflect", "curate"), ("curate", "collect")]
+    for source, target in common_edges:
         graph.add_edge(source, target)
-    graph.add_edge(
-        ["evidence_judge", "single_answer_judge", "safety_bias_judge", "adversarial_solver"],
-        "consolidate_judge_reports",
-    )
-    graph.add_conditional_edges(
-        "quality_gate",
-        route_after_quality_gate,
-        {"prepare_regeneration": "prepare_regeneration", "reflect": "reflect"},
-    )
-    graph.add_edge("prepare_regeneration", "generate")
+    if experiment_method in {"rag_judges", "full"}:
+        graph.add_edge(
+            ["evidence_judge", "single_answer_judge", "safety_bias_judge", "adversarial_solver"],
+            "consolidate_judge_reports",
+        )
+        if experiment_method == "full":
+            graph.add_conditional_edges(
+                "quality_gate",
+                route_after_quality_gate,
+                {"prepare_regeneration": "prepare_regeneration", "reflect": "reflect"},
+            )
+        else:
+            graph.add_conditional_edges(
+                "quality_gate",
+                route_after_judge_baseline,
+                {"prepare_regeneration": "prepare_regeneration", "collect": "collect"},
+            )
+        graph.add_edge("prepare_regeneration", "generate")
     graph.add_conditional_edges(
         "flush_outputs",
         lambda state: (
@@ -138,3 +178,15 @@ def route_after_quality_gate(state: MCQState) -> str:
         state.get("max_generation_retries", 2),
     )
     return route
+
+
+def route_after_judge_baseline(state: MCQState) -> str:
+    """Retry judges baseline but never enter reflection/playbook treatment."""
+    if state.get("verdict") == "verified":
+        return "collect"
+    retries_used = max(0, state.get("generation_attempt", 0) - 1)
+    return (
+        "prepare_regeneration"
+        if retries_used < state.get("max_generation_retries", 2)
+        else "collect"
+    )

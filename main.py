@@ -126,6 +126,15 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Comma-separated MCQ difficulties: easy,medium,hard",
     )
+    parser.add_argument(
+        "--experiment_method",
+        choices=("direct", "rag_only", "rag_judges", "full"),
+        default="full",
+        help=(
+            "RQ2 condition: direct=anchor only; rag_only=retrieval+generation; "
+            "rag_judges=RAG+A04-A07/retry; full=A01-A09 (default)"
+        ),
+    )
     return parser.parse_args()
 
 
@@ -327,7 +336,8 @@ def main():
         log_path=os.getenv("LOG_PATH"),
     )
     logger.info(
-        "Run requested: levels=%s; target_attempts=%s; max_generation_retries=%s",
+        "Run requested: method=%s; levels=%s; target_attempts=%s; max_generation_retries=%s",
+        args.experiment_method,
         ",".join(curriculum_levels),
         os.getenv("NUM_QA_PAIRS", "5000"),
         os.getenv("MAX_GENERATION_RETRIES", "2"),
@@ -342,7 +352,7 @@ def main():
     builtins.RETRIEVER = retriever
 
     # ── 2. Graph ──────────────────────────────────────────────────────────
-    app = create_mcq_graph()
+    app = create_mcq_graph(experiment_method=args.experiment_method)
 
     # ── 3. Config ─────────────────────────────────────────────────────────
     num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
@@ -350,7 +360,7 @@ def main():
         "OUTPUT_PATH", "data/output/generated_psychology_multiple_choice.jsonl"
     )
 
-    print(f"Running pipeline to generate {num_qa_pairs} QA pairs...")
+    print(f"Running {args.experiment_method} condition to generate {num_qa_pairs} QA pairs...")
     print(f"Curriculum levels: {', '.join(curriculum_levels)}")
 
     # ── 4. Load already-used anchor_ids to avoid duplicates ───────────────
@@ -409,10 +419,12 @@ def main():
         "quarantine_reason": [],
         "verified_outputs": [],
         "quarantine_outputs": [],
-        "failure_memory": load_json_list(failure_memory_path),
-        "judge_failure_memory": load_json_list(judge_memory_path),
-        "playbook": load_playbook(playbook_path),
+        "failure_memory": load_json_list(failure_memory_path) if args.experiment_method == "full" else [],
+        "judge_failure_memory": load_json_list(judge_memory_path) if args.experiment_method == "full" else [],
+        # RQ2 controls must not receive accumulated full-pipeline context.
+        "playbook": load_playbook(playbook_path) if args.experiment_method == "full" else "",
         "playbook_delta": [],
+        "experiment_method": args.experiment_method,
         "used_anchor_ids": used_anchor_ids,
         "last_saved_count": 0,
     }

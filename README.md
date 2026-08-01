@@ -347,6 +347,86 @@ Khi chạy tiếp với cùng output basename, pipeline quét cả file verified
 quarantine, tìm ID `PSY-<số>` lớn nhất rồi cấp ID kế tiếp. Vì vậy record mới
 không trùng ID với record đã verified hoặc quarantined ở các lần chạy trước.
 
+## RQ2: controlled pipeline comparison
+
+`--experiment_method` tạo bốn điều kiện có thể so sánh cho thực nghiệm RQ2.
+Luôn dùng **output path khác nhau** cho từng điều kiện để không trộn sample,
+sidecar hoặc ID giữa các treatment.
+
+| Method | Luồng thực thi | Mục đích |
+|---|---|---|
+| `direct` | anchor source → A03 | Control không vector retrieval và không LLM judge. |
+| `rag_only` | A01 → A02 → A03 | Đo riêng tác động retrieval; không A04–A09. |
+| `rag_judges` | A01 → A02 → A03 → A04–A07 → retry | Đo tác động evidence/judges; không A08/A09, playbook hay failure memory. |
+| `full` | A01–A09 | Pipeline đầy đủ; mặc định. |
+
+Ví dụ, chạy 100 item cho mỗi điều kiện với cùng `--levels` và
+`--difficulties`:
+
+```bash
+uv run python main.py --model_local --model_name <served-generator-model-id> \
+  --judge_base_url http://localhost:8081/v1 --judge_model_name gemini-3.6-flash \
+  --experiment_method direct --num_qa_pairs 100 \
+  --output_path data/output/rq2_direct.jsonl
+
+uv run python main.py --model_local --model_name <served-generator-model-id> \
+  --judge_base_url http://localhost:8081/v1 --judge_model_name gemini-3.6-flash \
+  --experiment_method rag_only --num_qa_pairs 100 \
+  --output_path data/output/rq2_rag_only.jsonl
+
+uv run python main.py --model_local --model_name <served-generator-model-id> \
+  --judge_base_url http://localhost:8081/v1 --judge_model_name gemini-3.6-flash \
+  --experiment_method rag_judges --num_qa_pairs 100 \
+  --output_path data/output/rq2_rag_judges.jsonl
+
+uv run python main.py --model_local --model_name <served-generator-model-id> \
+  --judge_base_url http://localhost:8081/v1 --judge_model_name gemini-3.6-flash \
+  --experiment_method full --num_qa_pairs 100 \
+  --output_path data/output/rq2_full.jsonl
+```
+
+Mỗi record có `metadata.experiment_method`. Với `direct` và `rag_only`, các
+trường validation của judge là `not_run`; không được diễn giải là đã pass.
+Các output này cần được trộn ngẫu nhiên và audit mù bởi chuyên gia trước khi
+tính `ExpertPassRate` giữa các điều kiện.
+
+### Tính metrics RQ2
+
+Sau khi chạy các điều kiện, tạo metrics JSON và bảng Markdown cho paper:
+
+```bash
+uv run python -m src.mcq.evaluation \
+  --input direct=data/output/rq2_direct.jsonl \
+  --input rag_only=data/output/rq2_rag_only.jsonl \
+  --input rag_judges=data/output/rq2_rag_judges.jsonl \
+  --input full=data/output/rq2_full.jsonl \
+  --quarantine rag_judges=data/output/rq2_rag_judges.quarantine.jsonl \
+  --quarantine full=data/output/rq2_full.quarantine.jsonl \
+  --output data/output/rq2_metrics.json \
+  --markdown_output data/output/rq2_metrics.md
+```
+
+Metrics nội bộ gồm `record_yield`, schema-valid rate, evidence-reference rate
+và các judge status có chạy. Mỗi tỷ lệ có bootstrap 95% CI. `record_yield` là
+verified/(verified + quarantined) trên record hoàn thành, không phải token cost
+hay số lần gọi model.
+
+Để tính metric chuyên gia, thêm `--audit_csv`. CSV phải có `method,id` và các
+cột tùy chọn: `overall_publishable`, `key_correct`, `single_best_answer`,
+`evidence_supported`, `distractors_plausible`, `vi_language_quality`,
+`ei_safety_bias`. Giá trị nhận `pass/fail`, `true/false` hoặc `1/0`.
+
+```bash
+uv run python -m src.mcq.evaluation \
+  --input full=data/output/rq2_full.jsonl \
+  --quarantine full=data/output/rq2_full.quarantine.jsonl \
+  --audit_csv data/audit/rq2_blind_expert_audit.csv \
+  --output data/output/rq2_full_metrics.json
+```
+
+`ExpertPassRate` chỉ xuất hiện khi có audit CSV; pipeline judge pass luôn được
+báo cáo tách riêng, không được dùng thay nhãn chuyên gia.
+
 ## CLI flags
 
 | Flag | Effect |
@@ -373,6 +453,7 @@ không trùng ID với record đã verified hoặc quarantined ở các lần ch
 | `--learning_checkpoint_interval N` | Persist playbook, failure memory, and judge memory after every `N` completed items; default `10`. |
 | `--levels CSV` | Comma-separated curriculum filter, e.g. `theory,emotion`. |
 | `--difficulties CSV` | Comma-separated difficulty filter, e.g. `easy,hard`. |
+| `--experiment_method METHOD` | RQ2 condition: `direct`, `rag_only`, `rag_judges`, or `full` (default). |
 
 CLI values override `.env` values for that run.
 

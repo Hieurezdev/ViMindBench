@@ -30,6 +30,8 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         if ref["chunk_id"] in cited
     ]
     record_number = state.get("next_record_id", state.get("iteration_count", 0) + 1)
+    method = state.get("experiment_method", "full")
+    uses_judges = method in {"rag_judges", "full"}
     record = {
         "id": f"PSY-{record_number:06d}",
         "question": mcq.get("question", ""),
@@ -50,7 +52,8 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
             "difficulty": blueprint.get("difficulty", "medium"),
             "language": "vi",
             "risk_tier": "B" if blueprint.get("level") == "clinical_scenario" else "A",
-            "generation_type": "synthetic_grounded",
+            "generation_type": "synthetic_grounded" if method != "direct" else "synthetic_direct",
+            "experiment_method": method,
             "playbook_version": os.getenv("PLAYBOOK_VERSION", "v0.2"),
             "emobench": blueprint.get("emobench", {"enabled": False}),
         },
@@ -58,18 +61,20 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         "validation": {
             "evidence_status": "pass"
             if reports.get("evidence", {}).get("passed")
-            else "fail",
+            else "fail" if uses_judges else "not_run",
             "single_best_answer": "pass"
             if reports.get("single_answer", {}).get("passed")
-            else "fail",
+            else "fail" if uses_judges else "not_run",
             "distractor_quality": "pass"
             if reports.get("single_answer", {}).get("passed")
-            else "fail",
-            "consistency_checked": bool(reports),
-            "bias_checked": bool(reports.get("ei_safety_bias", {}).get("passed")),
-            "safety_checked": bool(reports.get("ei_safety_bias", {}).get("passed")),
+            else "fail" if uses_judges else "not_run",
+            "consistency_checked": bool(reports) if uses_judges else False,
+            "bias_checked": bool(reports.get("ei_safety_bias", {}).get("passed")) if uses_judges else False,
+            "safety_checked": bool(reports.get("ei_safety_bias", {}).get("passed")) if uses_judges else False,
             "emobench_status": (
-                "pass"
+                "not_run"
+                if not uses_judges
+                else "pass"
                 if blueprint.get("emobench", {}).get("enabled")
                 and reports.get("ei_safety_bias", {}).get("passed")
                 else "not_applicable"
@@ -84,6 +89,7 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         "_audit": {
             "created_at": datetime.now(timezone.utc).isoformat(),
             "anchor_id": state.get("anchor", {}).get("chunk_id"),
+            "experiment_method": method,
             "judge_reports": reports,
             "verdict": state.get("verdict"),
             "quarantine_reason": state.get("quarantine_reason", []),

@@ -30,10 +30,12 @@ from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
 )
-from src.mcq.workflow import create_mcq_graph, route_after_quality_gate
+from src.mcq.workflow import create_mcq_graph, route_after_judge_baseline, route_after_quality_gate
+from src.mcq.application.nodes.baseline import direct_blueprint_node, direct_context_node
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
 from src.mcq.infrastructure import llm_gateway
+from src.mcq.evaluation import evaluate_experiment, render_markdown
 from src.retriever import MongoDBRetriever
 
 
@@ -345,6 +347,21 @@ class JudgeGatewayTests(unittest.TestCase):
 
     def test_parallel_judge_graph_compiles(self) -> None:
         self.assertIsNotNone(create_mcq_graph())
+        for method in ("direct", "rag_only", "rag_judges"):
+            self.assertIsNotNone(create_mcq_graph(method))
+
+    def test_direct_control_uses_anchor_without_retrieval(self) -> None:
+        state = {
+            "anchor": {"chunk_id": "anchor-1", "title": "Lo âu", "summary": "Né tránh"},
+            "curriculum_levels": ["theory"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+        }
+        blueprint = direct_blueprint_node(state)["blueprint"]
+        docs = direct_context_node({**state, "blueprint": blueprint})["evidence_docs"]
+        self.assertEqual(blueprint["topic"], "Lo âu")
+        self.assertEqual(len(docs), 1)
+        self.assertEqual(docs[0].metadata["chunk_id"], "anchor-1")
 
     def test_medium_prompts_require_one_near_miss_distractor(self) -> None:
         blueprint = {"difficulty": "medium"}
@@ -826,6 +843,40 @@ class OutputSchemaTests(unittest.TestCase):
         self.assertEqual(result["verified_outputs"][0]["id"], "PSY-000042")
         self.assertEqual(result["next_record_id"], 43)
 
+    def test_control_output_is_labeled_and_not_claimed_as_judged(self) -> None:
+        state = passing_state()
+        state["experiment_method"] = "rag_only"
+        state["judge_reports"] = {}
+        output = collect_node(state)["verified_outputs"][0]
+        self.assertEqual(output["metadata"]["experiment_method"], "rag_only")
+        self.assertEqual(output["validation"]["evidence_status"], "not_run")
+
+
+class RQ2EvaluationTests(unittest.TestCase):
+    def test_rq2_metrics_keep_pipeline_and_expert_scores_separate(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            verified_path = os.path.join(directory, "full.jsonl")
+            quarantine_path = os.path.join(directory, "full.quarantine.jsonl")
+            verified = passing_state()
+            verified_record = collect_node(verified)["verified_outputs"][0]
+            with open(verified_path, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps(verified_record) + "\n")
+            quarantined = dict(verified_record)
+            quarantined["id"] = "PSY-000002"
+            with open(quarantine_path, "w", encoding="utf-8") as handle:
+                handle.write(json.dumps(quarantined) + "\n")
+
+            report = evaluate_experiment(
+                {"full": verified_path},
+                {"full": quarantine_path},
+                bootstrap_samples=100,
+            )
+        result = report["methods"]["full"]
+        self.assertEqual(result["n_completed"], 2)
+        self.assertEqual(result["internal_metrics"]["record_yield"]["value"], 0.5)
+        self.assertIsNone(result["expert_audit_metrics"]["overall_publishable"]["value"])
+        self.assertIn("| full |", render_markdown(report))
+
 
 class RecordIdContinuationTests(unittest.TestCase):
     def test_next_id_uses_the_largest_id_across_verified_and_quarantine(self) -> None:
@@ -841,6 +892,20 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
+    def test_judge_baseline_routes_to_collect_without_reflection(self) -> None:
+        self.assertEqual(
+            route_after_judge_baseline(
+                {"verdict": "verified", "generation_attempt": 1, "max_generation_retries": 2}
+            ),
+            "collect",
+        )
+        self.assertEqual(
+            route_after_judge_baseline(
+                {"verdict": "quarantine", "generation_attempt": 3, "max_generation_retries": 2}
+            ),
+            "collect",
+        )
+
     def test_failed_first_attempt_retries(self) -> None:
         self.assertEqual(
             route_after_quality_gate(
