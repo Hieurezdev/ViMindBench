@@ -178,6 +178,7 @@ def context_retriever_node(state: MCQState) -> Dict[str, Any]:
             retriever.search(
                 query,
                 k=retrieval_depth["candidate_k"],
+                tier1_k=retrieval_depth["tier1_candidate_k"],
             ),
             limit=retrieval_depth["evidence_limit"],
         )

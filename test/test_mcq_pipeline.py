@@ -239,7 +239,7 @@ class CurriculumLevelTests(unittest.TestCase):
     def test_retriever_falls_back_to_anchor_when_query_is_missing(self) -> None:
         requested_queries = []
         retriever = SimpleNamespace(
-            search=lambda query, k: requested_queries.append((query, k)) or []
+            search=lambda query, k, *, tier1_k: requested_queries.append((query, k, tier1_k)) or []
         )
         state = {
             "anchor": {"title": "Lo âu", "summary": "Né tránh"},
@@ -248,7 +248,7 @@ class CurriculumLevelTests(unittest.TestCase):
         with patch.object(builtins, "RETRIEVER", retriever, create=True):
             result = context_retriever_node(state)
         self.assertEqual(result["evidence_docs"], [])
-        self.assertEqual(requested_queries, [("Lo âu Né tránh", 8)])
+        self.assertEqual(requested_queries, [("Lo âu Né tránh", 8, 2)])
 
 
 class EvidencePolicyTests(unittest.TestCase):
@@ -292,13 +292,31 @@ class EvidencePolicyTests(unittest.TestCase):
         retriever._search_collection = lambda *args, **kwargs: tier1
         retriever._search_tier2 = lambda query, k: tier2_queries.append((query, k)) or tier2
 
-        results = retriever.search_tiered("lo âu xã hội", k=4)
+        results = retriever.search_tiered("lo âu xã hội", k=4, tier1_k=3)
 
         self.assertEqual([item.metadata["chunk_id"] for item in results], ["textbook-1", "mental-1"])
         self.assertEqual(results[0].metadata["source_tier"], "tier_1")
         self.assertEqual(results[1].metadata["source_tier"], "tier_2")
         self.assertEqual(tier2_queries[0][1], 3)
         self.assertIn("Giáo trình: cơ chế lo âu xã hội.", tier2_queries[0][0])
+
+    def test_hard_retrieval_requests_ten_tier_one_candidates(self) -> None:
+        requested = []
+        retriever = SimpleNamespace(
+            search=lambda query, k, *, tier1_k: requested.append((query, k, tier1_k)) or []
+        )
+        previous = getattr(builtins, "RETRIEVER", None)
+        builtins.RETRIEVER = retriever
+        try:
+            context_retriever_node(
+                {
+                    "blueprint": {"difficulty": "hard", "retrieval_query": "lo âu xã hội"},
+                    "anchor": {},
+                }
+            )
+        finally:
+            builtins.RETRIEVER = previous
+        self.assertEqual(requested, [("lo âu xã hội", 24, 10)])
 
     def test_explicit_tier_three_is_never_treated_as_legacy(self) -> None:
         self.assertEqual(document_tier(doc("t3", "Tier 3")), "Tier 3")
@@ -323,11 +341,13 @@ class EvidencePolicyTests(unittest.TestCase):
     def test_retrieval_depth_increases_with_difficulty(self) -> None:
         documents = [doc(f"chunk-{index}", "Tier 2") for index in range(6)]
         requested_k = []
-        retriever = SimpleNamespace(search=lambda query, k: (requested_k.append(k), documents)[1])
+        retriever = SimpleNamespace(
+            search=lambda query, k, *, tier1_k: (requested_k.append((k, tier1_k)), documents)[1]
+        )
         with patch.object(builtins, "RETRIEVER", retriever, create=True):
             medium = context_retriever_node({"blueprint": {"difficulty": "medium", "retrieval_query": "stress"}})
             hard = context_retriever_node({"blueprint": {"difficulty": "hard", "retrieval_query": "stress"}})
-        self.assertEqual(requested_k, [16, 24])
+        self.assertEqual(requested_k, [(16, 4), (24, 10)])
         self.assertEqual(len(medium["evidence_docs"]), 4)
         self.assertEqual(len(hard["evidence_docs"]), 6)
 

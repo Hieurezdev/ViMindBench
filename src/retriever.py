@@ -242,7 +242,9 @@ class MongoDBRetriever:
         self._cache_set(self._dsm5_search_cache, key, list(results))
         return results
 
-    def search(self, query: str, k: int = 5) -> List[Document]:
+    def search(
+        self, query: str, k: int = 5, *, tier1_k: int | None = None
+    ) -> List[Document]:
         """
         Search MongoDB for relevant documents.
 
@@ -266,13 +268,16 @@ class MongoDBRetriever:
             print("Error: Local embedding model not initialized. Cannot search.")
             return []
 
-        cache_key = (self._cache_key(query), k)
+        # Tier-1 depth changes the Tier-2 expansion query, so it must be part
+        # of the cache key; otherwise a hard request could reuse a shallow
+        # easy/medium retrieval result for the same query.
+        cache_key = (self._cache_key(query), k, tier1_k)
         cached = self._cache_get(self._search_cache, cache_key)
         if cached is not None:
             return list(cached)
 
         if getattr(self, "tier1_collection", None) is not None:
-            results = self.search_tiered(query, k=k)
+            results = self.search_tiered(query, k=k, tier1_k=tier1_k)
         else:
             results = self._search_tier2(query, k)
         self._cache_set(self._search_cache, cache_key, list(results))
@@ -319,14 +324,21 @@ class MongoDBRetriever:
             document.metadata["source_tier"] = tier
         return documents
 
-    def search_tiered(self, query: str, k: int = 5) -> List[Document]:
+    def search_tiered(
+        self, query: str, k: int = 5, *, tier1_k: int | None = None
+    ) -> List[Document]:
         """Retrieve Tier 1 textbooks first, then retrieve related Tier 2 evidence.
 
         Tier 2 is never queried from the original question alone when Tier 1
         material is available: the selected textbook passages expand the query
         so secondary material is anchored to the primary source.
         """
-        tier1_k = min(k, max(1, int(os.getenv("TIER1_RETRIEVAL_K", "2"))))
+        requested_tier1_k = (
+            tier1_k
+            if tier1_k is not None
+            else int(os.getenv("TIER1_RETRIEVAL_K", "2"))
+        )
+        tier1_k = min(k, max(1, requested_tier1_k))
         tier1_docs = self._search_collection(
             self.tier1_collection,
             query,
@@ -348,7 +360,8 @@ class MongoDBRetriever:
         )
         results = self._deduplicate_documents([*tier1_docs, *tier2_docs])[:k]
         logger.info(
-            "Tiered retrieval: tier1=%s tier2=%s returned=%s",
+            "Tiered retrieval: requested_tier1=%s tier1=%s tier2=%s returned=%s",
+            tier1_k,
             len(tier1_docs), len(tier2_docs), len(results),
         )
         return results

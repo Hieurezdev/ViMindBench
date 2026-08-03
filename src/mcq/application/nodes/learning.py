@@ -185,15 +185,27 @@ def _notebook_rule(
 
 def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
     counts = Counter(item["issue"] for item in state.get("failure_memory", []))
+    threshold = int(os.getenv("PLAYBOOK_REPEAT_THRESHOLD", "3"))
     recurring = [
         issue
         for issue, count in counts.items()
-        if count >= int(os.getenv("PLAYBOOK_REPEAT_THRESHOLD", "3"))
+        if count >= threshold
     ]
     playbook, delta = state.get("playbook", ""), []
 
+    logger.info(
+        "A09 curation scan | failure_events=%s distinct_issues=%s threshold=%s recurring=%s",
+        sum(counts.values()),
+        len(counts),
+        threshold,
+        {issue: counts[issue] for issue in recurring},
+    )
+    if not recurring:
+        logger.info("A09 no playbook update: no issue has reached the repeat threshold")
+
     for issue in recurring:
         if issue in playbook:
+            logger.info("A09 skipped issue already represented in playbook: %s", issue)
             continue
 
         is_success = issue.startswith("success:")
@@ -227,6 +239,7 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
         if section == "COMMON MISTAKES TO AVOID" and _duplicates_common_mistake(
             playbook, content
         ):
+            logger.info("A09 skipped semantically duplicate rule for issue: %s", issue)
             continue
 
         next_id = 1 + max(
@@ -263,4 +276,13 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
                 "support": counts[issue],
             }
         )
+        logger.info(
+            "A09 added playbook rule | issue=%s section=%s bullet_id=%s support=%s",
+            issue,
+            section,
+            bullet_id,
+            counts[issue],
+        )
+    if recurring and not delta:
+        logger.info("A09 no playbook update: every recurring issue was skipped")
     return {"playbook": playbook, "playbook_delta": delta}

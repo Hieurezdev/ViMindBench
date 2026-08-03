@@ -473,7 +473,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `TIER1_MONGO_COLLECTION_NAME` | `gtrinh` | Textbook collection, always exported as Tier 1 evidence. |
 | `TIER1_MONGO_VECTOR_INDEX` | `vector_index` | Atlas vector index in the Tier 1 collection. |
 | `TIER1_MONGO_TEXT_INDEX` | `atlas_index` | Atlas text-search fallback index for Tier 1. |
-| `TIER1_RETRIEVAL_K` | `2` | Maximum Tier 1 chunks retrieved before Tier 2 expansion. |
+| `TIER1_RETRIEVAL_K` | `2` | Fallback Tier 1 depth for generic calls. A02 uses easy=2, medium=4, hard=10 Tier 1 candidates before Tier 2 expansion. |
 | `TIER1_QUERY_CONTEXT_CHARS` | `900` | Maximum text per Tier 1 chunk appended to the Tier 2 query. |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat completion endpoint. |
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
@@ -514,7 +514,7 @@ When `TIER1_MONGO_URI` is configured, A02 uses this sequence:
 
 ```text
 A01 retrieval_query
-  → retrieve up to TIER1_RETRIEVAL_K textbook chunks (forced Tier 1)
+  → retrieve textbook chunks (easy=2, medium=4, hard=10; forced Tier 1)
   → append bounded textbook passages to the original query
   → retrieve related chunks from mental (forced Tier 2)
   → deduplicate and return Tier 1 first, then Tier 2
