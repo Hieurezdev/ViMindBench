@@ -2,6 +2,7 @@ from collections import OrderedDict
 from threading import RLock
 from typing import List, Dict, Any
 import os
+import logging
 from pymongo import MongoClient
 from openai import OpenAI
 from langchain_core.documents import Document
@@ -13,6 +14,8 @@ except ImportError:
     SentenceTransformer = None
 
 load_dotenv()
+
+logger = logging.getLogger("mcq.retriever")
 
 
 class MongoDBRetriever:
@@ -40,16 +43,34 @@ class MongoDBRetriever:
         self.mongo_uri = os.getenv("MONGO_URI")
         self.db_name = os.getenv("MONGO_DB_NAME", "Data")
         self.collection_name = os.getenv("MONGO_COLLECTION_NAME", "mental")
+        self.tier1_mongo_uri = os.getenv("TIER1_MONGO_URI")
+        self.tier1_db_name = os.getenv("TIER1_MONGO_DB_NAME", "gtrinh")
+        self.tier1_collection_name = os.getenv("TIER1_MONGO_COLLECTION_NAME", "gtrinh")
 
         if not self.mongo_uri:
             print("Warning: MONGO_URI not set. Retriever will fail if used.")
 
         self.collection = None
+        self.tier1_client = None
+        self.tier1_collection = None
         if self.mongo_uri:
             self.client = MongoClient(self.mongo_uri)
             self.db = self.client[self.db_name]
             self.collection = self.db[self.collection_name]
             print(f"✓ Connected to MongoDB: {self.db_name}.{self.collection_name}")
+
+        if self.tier1_mongo_uri:
+            self.tier1_client = MongoClient(self.tier1_mongo_uri)
+            tier1_db = self.tier1_client[self.tier1_db_name]
+            self.tier1_collection = tier1_db[self.tier1_collection_name]
+            print(
+                f"✓ Connected to Tier 1 MongoDB: "
+                f"{self.tier1_db_name}.{self.tier1_collection_name}"
+            )
+        else:
+            logger.warning(
+                "TIER1_MONGO_URI is not set; retrieval will use Tier 2 only."
+            )
 
         # Embedding configuration
         if use_local_embedding is None:
@@ -250,6 +271,15 @@ class MongoDBRetriever:
         if cached is not None:
             return list(cached)
 
+        if getattr(self, "tier1_collection", None) is not None:
+            results = self.search_tiered(query, k=k)
+        else:
+            results = self._search_tier2(query, k)
+        self._cache_set(self._search_cache, cache_key, list(results))
+        return results
+
+    def _search_tier2(self, query: str, k: int) -> List[Document]:
+        """Search the existing mental collection using its normal fallbacks."""
         try:
             # Strategy 1: Try Atlas Vector Search (requires atlas_vector_search index)
             results = self._vector_search(query, k)
@@ -262,8 +292,121 @@ class MongoDBRetriever:
                 print(f"Text search failed: {e2}, falling back to keyword search")
                 # Strategy 3: Simple keyword search
                 results = self._keyword_search(query, k)
-        self._cache_set(self._search_cache, cache_key, list(results))
         return results
+
+    @staticmethod
+    def _tier1_query_context(documents: List[Document]) -> str:
+        """Build a bounded Tier 1-derived query expansion for Tier 2 retrieval."""
+        per_chunk = max(120, int(os.getenv("TIER1_QUERY_CONTEXT_CHARS", "900")))
+        return "\n".join(document.page_content[:per_chunk] for document in documents)
+
+    @staticmethod
+    def _deduplicate_documents(documents: List[Document]) -> List[Document]:
+        unique: List[Document] = []
+        seen = set()
+        for document in documents:
+            metadata = document.metadata or {}
+            key = str(metadata.get("chunk_id") or metadata.get("uuid") or document.page_content)
+            if key not in seen:
+                seen.add(key)
+                unique.append(document)
+        return unique
+
+    @staticmethod
+    def _set_source_tier(documents: List[Document], tier: str) -> List[Document]:
+        for document in documents:
+            document.metadata["tier"] = tier
+            document.metadata["source_tier"] = tier
+        return documents
+
+    def search_tiered(self, query: str, k: int = 5) -> List[Document]:
+        """Retrieve Tier 1 textbooks first, then retrieve related Tier 2 evidence.
+
+        Tier 2 is never queried from the original question alone when Tier 1
+        material is available: the selected textbook passages expand the query
+        so secondary material is anchored to the primary source.
+        """
+        tier1_k = min(k, max(1, int(os.getenv("TIER1_RETRIEVAL_K", "2"))))
+        tier1_docs = self._search_collection(
+            self.tier1_collection,
+            query,
+            k=tier1_k,
+            vector_index=os.getenv("TIER1_MONGO_VECTOR_INDEX", "vector_index"),
+            text_index=os.getenv("TIER1_MONGO_TEXT_INDEX", "atlas_index"),
+            source_tier="tier_1",
+        )
+        tier1_docs = self._set_source_tier(tier1_docs, "tier_1")
+        related_query = query
+        if tier1_docs:
+            related_query = f"{query}\n\nGiáo trình liên quan:\n{self._tier1_query_context(tier1_docs)}"
+        else:
+            logger.warning("Tier 1 retrieval returned no documents; using original query for Tier 2")
+
+        tier2_k = max(0, k - len(tier1_docs))
+        tier2_docs = self._set_source_tier(
+            self._search_tier2(related_query, tier2_k) if tier2_k else [], "tier_2"
+        )
+        results = self._deduplicate_documents([*tier1_docs, *tier2_docs])[:k]
+        logger.info(
+            "Tiered retrieval: tier1=%s tier2=%s returned=%s",
+            len(tier1_docs), len(tier2_docs), len(results),
+        )
+        return results
+
+    def _search_collection(
+        self,
+        collection: Any,
+        query: str,
+        *,
+        k: int,
+        vector_index: str,
+        text_index: str,
+        source_tier: str,
+    ) -> List[Document]:
+        """Search another Mongo collection without changing the Tier 2 client."""
+        if collection is None or k < 1:
+            return []
+        projection = {
+            "content": 1, "text": 1, "page_content": 1, "body": 1,
+            "title": 1, "headers": 1, "summary": 1, "tags": 1, "keywords": 1,
+            "uuid": 1, "chunk_id": 1, "type": 1, "source": 1,
+            "source_sha256": 1, "chunk_index": 1, "start_char": 1,
+            "end_char": 1, "source_char_count": 1, "structure_path": 1, "_id": 1,
+            "score": {"$meta": "vectorSearchScore"},
+        }
+        try:
+            vector_pipeline = [
+                {"$vectorSearch": {
+                    "index": vector_index, "path": "embedding",
+                    "queryVector": self.generate_embedding(query),
+                    "numCandidates": k * 10, "limit": k,
+                }},
+                {"$project": projection},
+            ]
+            return self._format_results(list(collection.aggregate(vector_pipeline)), force_tier=source_tier)
+        except Exception as vector_error:
+            logger.info("Tier 1 vector search unavailable (%s); trying text search", type(vector_error).__name__)
+        try:
+            text_pipeline = [
+                {"$search": {"index": text_index, "text": {"query": query, "path": ["content", "text", "title", "summary", "keywords"]}}},
+                {"$limit": k},
+                {"$project": {**projection, "score": {"$meta": "searchScore"}}},
+            ]
+            return self._format_results(list(collection.aggregate(text_pipeline)), force_tier=source_tier)
+        except Exception as text_error:
+            logger.info("Tier 1 Atlas text search unavailable (%s); trying keyword search", type(text_error).__name__)
+        keywords = [keyword for keyword in query.split() if len(keyword) > 1]
+        if not keywords:
+            return []
+        patterns = [{"$regex": keyword, "$options": "i"} for keyword in keywords]
+        results = collection.find(
+            {"$or": [
+                {"content": {"$in": patterns}}, {"text": {"$in": patterns}},
+                {"title": {"$in": patterns}}, {"summary": {"$in": patterns}},
+                {"keywords": {"$in": patterns}},
+            ]}
+        ).limit(k)
+        return self._format_results(list(results), force_tier=source_tier)
 
     def _vector_search(self, query: str, k: int) -> List[Document]:
         """
@@ -395,7 +538,9 @@ class MongoDBRetriever:
 
         return self._format_results(list(results))
 
-    def _format_results(self, results: List[Dict]) -> List[Document]:
+    def _format_results(
+        self, results: List[Dict], *, force_tier: str | None = None
+    ) -> List[Document]:
         """Convert MongoDB results to LangChain Documents."""
         documents = []
 
@@ -405,9 +550,18 @@ class MongoDBRetriever:
             code = result.get("code")
             differential_diagnosis = result.get("differential_diagnosis", [])
 
-            title = result.get("title", disease_name or "")
+            headers = result.get("headers", [])
+            fallback_title = " / ".join(headers) if isinstance(headers, list) else str(headers or "")
+            source = str(result.get("source") or "")
+            title = result.get("title") or disease_name or fallback_title or source
             summary = result.get("summary", "")
-            content = result.get("content", "")
+            content = (
+                result.get("content")
+                or result.get("text")
+                or result.get("page_content")
+                or result.get("body")
+                or ""
+            )
 
             # Format page_content with available fields
             if disease_name:
@@ -432,8 +586,8 @@ class MongoDBRetriever:
                 "chunk_id": result.get(
                     "chunk_id", result.get("uuid", result.get("_id", ""))
                 ),
-                "tier": result.get("tier", result.get("source_tier", "")),
-                "source_tier": result.get("source_tier", result.get("tier", "")),
+                "tier": force_tier or result.get("tier", result.get("source_tier", "")),
+                "source_tier": force_tier or result.get("source_tier", result.get("tier", "")),
                 "title": title or disease_name or "",
                 "summary": summary or "",
                 "tags": result.get("tags", []),
@@ -442,6 +596,13 @@ class MongoDBRetriever:
                 "score": result.get("score", 0.0),
                 "code": code or "",
                 "disease_name": disease_name or "",
+                "source": source,
+                "source_sha256": result.get("source_sha256", ""),
+                "chunk_index": result.get("chunk_index"),
+                "start_char": result.get("start_char"),
+                "end_char": result.get("end_char"),
+                "source_char_count": result.get("source_char_count"),
+                "structure_path": result.get("structure_path", []),
             }
 
             documents.append(Document(page_content=page_content, metadata=metadata))
@@ -453,6 +614,9 @@ class MongoDBRetriever:
         if hasattr(self, "client") and self.client:
             self.client.close()
             print("MongoDB connection closed")
+        if getattr(self, "tier1_client", None):
+            self.tier1_client.close()
+            print("Tier 1 MongoDB connection closed")
 
 
 # Alias for backward compatibility

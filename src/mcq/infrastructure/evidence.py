@@ -30,9 +30,23 @@ def select_eligible_documents(candidates: List[Any], *, limit: int = 3) -> List[
 
 
 def evidence_refs(docs: List[Any]) -> List[Dict[str, Any]]:
+    """Create compact evidence records while retaining source provenance for judges."""
     refs = []
     for doc in docs:
         meta = doc.metadata or {}
+        provenance = {
+            key: meta[key]
+            for key in (
+                "source",
+                "source_sha256",
+                "chunk_index",
+                "start_char",
+                "end_char",
+                "source_char_count",
+                "structure_path",
+            )
+            if meta.get(key) is not None
+        }
         refs.append(
             {
                 "chunk_id": str(
@@ -42,6 +56,7 @@ def evidence_refs(docs: List[Any]) -> List[Dict[str, Any]]:
                 "title": meta.get("title", ""),
                 "score": meta.get("score", 0.0),
                 "excerpt": doc.page_content[:1200],
+                "provenance": provenance,
             }
         )
     return refs

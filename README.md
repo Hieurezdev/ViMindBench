@@ -91,7 +91,8 @@ của MCQ vẫn chỉ là các chunk Tier 1/2 từ MongoDB trong giới hạn di
 ## Requirements
 
 - Python 3.12 and [uv](https://docs.astral.sh/uv/).
-- MongoDB collection `mental` with vector index `vector_index`.
+- MongoDB Tier 1 textbook collection and Tier 2 `mental` collection, each with
+  a compatible vector index (`vector_index` by default).
 - DSM-5 collection (default `DSM-5`) with the same vector index for clinical
   safety review.
 - An OpenAI-compatible chat endpoint or a local endpoint at port `8000`.
@@ -467,6 +468,13 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `MONGO_DB_NAME` | `Data` | Database containing source collections. |
 | `MONGO_COLLECTION_NAME` | `mental` | Main psychology evidence collection; approved as Tier 2 after backfill. |
 | `MONGO_DSM5_COLLECTION_NAME` | `DSM-5` | DSM-5 collection for clinical safety context. |
+| `TIER1_MONGO_URI` | empty | Separate MongoDB URI for the primary textbook corpus. Set it through an untracked local environment file, shell variable, or Colab Secret; never commit it. |
+| `TIER1_MONGO_DB_NAME` | `gtrinh` | Database containing textbook chunks. |
+| `TIER1_MONGO_COLLECTION_NAME` | `gtrinh` | Textbook collection, always exported as Tier 1 evidence. |
+| `TIER1_MONGO_VECTOR_INDEX` | `vector_index` | Atlas vector index in the Tier 1 collection. |
+| `TIER1_MONGO_TEXT_INDEX` | `atlas_index` | Atlas text-search fallback index for Tier 1. |
+| `TIER1_RETRIEVAL_K` | `2` | Maximum Tier 1 chunks retrieved before Tier 2 expansion. |
+| `TIER1_QUERY_CONTEXT_CHARS` | `900` | Maximum text per Tier 1 chunk appended to the Tier 2 query. |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat completion endpoint. |
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
 | `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by A01 planner and A03 generator. |
@@ -499,6 +507,27 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `ALLOW_UNTIERED_EVIDENCE` | `true` initially | Set `false` after all main evidence has explicit Tier 1/2 metadata. |
 | `DATA_DIR`, `SOURCE_TIER` | `data/formated_data`, `tier_2` | Used only by the JSON-to-Mongo import script. |
 | `START_INDEX`, `END_INDEX` | `0` | Legacy-pipeline compatibility only; ignored by the new MCQ workflow. |
+
+## Two-stage Tier 1 → Tier 2 retrieval
+
+When `TIER1_MONGO_URI` is configured, A02 uses this sequence:
+
+```text
+A01 retrieval_query
+  → retrieve up to TIER1_RETRIEVAL_K textbook chunks (forced Tier 1)
+  → append bounded textbook passages to the original query
+  → retrieve related chunks from mental (forced Tier 2)
+  → deduplicate and return Tier 1 first, then Tier 2
+```
+
+The final evidence limit still follows difficulty: easy=2, medium=4, hard=6.
+Therefore easy may contain two Tier 1 chunks; medium/hard can add related Tier 2
+material after the primary textbook evidence. If Tier 1 returns no result, A02
+logs a warning and retrieves Tier 2 with the original query rather than failing.
+
+`TIER1_MONGO_URI` is a secret: set it through an untracked local environment
+file, shell variable, or Colab Secret; never put it in source code or
+`.env.example`. If the repository's `.env` is tracked, do not place it there.
 
 ## Tier migration for `mental`
 

@@ -282,6 +282,24 @@ class EvidencePolicyTests(unittest.TestCase):
         self.assertEqual(retriever.search("  LO ÂU ", k=8), expected)
         self.assertEqual(calls, [("lo âu", 8)])
 
+    def test_tiered_retrieval_uses_tier_one_context_before_tier_two(self) -> None:
+        retriever = self._cache_ready_retriever()
+        retriever.tier1_collection = object()
+        tier1 = [doc("textbook-1", "Tier 3")]
+        tier1[0].page_content = "Giáo trình: cơ chế lo âu xã hội."
+        tier2 = [doc("mental-1", "Tier 1")]
+        tier2_queries = []
+        retriever._search_collection = lambda *args, **kwargs: tier1
+        retriever._search_tier2 = lambda query, k: tier2_queries.append((query, k)) or tier2
+
+        results = retriever.search_tiered("lo âu xã hội", k=4)
+
+        self.assertEqual([item.metadata["chunk_id"] for item in results], ["textbook-1", "mental-1"])
+        self.assertEqual(results[0].metadata["source_tier"], "tier_1")
+        self.assertEqual(results[1].metadata["source_tier"], "tier_2")
+        self.assertEqual(tier2_queries[0][1], 3)
+        self.assertIn("Giáo trình: cơ chế lo âu xã hội.", tier2_queries[0][0])
+
     def test_explicit_tier_three_is_never_treated_as_legacy(self) -> None:
         self.assertEqual(document_tier(doc("t3", "Tier 3")), "Tier 3")
 
