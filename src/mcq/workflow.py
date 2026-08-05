@@ -61,14 +61,17 @@ def _trace_node(
     return traced
 
 
-def create_mcq_graph(experiment_method: str = "full"):
-    """Build one controlled RQ2 condition.
+def create_mcq_graph(experiment_method: str = "full", ablate_judges: str | None = None):
+    """Build one controlled RQ2 condition or RQ4 ablation condition.
 
     The controls intentionally keep raw output for blind external audit. Only
     ``full`` updates playbook/failure memory; this prevents treatment leakage.
     """
     if experiment_method not in EXPERIMENT_METHODS:
         raise ValueError(f"Unknown experiment method: {experiment_method}")
+    
+    ablate_list = [j.strip().upper() for j in ablate_judges.split(",")] if ablate_judges else []
+    
     graph = StateGraph(MCQState)
     nodes = (
         ("select_anchor", select_anchor_node),
@@ -119,22 +122,38 @@ def create_mcq_graph(experiment_method: str = "full"):
         common_edges += [
             ("plan", "retrieve"),
             ("retrieve", "generate"),
-            ("generate", "evidence_judge"),
-            ("generate", "single_answer_judge"),
-            ("generate", "dsm5_safety_context"),
-            ("generate", "adversarial_solver"),
-            ("dsm5_safety_context", "safety_bias_judge"),
             ("consolidate_judge_reports", "quality_gate"),
         ]
+        
+        judges_to_run = []
+        if "A04" not in ablate_list:
+            common_edges.append(("generate", "evidence_judge"))
+            judges_to_run.append("evidence_judge")
+        
+        if "A05" not in ablate_list:
+            common_edges.append(("generate", "single_answer_judge"))
+            judges_to_run.append("single_answer_judge")
+            
+        if "A06" not in ablate_list:
+            common_edges.extend([
+                ("generate", "dsm5_safety_context"),
+                ("dsm5_safety_context", "safety_bias_judge")
+            ])
+            judges_to_run.append("safety_bias_judge")
+            
+        if "A07" not in ablate_list:
+            common_edges.append(("generate", "adversarial_solver"))
+            judges_to_run.append("adversarial_solver")
+
         if experiment_method == "full":
             common_edges += [("reflect", "curate"), ("curate", "collect")]
+
     for source, target in common_edges:
         graph.add_edge(source, target)
+        
     if experiment_method in {"rag_judges", "full"}:
-        graph.add_edge(
-            ["evidence_judge", "single_answer_judge", "safety_bias_judge", "adversarial_solver"],
-            "consolidate_judge_reports",
-        )
+        if judges_to_run:
+            graph.add_edge(judges_to_run, "consolidate_judge_reports")
         if experiment_method == "full":
             graph.add_conditional_edges(
                 "quality_gate",

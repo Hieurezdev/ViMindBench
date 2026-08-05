@@ -135,6 +135,12 @@ def parse_args() -> argparse.Namespace:
             "rag_judges=RAG+A04-A07/retry; full=A01-A09 (default)"
         ),
     )
+    parser.add_argument(
+        "--ablate_judges",
+        type=str,
+        default=None,
+        help="Comma-separated list of judges to ablate for RQ4 (e.g., A04,A05,A06,A07)",
+    )
     return parser.parse_args()
 
 
@@ -352,7 +358,7 @@ def main():
     builtins.RETRIEVER = retriever
 
     # ── 2. Graph ──────────────────────────────────────────────────────────
-    app = create_mcq_graph(experiment_method=args.experiment_method)
+    app = create_mcq_graph(experiment_method=args.experiment_method, ablate_judges=args.ablate_judges)
 
     # ── 3. Config ─────────────────────────────────────────────────────────
     num_qa_pairs = int(os.getenv("NUM_QA_PAIRS", "5000"))
