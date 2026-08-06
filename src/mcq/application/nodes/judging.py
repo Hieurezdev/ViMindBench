@@ -13,6 +13,18 @@ from ..prompts import a04_evidence_judge, a05_single_answer_judge, a06_safety_bi
 
 HAN_CHARACTER = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 logger = logging.getLogger("mcq.judging")
+SURFACE_CUE_TYPES = {"length", "absolute_wording", "grammar"}
+ABSOLUTE_OPTION_WORDING = re.compile(
+    r"\b(hoàn\s+toàn|tuyệt\s+đối|luôn\s+luôn|không\s+bao\s+giờ|duy\s+nhất|"
+    r"chắc\s+chắn|triệt\s+để|tất\s+cả)\b",
+    re.IGNORECASE,
+)
+META_OPTION_WORDING = re.compile(
+    r"\b(tất\s+cả\s+(?:các\s+)?đáp\s+án\s+(?:trên|đúng)|"
+    r"cả\s+[abcd]\s+(?:và|lẫn)\s+[abcd]|"
+    r"[abcd]\s+(?:và|lẫn)\s+[abcd]\s+(?:đều\s+)?đúng)\b",
+    re.IGNORECASE,
+)
 
 
 def _contains_han_script(value: Any) -> bool:
@@ -174,6 +186,13 @@ def _adversarial_solver_report(state: MCQState) -> Dict[str, Any]:
             and isinstance(cue_evidence, str)
             and bool(cue_evidence.strip())
         )
+        blocking_surface_cue = (
+            selected_option == actual_answer
+            and confidence == "high"
+            and is_hard
+            and concrete_cue
+            and cue_type in SURFACE_CUE_TYPES
+        )
         if selected_option == actual_answer and confidence == "high" and is_hard and concrete_cue:
             passed = False
             issues.append("adversarial:spurious_cues_found")
@@ -182,7 +201,10 @@ def _adversarial_solver_report(state: MCQState) -> Dict[str, Any]:
         return {
             "passed": passed,
             "issues": issues,
-            "feedback": feedback
+            "feedback": feedback,
+            "surface_cue_type": cue_type,
+            "surface_cue_evidence": cue_evidence,
+            "blocking_surface_cue": blocking_surface_cue,
         }
     except Exception as exc:
         return {
@@ -245,6 +267,25 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
             )
         ):
             errors.append("incomplete_distractor_analysis")
+    if valid_options_mapping and all(
+        isinstance(text, str) and text.strip() for text in options.values()
+    ):
+        option_texts = list(options.values())
+        if any(META_OPTION_WORDING.search(text) for text in option_texts):
+            errors.append("surface_cue:meta_option")
+        if any(ABSOLUTE_OPTION_WORDING.search(text) for text in option_texts):
+            errors.append("surface_cue:absolute_wording")
+        word_counts = [len(re.findall(r"\w+", text, re.UNICODE)) for text in option_texts]
+        max_gap = int(
+            os.getenv(
+                "A07_HARD_MAX_OPTION_WORD_GAP"
+                if state.get("blueprint", {}).get("difficulty") == "hard"
+                else "A07_MAX_OPTION_WORD_GAP",
+                "5" if state.get("blueprint", {}).get("difficulty") == "hard" else "8",
+            )
+        )
+        if max(word_counts) - min(word_counts) > max_gap:
+            errors.append("surface_cue:option_length_imbalance")
     language_fields = {
         key: state.get("mcq", {}).get(key)
         for key in ("question", "options", "rationale_short", "distractor_analysis", "audit_steps")
@@ -272,13 +313,18 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     ).lower() in {"1", "true", "yes"}
     for judge, report in reports.items():
         if not report.get("passed", False):
-            # A07 is a red-team signal by default. It often flags the very
-            # evidence-based distinction that A05 requires for a valid MCQ.
-            # Keep its full report in the audit trail, but require an explicit
-            # opt-in before it can quarantine an otherwise verified item.
-            if judge == "adversarial_solver" and not adversarial_is_blocking:
+            if judge == "adversarial_solver":
+                # Block only verifiable surface cues. Semantic differences such
+                # as a uniquely correct qualification belong to A04/A05 and
+                # must not invalidate a single-best-answer item. The opt-in
+                # switch preserves the former strict red-team behaviour.
+                if report.get("blocking_surface_cue") or adversarial_is_blocking:
+                    errors.extend(
+                        f"{judge}:{issue}" for issue in report.get("issues", ["failed"])
+                    )
+                    continue
                 logger.info(
-                    "A07 adversarial finding retained as warning, not blocking: %s",
+                    "A07 finding retained as warning (not a verifiable surface cue): %s",
                     report.get("issues", ["failed"]),
                 )
                 continue

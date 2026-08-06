@@ -752,6 +752,19 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("adversarial_solver:adversarial:spurious_cues_found", result["quarantine_reason"])
 
+    def test_quality_gate_blocks_deterministic_surface_cues(self) -> None:
+        meta = passing_state()
+        meta["mcq"]["options"]["C"] = "Tất cả các đáp án trên đều đúng"
+        self.assertIn("surface_cue:meta_option", quality_gate_node(meta)["quarantine_reason"])
+
+        absolute = passing_state()
+        absolute["mcq"]["options"]["B"] = "Luôn luôn đúng trong mọi trường hợp"
+        self.assertIn("surface_cue:absolute_wording", quality_gate_node(absolute)["quarantine_reason"])
+
+        length = passing_state()
+        length["mcq"]["options"]["A"] = "một " * 20
+        self.assertIn("surface_cue:option_length_imbalance", quality_gate_node(length)["quarantine_reason"])
+
     def test_quality_gate_requires_at_most_the_difficulty_limit_citations(self) -> None:
         state = passing_state()
         state["blueprint"]["difficulty"] = "medium"
