@@ -89,6 +89,14 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
         summary=anchor["summary"],
         playbook=state.get("playbook", ""),
     )
+    planning_feedback = state.get("planning_feedback", [])
+    if planning_feedback:
+        prompt += (
+            "\n\nA previous blueprint/evidence pairing failed validation. Create a NEW "
+            "blueprint whose topic, subtopic, skill, and retrieval_query are mutually "
+            "aligned. Do not repeat the failure pattern:\n"
+            f"{planning_feedback[-3:]}"
+        )
     try:
         blueprint = request_json(
             prompt,
@@ -152,10 +160,16 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]
     blueprint["min_evidence_refs"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["min_evidence_refs"]
     blueprint["num_options"] = 4
-    blueprint["requires_emobench"] = level == "emotion"
-    blueprint["emobench"] = normalize_blueprint_emobench(blueprint.get("emobench"), enabled=level == "emotion")
+    # An emotion curriculum item is not automatically an EmoBench item. EU/EA
+    # needs a person-centred emotional vignette; forcing the rubric on a theory
+    # question creates systematic false quarantines.
+    requires_emobench = level == "emotion" and blueprint.get("requires_emobench") is True
+    blueprint["requires_emobench"] = requires_emobench
+    blueprint["emobench"] = normalize_blueprint_emobench(
+        blueprint.get("emobench"), enabled=requires_emobench
+    )
     blueprint["playbook_bullet_ids"] = blueprint.get("playbook_bullet_ids", [])
-    return {"blueprint": blueprint}
+    return {"blueprint": blueprint, "planning_feedback": []}
 
 
 def context_retriever_node(state: MCQState) -> Dict[str, Any]:

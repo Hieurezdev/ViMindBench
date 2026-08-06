@@ -475,6 +475,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `TIER1_MONGO_TEXT_INDEX` | `atlas_index` | Atlas text-search fallback index for Tier 1. |
 | `TIER1_RETRIEVAL_K` | `2` | Fallback Tier 1 depth for generic calls. A02 uses easy=2, medium=4, hard=10 Tier 1 candidates before Tier 2 expansion. |
 | `TIER1_QUERY_CONTEXT_CHARS` | `900` | Maximum text per Tier 1 chunk appended to the Tier 2 query. |
+| `A07_ADVERSARIAL_BLOCKING` | `false` | Treat A07 red-team findings as quarantine-blocking. Default `false`: retain them in audit logs as warnings because A07 may flag a legitimate evidence-based distinction. |
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat completion endpoint. |
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
 | `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by A01 planner and A03 generator. |

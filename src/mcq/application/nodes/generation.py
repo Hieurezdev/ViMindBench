@@ -230,7 +230,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
 
 def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
-    """Carry only failed judge findings into the next bounded A03 attempt."""
+    """Route item-local fixes to A03 and alignment failures to A01/A02."""
     feedback = []
     for judge, report in state.get("judge_reports", {}).items():
         if not report.get("passed", False):
@@ -241,4 +241,19 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
                     "feedback": report.get("feedback", ""),
                 }
             )
-    return {"judge_feedback": feedback, "dsm5_safety_docs": []}
+    issues = [
+        str(issue)
+        for item in feedback
+        for issue in item.get("issues", [])
+    ]
+    needs_replan = any(
+        marker in issue
+        for issue in issues
+        for marker in ("blueprint_mismatch", "unsupported_option_claims", "unsupported_key")
+    )
+    return {
+        "judge_feedback": feedback,
+        "planning_feedback": feedback if needs_replan else [],
+        "regeneration_route": "replan" if needs_replan else "generate",
+        "dsm5_safety_docs": [],
+    }

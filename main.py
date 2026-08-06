@@ -415,6 +415,8 @@ def main():
         "ei_safety_bias_report": {},
         "adversarial_solver_report": {},
         "judge_feedback": [],
+        "planning_feedback": [],
+        "regeneration_route": "generate",
         "verdict": "",
         "quarantine_reason": [],
         "verified_outputs": [],

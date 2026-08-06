@@ -58,6 +58,8 @@ class MCQState(TypedDict, total=False):
     ei_safety_bias_report: Dict[str, Any]
     adversarial_solver_report: Dict[str, Any]
     judge_feedback: List[Dict[str, Any]]
+    planning_feedback: List[Dict[str, Any]]
+    regeneration_route: str
     verdict: str
     quarantine_reason: List[str]
     verified_outputs: List[Dict[str, Any]]

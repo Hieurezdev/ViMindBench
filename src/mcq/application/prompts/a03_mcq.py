@@ -32,6 +32,12 @@ Every factual detail in the question stem, vignette, or illustrative example
 MUST come only from `stem_safe_claims` (or be neutral, non-factual framing).
 Never invent a person characteristic, timeline, symptom, event, mechanism,
 outcome, or cultural detail merely to make the question sound realistic.
+If blueprint.emobench.enabled is true, write a person-centred emotional
+vignette. It must identify whose perspective is being considered and contain
+an evidence-supported emotion or emotional cause; the correct answer must
+require perspective-taking rather than factual recall alone. If the blueprint
+does not enable EmoBench, do not pretend that a general theory question is an
+emotional-intelligence scenario.
 You MUST cite {blueprint.get("min_evidence_refs", 1)} to {blueprint.get("evidence_limit", 4)} retrieved chunk_id values in evidence_refs. Each cited
 chunk must directly support the keyed option or a factual stem detail. Include
 every chunk that supports a factual detail used in the stem, vignette, or

@@ -147,7 +147,11 @@ def create_mcq_graph(experiment_method: str = "full"):
                 route_after_judge_baseline,
                 {"prepare_regeneration": "prepare_regeneration", "collect": "collect"},
             )
-        graph.add_edge("prepare_regeneration", "generate")
+        graph.add_conditional_edges(
+            "prepare_regeneration",
+            route_after_prepare_regeneration,
+            {"plan": "plan", "generate": "generate"},
+        )
     graph.add_conditional_edges(
         "flush_outputs",
         lambda state: (
@@ -161,7 +165,7 @@ def create_mcq_graph(experiment_method: str = "full"):
 
 
 def route_after_quality_gate(state: MCQState) -> str:
-    """Retry the same blueprint/evidence before quarantining a failed item."""
+    """Retry within a bounded budget; preparation selects the repair scope."""
     if state.get("verdict") == "verified":
         logger.info("[quality_gate] route=reflect | verified")
         return "reflect"
@@ -177,6 +181,13 @@ def route_after_quality_gate(state: MCQState) -> str:
         retries_used,
         state.get("max_generation_retries", 2),
     )
+    return route
+
+
+def route_after_prepare_regeneration(state: MCQState) -> str:
+    """Re-plan/retrieve only for evidence or blueprint alignment failures."""
+    route = "plan" if state.get("regeneration_route") == "replan" else "generate"
+    logger.info("[prepare_regeneration] route=%s", route)
     return route
 
 

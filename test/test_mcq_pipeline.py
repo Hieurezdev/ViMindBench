@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from main import load_next_record_id, parse_levels
 from src.mcq.application.nodes.collection import collect_node
-from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, mcq_generator_node
+from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, mcq_generator_node, prepare_regeneration_node
 from src.mcq.application.nodes import generation
 from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, consolidate_judge_reports_node, quality_gate_node
 from src.mcq.application.nodes import judging
@@ -235,6 +235,24 @@ class CurriculumLevelTests(unittest.TestCase):
         with patch.object(planning, "request_json", return_value=response):
             result = curriculum_planner_node(state)
         self.assertEqual(result["blueprint"]["playbook_bullet_ids"], ["evi-00002"])
+
+    def test_theoretical_emotion_item_is_not_forced_into_emobench(self) -> None:
+        state = {
+            "anchor": {"title": "Cảm xúc", "summary": "Kiến thức lý thuyết."},
+            "curriculum_levels": ["emotion"],
+            "curriculum_difficulties": ["easy"],
+            "iteration_count": 0,
+            "playbook": "",
+        }
+        response = {
+            "topic": "Cảm xúc", "subtopic": "Khái niệm", "skill": "nhận diện",
+            "retrieval_query": "khái niệm cảm xúc", "clinical_guardrail": "Không chẩn đoán.",
+            "playbook_bullet_ids": [], "requires_emobench": False, "emobench": None,
+        }
+        with patch.object(planning, "request_json", return_value=response):
+            result = curriculum_planner_node(state)
+        self.assertFalse(result["blueprint"]["requires_emobench"])
+        self.assertEqual(result["blueprint"]["emobench"], {"enabled": False})
 
     def test_retriever_falls_back_to_anchor_when_query_is_missing(self) -> None:
         requested_queries = []
@@ -713,14 +731,24 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("invalid_options", result["quarantine_reason"])
 
-    def test_quality_gate_quarantines_hard_item_with_spurious_cues(self) -> None:
+    def test_quality_gate_keeps_adversarial_cue_as_warning_by_default(self) -> None:
         state = passing_state()
-        state["blueprint"]["difficulty"] = "hard"
         state["judge_reports"]["adversarial_solver"] = {
             "passed": False,
             "issues": ["adversarial:spurious_cues_found"],
         }
         result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "verified")
+        self.assertNotIn("adversarial_solver:adversarial:spurious_cues_found", result["quarantine_reason"])
+
+    def test_quality_gate_can_block_adversarial_cue_when_enabled(self) -> None:
+        state = passing_state()
+        state["judge_reports"]["adversarial_solver"] = {
+            "passed": False,
+            "issues": ["adversarial:spurious_cues_found"],
+        }
+        with patch.dict(os.environ, {"A07_ADVERSARIAL_BLOCKING": "true"}):
+            result = quality_gate_node(state)
         self.assertEqual(result["verdict"], "quarantine")
         self.assertIn("adversarial_solver:adversarial:spurious_cues_found", result["quarantine_reason"])
 
@@ -930,6 +958,28 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
+    def test_blueprint_or_evidence_failure_requests_replanning(self) -> None:
+        result = prepare_regeneration_node(
+            {
+                "judge_reports": {
+                    "single_answer": {"passed": False, "issues": ["blueprint_mismatch"], "feedback": "Topic does not match evidence."}
+                }
+            }
+        )
+        self.assertEqual(result["regeneration_route"], "replan")
+        self.assertEqual(len(result["planning_feedback"]), 1)
+
+    def test_distractor_failure_stays_on_generation_repair(self) -> None:
+        result = prepare_regeneration_node(
+            {
+                "judge_reports": {
+                    "single_answer": {"passed": False, "issues": ["easy_distractors"], "feedback": "Make a near-miss distractor."}
+                }
+            }
+        )
+        self.assertEqual(result["regeneration_route"], "generate")
+        self.assertEqual(result["planning_feedback"], [])
+
     def test_judge_baseline_routes_to_collect_without_reflection(self) -> None:
         self.assertEqual(
             route_after_judge_baseline(

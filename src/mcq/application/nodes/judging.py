@@ -1,6 +1,8 @@
 """A04–A07 quality-judging nodes."""
 
+import os
 import re
+import logging
 from typing import Any, Dict, Callable, Set
 from ...domain import MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import evidence_refs
@@ -10,6 +12,7 @@ from ..failure_memory import prompt_context, retrieve_similar_failures
 from ..prompts import a04_evidence_judge, a05_single_answer_judge, a06_safety_bias_judge, a07_adversarial_solver
 
 HAN_CHARACTER = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
+logger = logging.getLogger("mcq.judging")
 
 
 def _contains_han_script(value: Any) -> bool:
@@ -264,8 +267,21 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
         or not cited.issubset(available)
     ):
         errors.append("invalid_evidence_refs")
+    adversarial_is_blocking = os.getenv(
+        "A07_ADVERSARIAL_BLOCKING", "false"
+    ).lower() in {"1", "true", "yes"}
     for judge, report in reports.items():
         if not report.get("passed", False):
+            # A07 is a red-team signal by default. It often flags the very
+            # evidence-based distinction that A05 requires for a valid MCQ.
+            # Keep its full report in the audit trail, but require an explicit
+            # opt-in before it can quarantine an otherwise verified item.
+            if judge == "adversarial_solver" and not adversarial_is_blocking:
+                logger.info(
+                    "A07 adversarial finding retained as warning, not blocking: %s",
+                    report.get("issues", ["failed"]),
+                )
+                continue
             errors.extend(
                 f"{judge}:{issue}" for issue in report.get("issues", ["failed"])
             )

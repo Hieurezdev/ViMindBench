@@ -74,9 +74,14 @@ Plan exactly one item with these fixed settings:
 
 For clinical_scenario, set a safety guardrail for educational/supportive next
 steps only; never diagnosis, medication, prognosis, or emergency advice.
-For emotion, choose exactly one EmoBench task: EU (identify an emotion/cause)
-or EA (select an effective response/action). For every other level, emobench
-must be null. Choose relevant existing playbook IDs, or [] if none apply.
+For emotion, set requires_emobench=true and choose exactly one EmoBench task
+(EU: identify an emotion/cause; EA: select an effective response/action) ONLY
+when the planned item will be a person-centred emotional vignette with an
+identifiable perspective, emotion, and contextual cause. When the item is
+theoretical or the evidence cannot support such a vignette, set
+requires_emobench=false and emobench=null. For every other level,
+requires_emobench=false and emobench must be null. Choose relevant existing
+playbook IDs, or [] if none apply.
 
 OUTPUT CONTRACT — return JSON only, with exactly these keys and no others:
 {{
