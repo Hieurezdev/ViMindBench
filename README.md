@@ -228,6 +228,13 @@ A09 chỉ gọi endpoint insight khi một lỗi hoặc chiến lược mới đ
 Nó không gọi model cho từng MCQ. Đặt `INSIGHT_MODEL_NAME` đúng bằng ID trả về từ
 `curl http://localhost:8001/v1/models`; không đoán tên model từ Hugging Face.
 
+Sau khi thêm rule, A09 dùng embedding retrieval để so sánh các bullet trong
+cùng section. Nếu một cặp vượt `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD`, A09 gửi
+cả ID, nội dung và bộ đếm của chúng tới Insight model để viết lại thành một
+rule duy nhất. Hai ID được giữ dưới dạng ID ghép, ví dụ
+`err-00003+err-00007`; `helpful` và `harmful` là tổng của hai bullet gốc. Nếu
+embedding hoặc Insight model lỗi, A09 bỏ qua merge để không làm mất rule.
+
 ```bash
 uv run python main.py \
   --model_local \
@@ -499,6 +506,9 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
 | `PLAYBOOK_SIMILARITY_THRESHOLD` | `0.8` | Cosine-similarity threshold for skipping a duplicate A09 rule in `COMMON MISTAKES TO AVOID`. Uses the configured retrieval embedder. |
+| `PLAYBOOK_BULLET_MERGE_ENABLED` | `true` | After A09 adds a rule, compare same-section bullets and merge semantically overlapping pairs. |
+| `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD` | `0.88` | Cosine similarity required to propose a bullet merge. |
+| `PLAYBOOK_MERGE_MAX_PAIRS` | `1` | Maximum similar bullet pairs merged by A09 during one curation pass. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |

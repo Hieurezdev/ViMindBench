@@ -23,7 +23,11 @@ from src.mcq.application.nodes.planning import context_retriever_node, curriculu
 from src.mcq.application.nodes import planning
 from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
-from src.mcq.application.nodes.learning import _update_counters, playbook_curator_node
+from src.mcq.application.nodes.learning import (
+    _merge_similar_bullets,
+    _update_counters,
+    playbook_curator_node,
+)
 from src.mcq.application.nodes import learning
 from src.mcq.application.prompts import a01_curriculum, a03_mcq, a05_single_answer_judge
 from src.mcq.application.failure_memory import (
@@ -844,6 +848,41 @@ class QualityAndPlaybookTests(unittest.TestCase):
             result = playbook_curator_node(state)
         self.assertEqual(result["playbook_delta"], [])
         self.assertNotIn("Check answer ambiguity", result["playbook"])
+
+    def test_curator_merges_similar_bullets_and_combines_outcome_counters(self) -> None:
+        playbook = (
+            "## EVIDENCE & GROUNDING\n"
+            "[evi-00001] helpful=2 harmful=1 :: Require direct evidence support for every keyed claim.\n"
+            "[evi-00002] helpful=3 harmful=4 :: Ensure each answer-key claim is directly supported by evidence.\n\n"
+            "## COMMON MISTAKES TO AVOID\n\n"
+            "## SUCCESSFUL STRATEGIES TO REPLICATE"
+        )
+        retriever = SimpleNamespace(generate_embedding=lambda _: [1.0, 0.0])
+        merged_rule = "Require direct evidence support for every claim used to justify the keyed answer."
+        with patch.dict(
+            os.environ,
+            {
+                "PLAYBOOK_BULLET_MERGE_ENABLED": "true",
+                "PLAYBOOK_MERGE_SIMILARITY_THRESHOLD": "0.88",
+                "PLAYBOOK_MERGE_MAX_PAIRS": "1",
+            },
+        ), patch.object(
+            builtins, "RETRIEVER", retriever, create=True
+        ), patch.object(
+            learning, "request_insight_json", return_value={"rule": merged_rule}
+        ) as insight:
+            result, delta = _merge_similar_bullets(playbook)
+
+        self.assertEqual(insight.call_count, 1)
+        self.assertNotIn("[evi-00001] helpful=2 harmful=1", result)
+        self.assertNotIn("[evi-00002] helpful=3 harmful=4", result)
+        self.assertIn(
+            "[evi-00001+evi-00002] helpful=5 harmful=5 :: " + merged_rule,
+            result,
+        )
+        self.assertEqual(len(delta), 1)
+        self.assertEqual(delta[0]["op"], "MERGE")
+        self.assertEqual(delta[0]["source_bullet_ids"], ["evi-00001", "evi-00002"])
 
 
 class JudgeFailureMemoryTests(unittest.TestCase):

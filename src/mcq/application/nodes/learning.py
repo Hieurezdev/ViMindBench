@@ -39,6 +39,28 @@ def _section_bullet_contents(playbook: str, section: str) -> List[str]:
     return contents
 
 
+def _section_bullets(playbook: str, section: str) -> List[Dict[str, Any]]:
+    """Parse ACE bullets with IDs and outcome counters from one section."""
+    current_section = ""
+    bullets: List[Dict[str, Any]] = []
+    for line in playbook.splitlines():
+        if line.startswith("## "):
+            current_section = line[3:].strip()
+            continue
+        match = ACE_BULLET.match(line)
+        if match and current_section == section:
+            bullet_id, helpful, harmful, content = match.groups()
+            bullets.append(
+                {
+                    "bullet_id": bullet_id,
+                    "helpful": int(helpful),
+                    "harmful": int(harmful),
+                    "content": content,
+                }
+            )
+    return bullets
+
+
 def _cosine_similarity(left: List[float], right: List[float]) -> float | None:
     """Return cosine similarity, or None for unusable embedding vectors."""
     if not left or len(left) != len(right):
@@ -100,6 +122,139 @@ def _update_counters(playbook: str, bullet_ids: List[str], tag: str) -> str:
             line = f"[{bullet_id}] helpful={int(helpful) + (tag == 'helpful')} harmful={int(harmful) + (tag == 'harmful')} :: {content}"
         lines.append(line)
     return "\n".join(lines)
+
+
+def _replace_bullets_with_merge(
+    playbook: str,
+    *,
+    section: str,
+    merged_bullet: Dict[str, Any],
+    removed_ids: set[str],
+) -> str:
+    """Atomically replace a same-section bullet group with one composite ID."""
+    current_section = ""
+    inserted = False
+    lines: List[str] = []
+    merged_line = (
+        f"[{merged_bullet['bullet_id']}] helpful={merged_bullet['helpful']} "
+        f"harmful={merged_bullet['harmful']} :: {merged_bullet['content']}"
+    )
+    for line in playbook.splitlines():
+        if line.startswith("## "):
+            current_section = line[3:].strip()
+            lines.append(line)
+            continue
+        match = ACE_BULLET.match(line)
+        if (
+            current_section == section
+            and match
+            and match.group(1) in removed_ids
+        ):
+            if not inserted:
+                lines.append(merged_line)
+                inserted = True
+            continue
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _merge_similar_bullets(
+    playbook: str,
+) -> tuple[str, List[Dict[str, Any]]]:
+    """Merge nearby ACE bullets using embeddings and the A09 insight model.
+
+    Merging occurs only after A09 added a new rule. This keeps the extra
+    embedding/LLM work bounded while eliminating newly introduced redundancy.
+    The new composite ID retains traceability, and its helpful/harmful counts
+    are the sums of every merged source bullet.
+    """
+    if os.getenv("PLAYBOOK_BULLET_MERGE_ENABLED", "true").lower() not in {"1", "true", "yes"}:
+        return playbook, []
+    retriever = getattr(builtins, "RETRIEVER", None)
+    embed = getattr(retriever, "generate_embedding", None)
+    if not callable(embed):
+        logger.warning("A09 skipped similar-bullet merge: embedding retriever unavailable")
+        return playbook, []
+
+    try:
+        threshold = float(os.getenv("PLAYBOOK_MERGE_SIMILARITY_THRESHOLD", "0.88"))
+        max_pairs = max(1, int(os.getenv("PLAYBOOK_MERGE_MAX_PAIRS", "1")))
+    except ValueError:
+        logger.warning("A09 skipped similar-bullet merge: invalid merge configuration")
+        return playbook, []
+
+    candidates: List[tuple[float, str, Dict[str, Any], Dict[str, Any]]] = []
+    for section in SECTION_SLUGS:
+        bullets = _section_bullets(playbook, section)
+        try:
+            vectors = {bullet["bullet_id"]: embed(bullet["content"]) for bullet in bullets}
+        except Exception as exc:
+            logger.warning("A09 skipped similar-bullet merge after embedding error: %s", exc)
+            return playbook, []
+        for left_index, left in enumerate(bullets):
+            for right in bullets[left_index + 1 :]:
+                similarity = _cosine_similarity(
+                    vectors[left["bullet_id"]], vectors[right["bullet_id"]]
+                )
+                if similarity is not None and similarity >= threshold:
+                    candidates.append((similarity, section, left, right))
+
+    merged_delta: List[Dict[str, Any]] = []
+    used_ids: set[str] = set()
+    for similarity, section, left, right in sorted(candidates, reverse=True, key=lambda item: item[0]):
+        if len(merged_delta) >= max_pairs:
+            break
+        source_ids = [left["bullet_id"], right["bullet_id"]]
+        if any(bullet_id in used_ids for bullet_id in source_ids):
+            continue
+        try:
+            response = request_insight_json(
+                a09_notebook.render_merge(
+                    section=section,
+                    bullets=[left, right],
+                )
+            )
+            content = response.get("rule")
+        except Exception as exc:
+            logger.warning("A09 skipped similar-bullet merge after insight error: %s", exc)
+            continue
+        if not isinstance(content, str) or not 20 <= len(content.strip()) <= 500:
+            logger.warning("A09 skipped similar-bullet merge: insight returned no usable rule")
+            continue
+
+        merged = {
+            "bullet_id": "+".join(source_ids),
+            "helpful": left["helpful"] + right["helpful"],
+            "harmful": left["harmful"] + right["harmful"],
+            "content": content.strip(),
+        }
+        playbook = _replace_bullets_with_merge(
+            playbook,
+            section=section,
+            merged_bullet=merged,
+            removed_ids=set(source_ids),
+        )
+        used_ids.update(source_ids)
+        merged_delta.append(
+            {
+                "op": "MERGE",
+                "section": section,
+                "source_bullet_ids": source_ids,
+                "bullet_id": merged["bullet_id"],
+                "helpful": merged["helpful"],
+                "harmful": merged["harmful"],
+                "content": merged["content"],
+                "similarity": round(similarity, 4),
+            }
+        )
+        logger.info(
+            "A09 merged similar bullets | section=%s source_ids=%s merged_id=%s similarity=%.3f",
+            section,
+            source_ids,
+            merged["bullet_id"],
+            similarity,
+        )
+    return playbook, merged_delta
 
 
 def reflector_node(state: MCQState) -> Dict[str, Any]:
@@ -285,4 +440,7 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
         )
     if recurring and not delta:
         logger.info("A09 no playbook update: every recurring issue was skipped")
+    if delta:
+        playbook, merge_delta = _merge_similar_bullets(playbook)
+        delta.extend(merge_delta)
     return {"playbook": playbook, "playbook_delta": delta}
