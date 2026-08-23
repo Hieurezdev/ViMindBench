@@ -829,7 +829,7 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(request.call_count, 1)
         self.assertIn("Require every answer key", result["playbook"])
 
-    def test_curator_skips_embedding_duplicate_common_mistake(self) -> None:
+    def test_curator_updates_the_bullet_selected_for_the_current_item(self) -> None:
         state = {
             "playbook": (
                 "## COMMON MISTAKES TO AVOID\n"
@@ -837,17 +837,31 @@ class QualityAndPlaybookTests(unittest.TestCase):
                 "## OTHERS"
             ),
             "failure_memory": [{"issue": "single_answer:overlap"}] * 3,
+            "blueprint": {"playbook_bullet_ids": ["err-00001"]},
         }
-        retriever = SimpleNamespace(generate_embedding=lambda _: [1.0, 0.0])
+        updated_rule = (
+            "Require every distractor to be demonstrably less appropriate than the keyed "
+            "option on one evidence-checkable distinction."
+        )
         with patch.dict(
             os.environ,
-            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "PLAYBOOK_SIMILARITY_THRESHOLD": "0.8"},
-        ), patch.object(learning, "_notebook_rule", return_value="Check answer ambiguity before generation."), patch.object(
-            builtins, "RETRIEVER", retriever, create=True
+            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "INSIGHT_OPENAI_BASE_URL": "http://insight.test/v1"},
+        ), patch.object(
+            learning, "_notebook_rule", return_value="Check answer ambiguity before generation."
+        ), patch.object(
+            learning,
+            "request_insight_json",
+            return_value={
+                "action": "UPDATE",
+                "bullet_id": "err-00001",
+                "rule": updated_rule,
+            },
         ):
             result = playbook_curator_node(state)
-        self.assertEqual(result["playbook_delta"], [])
-        self.assertNotIn("Check answer ambiguity", result["playbook"])
+        self.assertEqual(result["playbook_delta"][0]["op"], "UPDATE")
+        self.assertTrue(result["playbook_delta"][0]["selected_for_item"])
+        self.assertIn(updated_rule, result["playbook"])
+        self.assertNotIn("Avoid ambiguous answer keys.", result["playbook"])
 
     def test_curator_merges_similar_bullets_and_combines_outcome_counters(self) -> None:
         playbook = (
@@ -865,11 +879,12 @@ class QualityAndPlaybookTests(unittest.TestCase):
                 "PLAYBOOK_BULLET_MERGE_ENABLED": "true",
                 "PLAYBOOK_MERGE_SIMILARITY_THRESHOLD": "0.88",
                 "PLAYBOOK_MERGE_MAX_PAIRS": "1",
+                "INSIGHT_OPENAI_BASE_URL": "http://insight.test/v1",
             },
         ), patch.object(
             builtins, "RETRIEVER", retriever, create=True
         ), patch.object(
-            learning, "request_insight_json", return_value={"rule": merged_rule}
+            learning, "request_insight_json", return_value={"merge": True, "rule": merged_rule}
         ) as insight:
             result, delta = _merge_similar_bullets(playbook)
 
@@ -883,6 +898,29 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(len(delta), 1)
         self.assertEqual(delta[0]["op"], "MERGE")
         self.assertEqual(delta[0]["source_bullet_ids"], ["evi-00001", "evi-00002"])
+
+    def test_curator_keeps_embedding_similar_bullets_when_llm_rejects_merge(self) -> None:
+        playbook = (
+            "## EVIDENCE & GROUNDING\n"
+            "[evi-00001] helpful=2 harmful=1 :: Require direct evidence support for every keyed claim.\n"
+            "[evi-00002] helpful=3 harmful=4 :: Ensure cited evidence also supports factual stem details."
+        )
+        retriever = SimpleNamespace(generate_embedding=lambda _: [1.0, 0.0])
+        with patch.dict(
+            os.environ,
+            {
+                "PLAYBOOK_BULLET_MERGE_ENABLED": "true",
+                "PLAYBOOK_MERGE_SIMILARITY_THRESHOLD": "0.88",
+                "INSIGHT_OPENAI_BASE_URL": "http://insight.test/v1",
+            },
+        ), patch.object(
+            builtins, "RETRIEVER", retriever, create=True
+        ), patch.object(
+            learning, "request_insight_json", return_value={"merge": False, "rule": ""}
+        ):
+            result, delta = _merge_similar_bullets(playbook)
+        self.assertEqual(result, playbook)
+        self.assertEqual(delta, [])
 
 
 class JudgeFailureMemoryTests(unittest.TestCase):

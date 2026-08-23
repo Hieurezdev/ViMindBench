@@ -223,17 +223,25 @@ tự dùng endpoint/model chính.
 
 ### 6. A09 Notebook dùng model ở cổng 8001
 
-A09 chỉ gọi endpoint insight khi một lỗi hoặc chiến lược mới đạt
-`PLAYBOOK_REPEAT_THRESHOLD` (mặc định `3`) và cần thêm rule mới vào playbook.
+A09 chỉ gọi endpoint insight khi một lỗi hoặc chiến lược đạt
+`PLAYBOOK_REPEAT_THRESHOLD` (mặc định `3`) và cần curate playbook (`ADD`,
+`UPDATE`, `KEEP`, hoặc quyết định `MERGE`).
 Nó không gọi model cho từng MCQ. Đặt `INSIGHT_MODEL_NAME` đúng bằng ID trả về từ
 `curl http://localhost:8001/v1/models`; không đoán tên model từ Hugging Face.
 
-Sau khi thêm rule, A09 dùng embedding retrieval để so sánh các bullet trong
-cùng section. Nếu một cặp vượt `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD`, A09 gửi
-cả ID, nội dung và bộ đếm của chúng tới Insight model để viết lại thành một
-rule duy nhất. Hai ID được giữ dưới dạng ID ghép, ví dụ
+A01 chọn các `playbook_bullet_ids` từ toàn bộ playbook cho mỗi item. Sau khi
+item hoàn tất, A09 ưu tiên các ID đã được chọn này để Insight model quyết định
+`ADD`, `UPDATE`, hoặc `KEEP`: một `UPDATE` chỉ sửa nội dung của bullet được
+dùng nếu rule cũ mơ hồ hoặc thiếu ràng buộc; ID cùng các bộ đếm `helpful` và
+`harmful` được giữ nguyên. Khi item không chọn được ID hợp lệ, embedding mới là
+fallback để tìm một ứng viên UPDATE gần nhất.
+
+Với `MERGE`, embedding chỉ tìm cặp bullet cùng section có thể trùng lặp. A09
+gửi cả ID, nội dung, bộ đếm và similarity tới Insight model; chỉ khi model trả
+về `merge=true` cặp đó mới được gộp. Hai ID được giữ dưới dạng ID ghép, ví dụ
 `err-00003+err-00007`; `helpful` và `harmful` là tổng của hai bullet gốc. Nếu
-embedding hoặc Insight model lỗi, A09 bỏ qua merge để không làm mất rule.
+embedding hoặc Insight model lỗi, A09 giữ nguyên các rule để không mất kiến
+thức.
 
 ```bash
 uv run python main.py \
@@ -505,9 +513,9 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
-| `PLAYBOOK_SIMILARITY_THRESHOLD` | `0.8` | Cosine-similarity threshold for skipping a duplicate A09 rule in `COMMON MISTAKES TO AVOID`. Uses the configured retrieval embedder. |
-| `PLAYBOOK_BULLET_MERGE_ENABLED` | `true` | After A09 adds a rule, compare same-section bullets and merge semantically overlapping pairs. |
-| `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD` | `0.88` | Cosine similarity required to propose a bullet merge. |
+| `PLAYBOOK_UPDATE_SIMILARITY_THRESHOLD` | `0.72` | Fallback cosine threshold for finding an UPDATE candidate when A01 selected no valid `playbook_bullet_ids`; selected IDs are always preferred. |
+| `PLAYBOOK_BULLET_MERGE_ENABLED` | `true` | Let A09 consider embedding-similar same-section bullet pairs for an LLM-approved MERGE. |
+| `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD` | `0.88` | Cosine similarity required to send a pair to the Insight LLM for a merge decision. |
 | `PLAYBOOK_MERGE_MAX_PAIRS` | `1` | Maximum similar bullet pairs merged by A09 during one curation pass. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |

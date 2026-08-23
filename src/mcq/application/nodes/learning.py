@@ -25,20 +25,6 @@ SECTION_SLUGS = {
 }
 
 
-def _section_bullet_contents(playbook: str, section: str) -> List[str]:
-    """Return ACE bullet text from one Markdown section, without its metadata."""
-    current_section = ""
-    contents = []
-    for line in playbook.splitlines():
-        if line.startswith("## "):
-            current_section = line[3:].strip()
-            continue
-        match = ACE_BULLET.match(line)
-        if match and current_section == section:
-            contents.append(match.group(4))
-    return contents
-
-
 def _section_bullets(playbook: str, section: str) -> List[Dict[str, Any]]:
     """Parse ACE bullets with IDs and outcome counters from one section."""
     current_section = ""
@@ -61,6 +47,32 @@ def _section_bullets(playbook: str, section: str) -> List[Dict[str, Any]]:
     return bullets
 
 
+def _playbook_sections(playbook: str) -> List[str]:
+    """Return every Markdown playbook section in document order."""
+    return list(
+        dict.fromkeys(
+            line[3:].strip()
+            for line in playbook.splitlines()
+            if line.startswith("## ") and line[3:].strip()
+        )
+    )
+
+
+def _bullets_for_ids(playbook: str, bullet_ids: List[str]) -> List[Dict[str, Any]]:
+    """Resolve A01-selected IDs to their full playbook bullets and sections."""
+    if not isinstance(bullet_ids, list):
+        return []
+    wanted = {bullet_id for bullet_id in bullet_ids if isinstance(bullet_id, str)}
+    if not wanted:
+        return []
+    selected: List[Dict[str, Any]] = []
+    for section in _playbook_sections(playbook):
+        for bullet in _section_bullets(playbook, section):
+            if bullet["bullet_id"] in wanted:
+                selected.append({**bullet, "section": section})
+    return selected
+
+
 def _cosine_similarity(left: List[float], right: List[float]) -> float | None:
     """Return cosine similarity, or None for unusable embedding vectors."""
     if not left or len(left) != len(right):
@@ -72,47 +84,6 @@ def _cosine_similarity(left: List[float], right: List[float]) -> float | None:
     return sum(a * b for a, b in zip(left, right)) / (left_norm * right_norm)
 
 
-def _duplicates_common_mistake(playbook: str, content: str) -> bool:
-    """Use the configured retriever embeddings to avoid duplicate error rules.
-
-    The retriever is initialized once by the composition root and shares the
-    embedding model/cache used by retrieval. If it is unavailable (notably in
-    offline tests), preserve the existing curation behaviour instead of making
-    learning fail closed.
-    """
-    existing = _section_bullet_contents(playbook, "COMMON MISTAKES TO AVOID")
-    if not existing:
-        return False
-
-    retriever = getattr(builtins, "RETRIEVER", None)
-    embed = getattr(retriever, "generate_embedding", None)
-    if not callable(embed):
-        logger.warning("Skipping playbook duplicate filter: embedding retriever unavailable")
-        return False
-
-    try:
-        candidate = embed(content)
-        threshold = float(os.getenv("PLAYBOOK_SIMILARITY_THRESHOLD", "0.8"))
-        similarities = [
-            similarity
-            for rule in existing
-            if (similarity := _cosine_similarity(candidate, embed(rule))) is not None
-        ]
-    except Exception as exc:
-        logger.warning("Skipping playbook duplicate filter after embedding error: %s", exc)
-        return False
-
-    highest = max(similarities, default=None)
-    if highest is not None and highest >= threshold:
-        logger.info(
-            "Skipped duplicate common-mistake rule: similarity=%.3f threshold=%.3f",
-            highest,
-            threshold,
-        )
-        return True
-    return False
-
-
 def _update_counters(playbook: str, bullet_ids: List[str], tag: str) -> str:
     lines = []
     for line in playbook.splitlines():
@@ -122,6 +93,89 @@ def _update_counters(playbook: str, bullet_ids: List[str], tag: str) -> str:
             line = f"[{bullet_id}] helpful={int(helpful) + (tag == 'helpful')} harmful={int(harmful) + (tag == 'harmful')} :: {content}"
         lines.append(line)
     return "\n".join(lines)
+
+
+def _replace_bullet_content(
+    playbook: str, *, bullet_id: str, content: str
+) -> str:
+    """Update one bullet's text without changing its ID or outcome counters."""
+    lines = []
+    for line in playbook.splitlines():
+        match = ACE_BULLET.match(line)
+        if match and match.group(1) == bullet_id:
+            _, helpful, harmful, _ = match.groups()
+            line = f"[{bullet_id}] helpful={helpful} harmful={harmful} :: {content}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _find_update_candidate(
+    playbook: str, *, section: str, content: str
+) -> tuple[Dict[str, Any], float] | None:
+    """Find the closest same-section rule for an LLM update decision."""
+    retriever = getattr(builtins, "RETRIEVER", None)
+    embed = getattr(retriever, "generate_embedding", None)
+    if not callable(embed):
+        return None
+    try:
+        threshold = float(os.getenv("PLAYBOOK_UPDATE_SIMILARITY_THRESHOLD", "0.72"))
+        candidate_vector = embed(content)
+        similarities = [
+            (similarity, bullet)
+            for bullet in _section_bullets(playbook, section)
+            if (similarity := _cosine_similarity(candidate_vector, embed(bullet["content"])))
+            is not None
+        ]
+    except (TypeError, ValueError) as exc:
+        logger.warning("A09 skipped update-candidate lookup: %s", exc)
+        return None
+    except Exception as exc:
+        logger.warning("A09 skipped update-candidate lookup after embedding error: %s", exc)
+        return None
+    if not similarities:
+        return None
+    similarity, bullet = max(similarities, key=lambda item: item[0])
+    return ({**bullet, "section": section}, similarity) if similarity >= threshold else None
+
+
+def _decide_add_or_update(
+    *, issue: str, section: str, proposed_rule: str, candidates: List[Dict[str, Any]]
+) -> tuple[str, str | None, str | None]:
+    """Use the insight model to decide ADD, UPDATE, or KEEP for used bullets."""
+    if not os.getenv("INSIGHT_OPENAI_BASE_URL"):
+        # Never overwrite a rule based on embeddings alone. In offline mode,
+        # retain both rules and allow the normal ADD path to preserve knowledge.
+        return "ADD", None, None
+    try:
+        response = request_insight_json(
+            a09_notebook.render_update_decision(
+                issue=issue,
+                section=section,
+                proposed_rule=proposed_rule,
+                selected_bullets=candidates,
+            )
+        )
+    except Exception as exc:
+        logger.warning("A09 update decision failed; preserving both rules: %s", exc)
+        return "ADD", None, None
+    action = response.get("action")
+    rule = response.get("rule")
+    bullet_id = response.get("bullet_id")
+    if action not in {"ADD", "UPDATE", "KEEP"}:
+        logger.warning("A09 update decision returned invalid action; preserving both rules")
+        return "ADD", None, None
+    if action == "UPDATE":
+        candidate_ids = {candidate["bullet_id"] for candidate in candidates}
+        if (
+            isinstance(rule, str)
+            and 20 <= len(rule.strip()) <= 500
+            and isinstance(bullet_id, str)
+            and bullet_id in candidate_ids
+        ):
+            return action, rule.strip(), bullet_id
+        logger.warning("A09 update decision had no usable replacement rule; preserving both rules")
+        return "ADD", None, None
+    return action, None, None
 
 
 def _replace_bullets_with_merge(
@@ -163,12 +217,15 @@ def _merge_similar_bullets(
 ) -> tuple[str, List[Dict[str, Any]]]:
     """Merge nearby ACE bullets using embeddings and the A09 insight model.
 
-    Merging occurs only after A09 added a new rule. This keeps the extra
-    embedding/LLM work bounded while eliminating newly introduced redundancy.
-    The new composite ID retains traceability, and its helpful/harmful counts
+    Embeddings only propose candidates. The A09 insight model must explicitly
+    approve every merge, so two rules are never collapsed on vector similarity
+    alone. The composite ID retains traceability and its helpful/harmful counts
     are the sums of every merged source bullet.
     """
     if os.getenv("PLAYBOOK_BULLET_MERGE_ENABLED", "true").lower() not in {"1", "true", "yes"}:
+        return playbook, []
+    if not os.getenv("INSIGHT_OPENAI_BASE_URL"):
+        logger.info("A09 skipped similar-bullet merge: insight endpoint not configured")
         return playbook, []
     retriever = getattr(builtins, "RETRIEVER", None)
     embed = getattr(retriever, "generate_embedding", None)
@@ -184,7 +241,7 @@ def _merge_similar_bullets(
         return playbook, []
 
     candidates: List[tuple[float, str, Dict[str, Any], Dict[str, Any]]] = []
-    for section in SECTION_SLUGS:
+    for section in _playbook_sections(playbook):
         bullets = _section_bullets(playbook, section)
         try:
             vectors = {bullet["bullet_id"]: embed(bullet["content"]) for bullet in bullets}
@@ -212,11 +269,21 @@ def _merge_similar_bullets(
                 a09_notebook.render_merge(
                     section=section,
                     bullets=[left, right],
+                    similarity=similarity,
                 )
             )
+            should_merge = response.get("merge") is True
             content = response.get("rule")
         except Exception as exc:
             logger.warning("A09 skipped similar-bullet merge after insight error: %s", exc)
+            continue
+        if not should_merge:
+            logger.info(
+                "A09 retained similar bullets after insight decision | section=%s source_ids=%s similarity=%.3f",
+                section,
+                source_ids,
+                similarity,
+            )
             continue
         if not isinstance(content, str) or not 20 <= len(content.strip()) <= 500:
             logger.warning("A09 skipped similar-bullet merge: insight returned no usable rule")
@@ -347,6 +414,10 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
         if count >= threshold
     ]
     playbook, delta = state.get("playbook", ""), []
+    selected_bullets = _bullets_for_ids(
+        playbook,
+        state.get("blueprint", {}).get("playbook_bullet_ids", []),
+    )
 
     logger.info(
         "A09 curation scan | failure_events=%s distinct_issues=%s threshold=%s recurring=%s",
@@ -359,10 +430,6 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
         logger.info("A09 no playbook update: no issue has reached the repeat threshold")
 
     for issue in recurring:
-        if issue in playbook:
-            logger.info("A09 skipped issue already represented in playbook: %s", issue)
-            continue
-
         is_success = issue.startswith("success:")
         sample_feedback = next(
             (
@@ -391,10 +458,62 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
             fallback=fallback,
         )
 
-        if section == "COMMON MISTAKES TO AVOID" and _duplicates_common_mistake(
-            playbook, content
-        ):
-            logger.info("A09 skipped semantically duplicate rule for issue: %s", issue)
+        candidates = selected_bullets
+        fallback_candidate = None
+        if not candidates:
+            fallback_candidate = _find_update_candidate(
+                playbook, section=section, content=content
+            )
+            candidates = [fallback_candidate[0]] if fallback_candidate else []
+        if candidates:
+            action, updated_content, target_id = _decide_add_or_update(
+                issue=issue,
+                section=section,
+                proposed_rule=content,
+                candidates=candidates,
+            )
+            if action == "KEEP":
+                logger.info(
+                    "A09 kept selected playbook bullet(s) | issue=%s bullet_ids=%s",
+                    issue,
+                    [candidate["bullet_id"] for candidate in candidates],
+                )
+                continue
+            if action == "UPDATE" and updated_content and target_id:
+                existing = next(
+                    candidate for candidate in candidates if candidate["bullet_id"] == target_id
+                )
+                playbook = _replace_bullet_content(
+                    playbook,
+                    bullet_id=target_id,
+                    content=updated_content,
+                )
+                delta.append(
+                    {
+                        "op": "UPDATE",
+                        "section": existing["section"],
+                        "bullet_id": target_id,
+                        "previous_content": existing["content"],
+                        "content": updated_content,
+                        "support": counts[issue],
+                        "selected_for_item": bool(selected_bullets),
+                        **(
+                            {"similarity": round(fallback_candidate[1], 4)}
+                            if fallback_candidate
+                            else {}
+                        ),
+                    }
+                )
+                logger.info(
+                    "A09 updated playbook rule | issue=%s bullet_id=%s selected_for_item=%s",
+                    issue,
+                    target_id,
+                    bool(selected_bullets),
+                )
+                continue
+
+        if issue in playbook:
+            logger.info("A09 skipped issue already represented in playbook: %s", issue)
             continue
 
         next_id = 1 + max(
