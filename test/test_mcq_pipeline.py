@@ -892,12 +892,13 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertNotIn("[evi-00001] helpful=2 harmful=1", result)
         self.assertNotIn("[evi-00002] helpful=3 harmful=4", result)
         self.assertIn(
-            "[evi-00001+evi-00002] helpful=5 harmful=5 :: " + merged_rule,
+            "[evi-00001] helpful=5 harmful=5 :: " + merged_rule,
             result,
         )
         self.assertEqual(len(delta), 1)
         self.assertEqual(delta[0]["op"], "MERGE")
         self.assertEqual(delta[0]["source_bullet_ids"], ["evi-00001", "evi-00002"])
+        self.assertEqual(delta[0]["retired_bullet_ids"], ["evi-00002"])
 
     def test_curator_keeps_embedding_similar_bullets_when_llm_rejects_merge(self) -> None:
         playbook = (

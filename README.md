@@ -238,10 +238,11 @@ fallback để tìm một ứng viên UPDATE gần nhất.
 
 Với `MERGE`, embedding chỉ tìm cặp bullet cùng section có thể trùng lặp. A09
 gửi cả ID, nội dung, bộ đếm và similarity tới Insight model; chỉ khi model trả
-về `merge=true` cặp đó mới được gộp. Hai ID được giữ dưới dạng ID ghép, ví dụ
-`err-00003+err-00007`; `helpful` và `harmful` là tổng của hai bullet gốc. Nếu
-embedding hoặc Insight model lỗi, A09 giữ nguyên các rule để không mất kiến
-thức.
+về `merge=true` cặp đó mới được gộp. Bullet sau dọn dẹp giữ ID nhỏ nhất, ví dụ
+gộp `err-00003` và `err-00007` sẽ giữ `err-00003`; ID bị loại cùng toàn bộ
+source IDs vẫn nằm trong `playbook_delta` để audit. `helpful` và `harmful` là
+tổng của hai bullet gốc. Nếu embedding hoặc Insight model lỗi, A09 giữ nguyên
+các rule để không mất kiến thức.
 
 ```bash
 uv run python main.py \

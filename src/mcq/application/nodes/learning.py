@@ -185,7 +185,7 @@ def _replace_bullets_with_merge(
     merged_bullet: Dict[str, Any],
     removed_ids: set[str],
 ) -> str:
-    """Atomically replace a same-section bullet group with one composite ID."""
+    """Atomically replace a same-section bullet group with its retained ID."""
     current_section = ""
     inserted = False
     lines: List[str] = []
@@ -212,6 +212,17 @@ def _replace_bullets_with_merge(
     return "\n".join(lines)
 
 
+def _smallest_bullet_id(bullet_ids: List[str]) -> str:
+    """Choose the lowest numeric ID, including components of legacy merged IDs."""
+    components = [component for bullet_id in bullet_ids for component in bullet_id.split("+")]
+
+    def sort_key(bullet_id: str) -> tuple[int, str]:
+        match = re.search(r"-(\d+)$", bullet_id)
+        return (int(match.group(1)), bullet_id) if match else (float("inf"), bullet_id)
+
+    return min(components, key=sort_key)
+
+
 def _merge_similar_bullets(
     playbook: str,
 ) -> tuple[str, List[Dict[str, Any]]]:
@@ -219,8 +230,8 @@ def _merge_similar_bullets(
 
     Embeddings only propose candidates. The A09 insight model must explicitly
     approve every merge, so two rules are never collapsed on vector similarity
-    alone. The composite ID retains traceability and its helpful/harmful counts
-    are the sums of every merged source bullet.
+    alone. The lowest source ID is retained after cleanup, while the audit delta
+    records every source ID; helpful/harmful counts are summed.
     """
     if os.getenv("PLAYBOOK_BULLET_MERGE_ENABLED", "true").lower() not in {"1", "true", "yes"}:
         return playbook, []
@@ -290,7 +301,7 @@ def _merge_similar_bullets(
             continue
 
         merged = {
-            "bullet_id": "+".join(source_ids),
+            "bullet_id": _smallest_bullet_id(source_ids),
             "helpful": left["helpful"] + right["helpful"],
             "harmful": left["harmful"] + right["harmful"],
             "content": content.strip(),
@@ -307,6 +318,9 @@ def _merge_similar_bullets(
                 "op": "MERGE",
                 "section": section,
                 "source_bullet_ids": source_ids,
+                "retired_bullet_ids": [
+                    bullet_id for bullet_id in source_ids if bullet_id != merged["bullet_id"]
+                ],
                 "bullet_id": merged["bullet_id"],
                 "helpful": merged["helpful"],
                 "harmful": merged["harmful"],
