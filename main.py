@@ -201,6 +201,21 @@ def load_json_list(path: str) -> list[dict]:
     return data if isinstance(data, list) else []
 
 
+def load_json_object(path: str) -> dict[str, int]:
+    """Load a small scalar sidecar, discarding malformed usage entries."""
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        return {}
+    return {
+        key: value
+        for key, value in data.items()
+        if isinstance(key, str) and isinstance(value, int) and value >= 0
+    }
+
+
 def load_playbook(persisted_path: str) -> str:
     """Prefer an accumulated playbook; otherwise start from the versioned seed."""
     seed_path = Path(__file__).parent / "config" / "initial_playbook.md"
@@ -370,6 +385,7 @@ def main():
     ]
     anchor_sidecar = os.path.splitext(output_path)[0] + ".anchors.json"
     playbook_path = os.path.splitext(output_path)[0] + ".playbook.md"
+    playbook_usage_path = os.path.splitext(output_path)[0] + ".playbook_usage.json"
     failure_memory_path = os.path.splitext(output_path)[0] + ".failure_memory.json"
     judge_memory_path = os.path.splitext(output_path)[0] + ".judge_failure_memory.json"
     quarantine_path = os.path.splitext(output_path)[0] + ".quarantine.jsonl"
@@ -396,6 +412,7 @@ def main():
             os.getenv("LEARNING_CHECKPOINT_INTERVAL", "10")
         ),
         "playbook_path": playbook_path,
+        "playbook_usage_path": playbook_usage_path,
         "failure_memory_path": failure_memory_path,
         "judge_memory_path": judge_memory_path,
         "verified_flushed_count": 0,
@@ -425,6 +442,7 @@ def main():
         "judge_failure_memory": load_json_list(judge_memory_path) if args.experiment_method == "full" else [],
         # RQ2 controls must not receive accumulated full-pipeline context.
         "playbook": load_playbook(playbook_path) if args.experiment_method == "full" else "",
+        "playbook_usage": load_json_object(playbook_usage_path) if args.experiment_method == "full" else {},
         "playbook_delta": [],
         "experiment_method": args.experiment_method,
         "used_anchor_ids": used_anchor_ids,
@@ -459,6 +477,8 @@ def main():
         )
     with open(playbook_path, "w", encoding="utf-8") as f:
         f.write(final_state.get("playbook", ""))
+    with open(playbook_usage_path, "w", encoding="utf-8") as f:
+        json.dump(final_state.get("playbook_usage", {}), f, ensure_ascii=False, indent=2)
     with open(failure_memory_path, "w", encoding="utf-8") as f:
         json.dump(final_state.get("failure_memory", []), f, ensure_ascii=False, indent=2)
     with open(anchor_sidecar, "w", encoding="utf-8") as f:
@@ -472,7 +492,7 @@ def main():
 
     print(f"Done. Verified={len(verified_items)}, quarantined={len(quarantine_items)}.")
     print(
-        f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; failure memory: {failure_memory_path}; judge memory: {judge_memory_path}"
+        f"Verified: {output_path}; quarantine: {quarantine_path}; playbook: {playbook_path}; playbook usage: {playbook_usage_path}; failure memory: {failure_memory_path}; judge memory: {judge_memory_path}"
     )
     logger.info(
         "Run complete: verified=%s; quarantined=%s; output=%s",

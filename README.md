@@ -244,6 +244,19 @@ source IDs vẫn nằm trong `playbook_delta` để audit. `helpful` và `harmfu
 tổng của hai bullet gốc. Nếu embedding hoặc Insight model lỗi, A09 giữ nguyên
 các rule để không mất kiến thức.
 
+A09 còn thực hiện `DROP` tại mỗi vòng curation: một bullet học thêm (không phải
+rule nền tảng) có `helpful=0` và `harmful=0`, đồng thời không được A01 chọn
+trong `PLAYBOOK_UNUSED_BULLET_MAX_CYCLES` vòng liên tiếp (mặc định `5`), sẽ bị
+xóa hẳn khỏi playbook. Bộ đếm vòng không dùng được lưu ở sidecar
+`<output>.playbook_usage.json`; counter khác 0 hoặc ID rule nền tảng sẽ không
+bị xóa. Có thể bảo vệ foundation ID riêng qua
+`PLAYBOOK_FOUNDATION_BULLET_IDS`.
+
+Để tránh playbook phình to bởi nhiều paraphrase của cùng lỗi, A09 chỉ cho phép
+`ADD` khi lỗi lần đầu chạm `PLAYBOOK_REPEAT_THRESHOLD`. Các lần lặp sau chỉ có
+thể `UPDATE` bullet được A01 chọn; một section cũng bị giới hạn bởi
+`PLAYBOOK_MAX_BULLETS_PER_SECTION` (mặc định `40`).
+
 ```bash
 uv run python main.py \
   --model_local \
@@ -275,6 +288,10 @@ uv run python main.py \
 
 Prefer configuring secrets in `.env`; `--api_key` may be visible in shell
 history.
+
+A03 phân bổ vị trí đáp án khóa theo ID bản ghi theo chu kỳ `A → B → C → D`.
+Vị trí được đưa trực tiếp vào prompt và được kiểm tra lại trước A04--A07, nên
+generator không thể mặc định đặt đáp án đúng ở A.
 
 ### 8. Chọn level và difficulty
 
@@ -514,7 +531,10 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `DATA_SPLIT` | `train` | Exported record split. |
 | `PLAYBOOK_VERSION` | `v0.2` | Exported playbook metadata version. |
 | `PLAYBOOK_REPEAT_THRESHOLD` | `3` | Repeated failures required before A09 Notebook adds a playbook bullet. |
+| `PLAYBOOK_MAX_BULLETS_PER_SECTION` | `40` | Hard cap per section; a recurring issue may add a new rule only at its first threshold crossing. |
 | `PLAYBOOK_UPDATE_SIMILARITY_THRESHOLD` | `0.72` | Fallback cosine threshold for finding an UPDATE candidate when A01 selected no valid `playbook_bullet_ids`; selected IDs are always preferred. |
+| `PLAYBOOK_UNUSED_BULLET_MAX_CYCLES` | `5` | Consecutive unselected curation cycles before permanently removing a non-foundation bullet with both counters equal to zero. |
+| `PLAYBOOK_FOUNDATION_BULLET_IDS` | empty | Optional comma-separated additional IDs that must never be removed by A09 cleanup. |
 | `PLAYBOOK_BULLET_MERGE_ENABLED` | `true` | Let A09 consider embedding-similar same-section bullet pairs for an LLM-approved MERGE. |
 | `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD` | `0.88` | Cosine similarity required to send a pair to the Insight LLM for a merge decision. |
 | `PLAYBOOK_MERGE_MAX_PAIRS` | `1` | Maximum similar bullet pairs merged by A09 during one curation pass. |

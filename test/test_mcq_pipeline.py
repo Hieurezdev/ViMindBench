@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from main import load_next_record_id, parse_levels
 from src.mcq.application.nodes.collection import collect_node
-from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, mcq_generator_node, prepare_regeneration_node
+from src.mcq.application.nodes.generation import _hard_guard_report, _normalize_evidence_ref_ids, _request_generation_json, _required_answer_position, mcq_generator_node, prepare_regeneration_node
 from src.mcq.application.nodes import generation
 from src.mcq.application.nodes.judging import _validate_single_answer_report, adversarial_solver_node, consolidate_judge_reports_node, quality_gate_node
 from src.mcq.application.nodes import judging
@@ -25,6 +25,7 @@ from src.mcq.application.nodes.clinical_context import dsm5_safety_context_node
 from src.mcq.application.emobench import judge_context, normalize_blueprint_emobench, validate_judge_report
 from src.mcq.application.nodes.learning import (
     _merge_similar_bullets,
+    _prune_unused_bullets,
     _update_counters,
     playbook_curator_node,
 )
@@ -431,6 +432,7 @@ class JudgeGatewayTests(unittest.TestCase):
             evidence=[],
             evidence_plan={},
             judge_feedback=[],
+            required_answer="B",
         )
         judge_prompt = a05_single_answer_judge.render(
             blueprint=blueprint,
@@ -450,6 +452,7 @@ class JudgeGatewayTests(unittest.TestCase):
             evidence=[],
             evidence_plan={},
             judge_feedback=[],
+            required_answer="C",
         )
         judge_prompt = a05_single_answer_judge.render(
             blueprint=blueprint,
@@ -462,6 +465,10 @@ class JudgeGatewayTests(unittest.TestCase):
         self.assertIn("Every factual detail in the question stem", generator_prompt)
         self.assertIn("Theo quan điểm của chuyên gia tâm lý", generator_prompt)
         self.assertIn("at least two cited chunks", judge_prompt)
+
+    def test_generator_cycles_required_answer_positions(self) -> None:
+        positions = [_required_answer_position({"next_record_id": number}) for number in range(1, 9)]
+        self.assertEqual(positions, ["A", "B", "C", "D", "A", "B", "C", "D"])
 
     def test_single_answer_audit_requires_key_and_three_incorrect_distractors(self) -> None:
         mcq = {"answer": "B", "options": {"A": "a", "B": "b", "C": "c", "D": "d"}}
@@ -636,8 +643,16 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertIn("hard_guard:option_length_imbalance", report["issues"])
 
     def test_generator_repairs_once_after_preflight_failure(self) -> None:
-        first = {"question": "Bản nháp", "options": {}, "evidence_refs": ["chunk-1"]}
-        repaired = {"question": "Bản sửa", "options": {}, "evidence_refs": ["chunk-1"]}
+        first = {
+            "question": "Bản nháp", "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
+            "answer": "A", "evidence_refs": ["chunk-1"], "rationale_short": "Vì bằng chứng hỗ trợ A.",
+            "distractor_analysis": {"B": "Sai", "C": "Sai", "D": "Sai"}, "audit_steps": ["Kiểm tra bằng chứng"],
+        }
+        repaired = {
+            "question": "Bản sửa", "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
+            "answer": "A", "evidence_refs": ["chunk-1"], "rationale_short": "Vì bằng chứng hỗ trợ A.",
+            "distractor_analysis": {"B": "Sai", "C": "Sai", "D": "Sai"}, "audit_steps": ["Kiểm tra bằng chứng"],
+        }
         state = {
             "blueprint": {"difficulty": "hard", "evidence_limit": 2},
             "evidence_docs": [doc("chunk-1", "Tier 1")],
@@ -658,6 +673,23 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(generate.call_count, 3)
         self.assertEqual(result["mcq"]["question"], "Bản sửa")
         self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_preflight")
+
+    def test_generator_repairs_malformed_contract_before_judges(self) -> None:
+        malformed = {"question": "", "options": [{"letter": "A", "text": "a"}], "answer": ""}
+        repaired = {
+            "question": "Câu hỏi hợp lệ", "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
+            "answer": "B", "evidence_refs": ["chunk-1"], "rationale_short": "B phù hợp.",
+            "distractor_analysis": {"A": "Sai", "C": "Sai", "D": "Sai"}, "audit_steps": ["Kiểm tra bằng chứng"],
+        }
+        state = {
+            "experiment_method": "direct", "blueprint": {"difficulty": "medium", "evidence_limit": 2},
+            "next_record_id": 2, "evidence_docs": [doc("chunk-1", "Tier 1")], "playbook": "", "judge_feedback": [], "generation_attempt": 0,
+        }
+        with patch.object(generation, "_generate_mcq", side_effect=[malformed, repaired]) as generate:
+            result = mcq_generator_node(state)
+        self.assertEqual(generate.call_count, 2)
+        self.assertEqual(result["mcq"]["answer"], "B")
+        self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_schema")
 
     def test_generator_refusal_becomes_a_retryable_failure(self) -> None:
         state = {
@@ -695,6 +727,9 @@ class QualityAndPlaybookTests(unittest.TestCase):
                 "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
                 "answer": "A",
                 "evidence_refs": ["chunk-1"],
+                "rationale_short": "A phù hợp.",
+                "distractor_analysis": {"B": "Sai", "C": "Sai", "D": "Sai"},
+                "audit_steps": ["Kiểm tra bằng chứng"],
             },
         ), patch.object(generation, "_preflight_report", return_value={"passed": True}):
             mcq_generator_node(state)
@@ -814,6 +849,18 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(len(result["playbook_delta"]), 1)
         self.assertIn("evidence:unsupported_key", result["playbook"])
 
+    def test_curator_does_not_add_a_new_paraphrase_after_threshold_crossing(self) -> None:
+        state = {
+            "playbook": "## EVIDENCE & GROUNDING\n\n## COMMON MISTAKES TO AVOID\n\n## OTHERS",
+            "failure_memory": [{"issue": "evidence:unsupported_key"}] * 4,
+        }
+        with patch.dict(
+            os.environ,
+            {"PLAYBOOK_REPEAT_THRESHOLD": "3", "INSIGHT_OPENAI_BASE_URL": ""},
+        ):
+            result = playbook_curator_node(state)
+        self.assertEqual(result["playbook_delta"], [])
+
     def test_curator_uses_insight_model_for_a_new_recurring_rule(self) -> None:
         state = {
             "playbook": "## EVIDENCE & GROUNDING\n\n## COMMON MISTAKES TO AVOID\n\n## OTHERS",
@@ -922,6 +969,26 @@ class QualityAndPlaybookTests(unittest.TestCase):
             result, delta = _merge_similar_bullets(playbook)
         self.assertEqual(result, playbook)
         self.assertEqual(delta, [])
+
+    def test_prune_removes_only_unselected_zero_counter_non_foundation_bullets(self) -> None:
+        playbook = (
+            "## EVIDENCE & GROUNDING\n"
+            "[evi-00002] helpful=0 harmful=0 :: Foundation evidence rule.\n"
+            "[evi-00099] helpful=0 harmful=0 :: Unused learned rule.\n"
+            "[evi-00100] helpful=1 harmful=0 :: Proven learned rule."
+        )
+        with patch.dict(os.environ, {"PLAYBOOK_UNUSED_BULLET_MAX_CYCLES": "5"}):
+            result, usage, delta = _prune_unused_bullets(
+                playbook,
+                usage={"evi-00099": 4, "evi-00100": 4},
+                selected_bullet_ids=[],
+            )
+        self.assertIn("[evi-00002]", result)
+        self.assertNotIn("[evi-00099]", result)
+        self.assertIn("[evi-00100]", result)
+        self.assertNotIn("evi-00099", usage)
+        self.assertEqual(delta[0]["op"], "DROP")
+        self.assertEqual(delta[0]["unused_cycles"], 5)
 
 
 class JudgeFailureMemoryTests(unittest.TestCase):
@@ -1060,6 +1127,21 @@ class RegenerationRoutingTests(unittest.TestCase):
         self.assertEqual(result["regeneration_route"], "replan")
         self.assertEqual(len(result["planning_feedback"]), 1)
 
+    def test_topic_and_retrieval_evidence_failures_request_replanning(self) -> None:
+        result = prepare_regeneration_node(
+            {
+                "judge_reports": {
+                    "evidence": {
+                        "passed": False,
+                        "issues": ["blueprint_topic_mismatch", "subtopic_unsupported_by_evidence"],
+                        "feedback": "Retrieved chunks do not support the planned subtopic.",
+                    }
+                }
+            }
+        )
+        self.assertEqual(result["regeneration_route"], "replan")
+        self.assertEqual(len(result["planning_feedback"]), 1)
+
     def test_distractor_failure_stays_on_generation_repair(self) -> None:
         result = prepare_regeneration_node(
             {
@@ -1149,6 +1231,7 @@ class OutputCheckpointTests(unittest.TestCase):
     def test_checkpoints_learning_state_every_ten_items(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             playbook_path = os.path.join(directory, "run.playbook.md")
+            playbook_usage_path = os.path.join(directory, "run.playbook_usage.json")
             failure_memory_path = os.path.join(directory, "run.failure_memory.json")
             judge_memory_path = os.path.join(
                 directory, "run.judge_failure_memory.json"
@@ -1159,9 +1242,11 @@ class OutputCheckpointTests(unittest.TestCase):
                     "output_flush_interval": 100,
                     "learning_checkpoint_interval": 10,
                     "playbook_path": playbook_path,
+                    "playbook_usage_path": playbook_usage_path,
                     "failure_memory_path": failure_memory_path,
                     "judge_memory_path": judge_memory_path,
                     "playbook": "# Checkpointed playbook\n",
+                    "playbook_usage": {"err-00001": 3},
                     "failure_memory": [{"issue": "evidence:unsupported_key"}],
                     "judge_failure_memory": [{"judge": "A04"}],
                 }
@@ -1169,6 +1254,8 @@ class OutputCheckpointTests(unittest.TestCase):
             self.assertEqual(result, {"learning_checkpoint_count": 1})
             with open(playbook_path, encoding="utf-8") as handle:
                 self.assertEqual(handle.read(), "# Checkpointed playbook\n")
+            with open(playbook_usage_path, encoding="utf-8") as handle:
+                self.assertEqual(json.load(handle), {"err-00001": 3})
             with open(failure_memory_path, encoding="utf-8") as handle:
                 self.assertIn("unsupported_key", handle.read())
             with open(judge_memory_path, encoding="utf-8") as handle:

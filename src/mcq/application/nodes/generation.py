@@ -12,6 +12,7 @@ HARD_EMPHATIC_WORDING = re.compile(
     r"\b(hoàn\s+toàn|tuyệt\s+đối|luôn\s+luôn|không\s+bao\s+giờ|duy\s+nhất|chắc\s+chắn|triệt\s+để|ngay\s+lập\s+tức|tự\s+ý|tất\s+cả)\b",
     re.IGNORECASE,
 )
+ANSWER_LABELS = ("A", "B", "C", "D")
 
 
 def _normalize_evidence_ref_ids(value: Any) -> List[str]:
@@ -30,6 +31,75 @@ def _normalize_evidence_ref_ids(value: Any) -> List[str]:
         if isinstance(chunk_id, str) and chunk_id and chunk_id not in ids:
             ids.append(chunk_id)
     return ids
+
+
+def _required_answer_position(state: MCQState) -> str:
+    """Cycle answer positions by public record ID to prevent positional bias."""
+    record_number = state.get("next_record_id", state.get("iteration_count", 0) + 1)
+    try:
+        index = max(1, int(record_number)) - 1
+    except (TypeError, ValueError):
+        index = 0
+    return ANSWER_LABELS[index % len(ANSWER_LABELS)]
+
+
+def _normalize_and_validate_mcq(
+    mcq: Any, *, refs: List[Dict[str, Any]], required_answer: str
+) -> tuple[Dict[str, Any], Dict[str, Any]]:
+    """Normalize tolerated citation shapes and enforce A03's public contract.
+
+    The full judges should assess psychology quality, not compensate for an
+    incomplete JSON object from the generator.  This check is intentionally
+    deterministic so malformed output is repaired before A04--A07 run.
+    """
+    if not isinstance(mcq, dict):
+        return {}, {
+            "passed": False,
+            "issues": ["schema:not_json_object"],
+            "feedback": "Return one JSON object, not a list, string, or wrapper.",
+        }
+
+    normalized = dict(mcq)
+    normalized["evidence_refs"] = _normalize_evidence_ref_ids(
+        normalized.get("evidence_refs")
+    ) or [ref["chunk_id"] for ref in refs]
+    options = normalized.get("options")
+    answer = normalized.get("answer")
+    analyses = normalized.get("distractor_analysis")
+    issues: List[str] = []
+
+    if not isinstance(normalized.get("question"), str) or not normalized["question"].strip():
+        issues.append("schema:missing_question")
+    if not isinstance(options, dict) or set(options) != {"A", "B", "C", "D"}:
+        issues.append("schema:options_must_be_mapping_A_to_D")
+    elif not all(isinstance(text, str) and text.strip() for text in options.values()):
+        issues.append("schema:options_must_be_nonempty_strings")
+    if not isinstance(answer, str) or answer not in {"A", "B", "C", "D"}:
+        issues.append("schema:answer_must_be_A_to_D")
+    elif answer != required_answer:
+        issues.append(f"schema:answer_position_must_be_{required_answer}")
+    elif isinstance(options, dict):
+        expected_distractors = {"A", "B", "C", "D"} - {answer}
+        if not isinstance(analyses, dict) or set(analyses) != expected_distractors:
+            issues.append("schema:distractor_analysis_must_cover_exactly_three_wrong_options")
+        elif not all(isinstance(text, str) and text.strip() for text in analyses.values()):
+            issues.append("schema:distractor_analysis_must_be_nonempty_strings")
+    if not isinstance(normalized.get("rationale_short"), str) or not normalized["rationale_short"].strip():
+        issues.append("schema:missing_rationale_short")
+    if not isinstance(normalized.get("audit_steps"), list) or not normalized["audit_steps"]:
+        issues.append("schema:missing_audit_steps")
+
+    if issues:
+        return normalized, {
+            "passed": False,
+            "issues": issues,
+            "feedback": (
+                "Repair the JSON contract exactly. Return a non-empty Vietnamese question; "
+                f"options as {{A,B,C,D}} strings; answer exactly {required_answer}; and "
+                "distractor_analysis for exactly the other three letters."
+            ),
+        }
+    return normalized, {"passed": True, "issues": [], "feedback": ""}
 
 
 def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -66,6 +136,7 @@ def _generate_mcq(
     refs: List[Dict[str, Any]],
     evidence_plan: Dict[str, Any],
     judge_feedback: List[Dict[str, Any]],
+    required_answer: str,
 ) -> Dict[str, Any]:
     return _request_generation_json(
         blueprint,
@@ -75,6 +146,7 @@ def _generate_mcq(
             evidence=refs,
             evidence_plan=evidence_plan,
             judge_feedback=judge_feedback,
+            required_answer=required_answer,
         ),
         max_tokens=1800,
     )
@@ -172,6 +244,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
     full_playbook = state.get("playbook", "")
     blueprint = state["blueprint"]
+    required_answer = _required_answer_position(state)
     method = state.get("experiment_method", "full")
     # Direct is the source-only control. It must not receive an additional
     # evidence-planning call or any LLM-as-judge preflight signal.
@@ -189,7 +262,32 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             refs=refs,
             evidence_plan=evidence_plan,
             judge_feedback=feedback,
+            required_answer=required_answer,
         )
+        mcq, schema_report = _normalize_and_validate_mcq(
+            mcq, refs=refs, required_answer=required_answer
+        )
+        if not schema_report["passed"]:
+            feedback.append(
+                {
+                    "judge": "a03_schema",
+                    "issues": schema_report["issues"],
+                    "feedback": schema_report["feedback"],
+                }
+            )
+            mcq = _generate_mcq(
+                blueprint=blueprint,
+                playbook=full_playbook,
+                refs=refs,
+                evidence_plan=evidence_plan,
+                judge_feedback=feedback,
+                required_answer=required_answer,
+            )
+            mcq, schema_report = _normalize_and_validate_mcq(
+                mcq, refs=refs, required_answer=required_answer
+            )
+            if not schema_report["passed"]:
+                raise ValueError("A03 schema repair failed: " + ", ".join(schema_report["issues"]))
         preflight = (
             {"passed": True, "issues": [], "feedback": ""}
             if method in {"direct", "rag_only"}
@@ -209,14 +307,15 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
                 refs=refs,
                 evidence_plan=evidence_plan,
                 judge_feedback=feedback,
+                required_answer=required_answer,
             )
+            mcq, schema_report = _normalize_and_validate_mcq(
+                mcq, refs=refs, required_answer=required_answer
+            )
+            if not schema_report["passed"]:
+                raise ValueError("A03 preflight repair broke schema: " + ", ".join(schema_report["issues"]))
     except Exception as exc:
         return _generation_failure(state, exc)
-    # A03 requests string IDs, but local models may return
-    # [{"chunk_id": "..."}]. Normalize before the judge pipeline.
-    mcq["evidence_refs"] = _normalize_evidence_ref_ids(mcq.get("evidence_refs")) or [
-        ref["chunk_id"] for ref in refs
-    ]
     return {
         "mcq": mcq,
         "generation_attempt": state.get("generation_attempt", 0) + 1,
@@ -246,11 +345,19 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         for item in feedback
         for issue in item.get("issues", [])
     ]
-    needs_replan = any(
-        marker in issue
-        for issue in issues
-        for marker in ("blueprint_mismatch", "unsupported_option_claims", "unsupported_key")
+    replan_markers = (
+        "blueprint_mismatch",
+        "blueprint_topic_mismatch",
+        "subtopic_mismatch",
+        "subtopic_unsupported",
+        "retrieval_query_mismatch",
+        "evidence_ref_mismatch",
+        "evidence_missing_primary_chunk",
+        "keyed_option_unsupported",
+        "unsupported_option_claims",
+        "unsupported_key",
     )
+    needs_replan = any(marker in issue for issue in issues for marker in replan_markers)
     return {
         "judge_feedback": feedback,
         "planning_feedback": feedback if needs_replan else [],

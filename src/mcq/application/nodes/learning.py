@@ -23,6 +23,22 @@ SECTION_SLUGS = {
     "COMMON MISTAKES TO AVOID": "err",
     "SUCCESSFUL STRATEGIES TO REPLICATE": "suc"
 }
+FOUNDATION_BULLET_IDS = frozenset(
+    {
+        "str-00001",
+        "evi-00002",
+        "evi-00003",
+        "evi-00004",
+        "qad-00004",
+        "qad-00005",
+        "qad-00006",
+        "qad-00007",
+        "qad-00008",
+        "qad-00009",
+        "ei-00006",
+        "cli-00007",
+    }
+)
 
 
 def _section_bullets(playbook: str, section: str) -> List[Dict[str, Any]]:
@@ -93,6 +109,83 @@ def _update_counters(playbook: str, bullet_ids: List[str], tag: str) -> str:
             line = f"[{bullet_id}] helpful={int(helpful) + (tag == 'helpful')} harmful={int(harmful) + (tag == 'harmful')} :: {content}"
         lines.append(line)
     return "\n".join(lines)
+
+
+def _foundation_bullet_ids() -> set[str]:
+    """Return protected seed IDs plus optional project-specific foundation IDs."""
+    configured = os.getenv("PLAYBOOK_FOUNDATION_BULLET_IDS", "")
+    return set(FOUNDATION_BULLET_IDS).union(
+        bullet_id.strip() for bullet_id in configured.split(",") if bullet_id.strip()
+    )
+
+
+def _active_bullets(playbook: str) -> List[Dict[str, Any]]:
+    """Return all bullets with their containing section."""
+    return [
+        {**bullet, "section": section}
+        for section in _playbook_sections(playbook)
+        for bullet in _section_bullets(playbook, section)
+    ]
+
+
+def _remove_bullets(playbook: str, bullet_ids: set[str]) -> str:
+    """Remove complete ACE bullet lines while preserving all headings and prose."""
+    return "\n".join(
+        line
+        for line in playbook.splitlines()
+        if not (match := ACE_BULLET.match(line)) or match.group(1) not in bullet_ids
+    )
+
+
+def _prune_unused_bullets(
+    playbook: str,
+    *,
+    usage: Dict[str, int],
+    selected_bullet_ids: List[str],
+) -> tuple[str, Dict[str, int], List[Dict[str, Any]]]:
+    """Drop unproven, unselected non-foundation rules after a bounded grace period."""
+    try:
+        max_unused_cycles = int(os.getenv("PLAYBOOK_UNUSED_BULLET_MAX_CYCLES", "5"))
+    except ValueError:
+        logger.warning("A09 invalid PLAYBOOK_UNUSED_BULLET_MAX_CYCLES; using 5")
+        max_unused_cycles = 5
+    max_unused_cycles = max(1, max_unused_cycles)
+
+    foundations = _foundation_bullet_ids()
+    selected = {bullet_id for bullet_id in selected_bullet_ids if isinstance(bullet_id, str)}
+    next_usage: Dict[str, int] = {}
+    dropped: List[Dict[str, Any]] = []
+
+    for bullet in _active_bullets(playbook):
+        bullet_id = bullet["bullet_id"]
+        has_outcome = bullet["helpful"] > 0 or bullet["harmful"] > 0
+        if bullet_id in foundations or has_outcome:
+            continue
+        unused_cycles = 0 if bullet_id in selected else max(0, usage.get(bullet_id, 0)) + 1
+        if unused_cycles >= max_unused_cycles:
+            dropped.append(
+                {
+                    "op": "DROP",
+                    "section": bullet["section"],
+                    "bullet_id": bullet_id,
+                    "content": bullet["content"],
+                    "reason": "unused_zero_counter",
+                    "unused_cycles": unused_cycles,
+                }
+            )
+        else:
+            next_usage[bullet_id] = unused_cycles
+
+    if dropped:
+        dropped_ids = {entry["bullet_id"] for entry in dropped}
+        playbook = _remove_bullets(playbook, dropped_ids)
+        logger.info(
+            "A09 pruned unused zero-counter bullets | count=%s ids=%s grace_cycles=%s",
+            len(dropped),
+            sorted(dropped_ids),
+            max_unused_cycles,
+        )
+    return playbook, next_usage, dropped
 
 
 def _replace_bullet_content(
@@ -419,6 +512,26 @@ def _notebook_rule(
     return fallback
 
 
+def _can_add_bullet(playbook: str, section: str) -> bool:
+    """Bound playbook growth even when a persistent failure keeps recurring."""
+    try:
+        maximum = int(os.getenv("PLAYBOOK_MAX_BULLETS_PER_SECTION", "40"))
+    except ValueError:
+        logger.warning("A09 invalid PLAYBOOK_MAX_BULLETS_PER_SECTION; using 40")
+        maximum = 40
+    maximum = max(1, maximum)
+    current = len(_section_bullets(playbook, section))
+    if current < maximum:
+        return True
+    logger.warning(
+        "A09 skipped ADD: section bullet limit reached | section=%s current=%s max=%s",
+        section,
+        current,
+        maximum,
+    )
+    return False
+
+
 def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
     counts = Counter(item["issue"] for item in state.get("failure_memory", []))
     threshold = int(os.getenv("PLAYBOOK_REPEAT_THRESHOLD", "3"))
@@ -428,9 +541,14 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
         if count >= threshold
     ]
     playbook, delta = state.get("playbook", ""), []
+    prior_usage = state.get("playbook_usage", {})
+    usage = dict(prior_usage) if isinstance(prior_usage, dict) else {}
+    selected_bullet_ids = state.get("blueprint", {}).get("playbook_bullet_ids", [])
+    if not isinstance(selected_bullet_ids, list):
+        selected_bullet_ids = []
     selected_bullets = _bullets_for_ids(
         playbook,
-        state.get("blueprint", {}).get("playbook_bullet_ids", []),
+        selected_bullet_ids,
     )
 
     logger.info(
@@ -526,8 +644,21 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
                 )
                 continue
 
+        # A failure may remain in memory for hundreds of subsequent items. It
+        # is eligible to introduce one rule when it first reaches the repeat
+        # threshold, but must not create a fresh paraphrase on every later
+        # curation pass. Later evidence can still UPDATE a selected bullet.
+        if counts[issue] > threshold:
+            logger.info(
+                "A09 skipped repeated ADD after initial threshold crossing | issue=%s support=%s",
+                issue,
+                counts[issue],
+            )
+            continue
         if issue in playbook:
             logger.info("A09 skipped issue already represented in playbook: %s", issue)
+            continue
+        if not _can_add_bullet(playbook, section):
             continue
 
         next_id = 1 + max(
@@ -576,4 +707,28 @@ def playbook_curator_node(state: MCQState) -> Dict[str, Any]:
     if delta:
         playbook, merge_delta = _merge_similar_bullets(playbook)
         delta.extend(merge_delta)
-    return {"playbook": playbook, "playbook_delta": delta}
+
+    # A newly added/updated/merged rule gets a fresh grace window. A merge
+    # retires its source IDs and retains only the lowest ID in the playbook.
+    touched_ids = set(selected_bullet_ids)
+    for change in delta:
+        if change.get("op") in {"ADD", "UPDATE", "MERGE"}:
+            bullet_id = change.get("bullet_id")
+            if isinstance(bullet_id, str):
+                touched_ids.add(bullet_id)
+                usage[bullet_id] = 0
+        if change.get("op") == "MERGE":
+            for retired_id in change.get("retired_bullet_ids", []):
+                usage.pop(retired_id, None)
+
+    playbook, usage, prune_delta = _prune_unused_bullets(
+        playbook,
+        usage=usage,
+        selected_bullet_ids=list(touched_ids),
+    )
+    delta.extend(prune_delta)
+    return {
+        "playbook": playbook,
+        "playbook_usage": usage,
+        "playbook_delta": delta,
+    }

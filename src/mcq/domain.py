@@ -39,6 +39,7 @@ class MCQState(TypedDict, total=False):
     output_flush_interval: int
     learning_checkpoint_interval: int
     playbook_path: str
+    playbook_usage_path: str
     failure_memory_path: str
     judge_memory_path: str
     verified_flushed_count: int
@@ -67,5 +68,6 @@ class MCQState(TypedDict, total=False):
     failure_memory: List[Dict[str, Any]]
     judge_failure_memory: List[Dict[str, Any]]
     playbook: str
+    playbook_usage: Dict[str, int]
     playbook_delta: List[Dict[str, Any]]
     last_saved_count: int

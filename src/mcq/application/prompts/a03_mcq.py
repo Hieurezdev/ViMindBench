@@ -11,6 +11,7 @@ def render(
     evidence: List[Dict[str, Any]],
     evidence_plan: Dict[str, Any],
     judge_feedback: List[Dict[str, Any]],
+    required_answer: str,
 ) -> str:
     return f"""You are A03, a Vietnamese psychology MCQ writer. Write one four-option,
 single-best-answer question using ONLY the evidence excerpts below.
@@ -58,7 +59,9 @@ evidence into Vietnamese; do not copy its surface form.
 Return exactly four options, with exactly the keys A, B, C, and D: no extra option,
 no missing option, no combined option, and no "tất cả các đáp án trên" / "cả A và B".
 Exactly one option must be the best answer, and answer must be exactly one of
-A, B, C, or D. Do not add explanatory prose before or after the JSON.
+A, B, C, or D. For this item, the answer field MUST be exactly "{required_answer}".
+Write the evidence-supported correct content at that assigned position; do not
+always place the correct answer in A. Do not add explanatory prose before or after the JSON.
 Avoid emphatic or absolute wording in all answer options, including "hoàn toàn",
 "tuyệt đối", "luôn luôn", "không bao giờ", "duy nhất", "chắc chắn", "triệt để",
 "tất cả", and "chỉ". Do not use such language to make distractors obviously
@@ -88,8 +91,9 @@ chunk must include that chunk in `evidence_refs`; do not add uncited details
 from another chunk. The required second hard citation must support the keyed
 synthesis, not be decorative.
 Return JSON only: {{"question":"...", "options":{{"A":"...","B":"...","C":"...","D":"..."}},
-"answer":"A", "rationale_short":"...", "evidence_refs":["chunk_id"],
-"distractor_analysis":{{"A":"...","B":"...","C":"...","D":"..."}},
+"answer":"{required_answer}", "rationale_short":"...", "evidence_refs":["chunk_id"],
+"distractor_analysis":{{"<three wrong letters only>":"..."}},
 "audit_steps":["identify relevant evidence", "match the key", "eliminate distractors"]}}.
-For distractor_analysis, omit the correct letter; explain each wrong option briefly.
+Omit "{required_answer}" from distractor_analysis and include exactly the three
+incorrect letters as its keys.
 audit_steps are short, externally auditable checks, never hidden chain-of-thought."""

@@ -31,6 +31,12 @@ def _atomic_write_text(path: str, content: str) -> None:
 def _checkpoint_learning_state(state: MCQState) -> None:
     """Persist reusable learning state independently of JSONL output flushing."""
     _atomic_write_text(state["playbook_path"], state.get("playbook", ""))
+    usage_path = state.get("playbook_usage_path")
+    if usage_path:
+        _atomic_write_text(
+            usage_path,
+            json.dumps(state.get("playbook_usage", {}), ensure_ascii=False, indent=2),
+        )
     _atomic_write_text(
         state["failure_memory_path"],
         json.dumps(state.get("failure_memory", []), ensure_ascii=False, indent=2),
@@ -75,10 +81,12 @@ def flush_outputs_node(state: MCQState) -> Dict[str, Any]:
     if should_checkpoint_learning:
         _checkpoint_learning_state(state)
         checkpoint_count = state.get("learning_checkpoint_count", 0) + 1
+        usage_path = state.get("playbook_usage_path")
         logger.info(
-            "Learning checkpoint at completed=%s | playbook=%s failure_memory=%s judge_memory=%s",
+            "Learning checkpoint at completed=%s | playbook=%s usage=%s failure_memory=%s judge_memory=%s",
             completed,
             state["playbook_path"],
+            usage_path or "(disabled)",
             state["failure_memory_path"],
             state["judge_memory_path"],
         )
