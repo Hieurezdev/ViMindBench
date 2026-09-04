@@ -43,6 +43,16 @@ def main() -> None:
     )
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument(
+        "--device",
+        default=os.getenv("EMBEDDING_DEVICE", "auto"),
+        help="SentenceTransformer device: auto, cpu, cuda, cuda:0, or cuda:1",
+    )
+    parser.add_argument(
+        "--multi-gpu",
+        action="store_true",
+        help="Use every visible CUDA GPU through SentenceTransformer multi-process encoding",
+    )
+    parser.add_argument(
         "--overwrite", action="store_true", help="Replace existing embedding fields"
     )
     args = parser.parse_args()
@@ -60,10 +70,32 @@ def main() -> None:
             raise SystemExit(
                 "sentence-transformers is required when USE_LOCAL_EMBEDDING=true"
             )
-        print(f"Loading local embedding model: {model_name}")
-        encoder = SentenceTransformer(model_name, trust_remote_code=True)
+        device = args.device.strip()
+        model_kwargs = {} if device.lower() == "auto" else {"device": device}
+        print(f"Loading local embedding model: {model_name} (device={device})")
+        encoder = SentenceTransformer(model_name, trust_remote_code=True, **model_kwargs)
+        pool = None
+        if args.multi_gpu:
+            import torch
+
+            gpu_count = torch.cuda.device_count()
+            if gpu_count < 2:
+                raise SystemExit(
+                    "--multi-gpu requires at least two visible CUDA GPUs; "
+                    f"found {gpu_count}."
+                )
+            devices = [f"cuda:{index}" for index in range(gpu_count)]
+            print(f"Using SentenceTransformer multi-GPU encoding on: {', '.join(devices)}")
+            pool = encoder.start_multi_process_pool(target_devices=devices)
 
         def embed(texts: list[str]) -> list[list[float]]:
+            if pool is not None:
+                return encoder.encode_multi_process(
+                    texts,
+                    pool,
+                    batch_size=args.batch_size,
+                    normalize_embeddings=True,
+                ).tolist()
             return encoder.encode(texts, normalize_embeddings=True).tolist()
     else:
         endpoint = os.getenv("EMBEDDING_BASE_URL", "http://127.0.0.1:1234/v1")
@@ -113,6 +145,8 @@ def main() -> None:
             collection.bulk_write(operations, ordered=False)
             updated += len(operations)
     finally:
+        if use_local and "pool" in locals() and pool is not None:
+            encoder.stop_multi_process_pool(pool)
         mongo.close()
     print(f"Updated {updated} embedding vectors using {model_name}.")
 

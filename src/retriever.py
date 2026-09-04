@@ -86,6 +86,7 @@ class MongoDBRetriever:
         self.embedding_model = embedding_model or os.getenv(
             "EMBEDDING_MODEL", "BAAI/bge-m3"
         )
+        self.embedding_device = os.getenv("EMBEDDING_DEVICE", "auto").strip()
 
         self.local_model = None
         self.embedding_client = None
@@ -100,9 +101,15 @@ class MongoDBRetriever:
                 raise ImportError(
                     "sentence-transformers not installed. Please install it or set USE_LOCAL_EMBEDDING=false"
                 )
-            print(f"✓ Initializing Local Embedding Model: {self.embedding_model}")
+            model_kwargs: Dict[str, str] = {}
+            if self.embedding_device and self.embedding_device.lower() != "auto":
+                model_kwargs["device"] = self.embedding_device
+            print(
+                f"✓ Initializing Local Embedding Model: {self.embedding_model} "
+                f"(device={self.embedding_device or 'auto'})"
+            )
             self.local_model = SentenceTransformer(
-                self.embedding_model, trust_remote_code=True
+                self.embedding_model, trust_remote_code=True, **model_kwargs
             )
             print("✓ Local model loaded successfully.")
         else:

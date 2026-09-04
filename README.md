@@ -467,6 +467,7 @@ báo cáo tách riêng, không được dùng thay nhãn chuyên gia.
 |---|---|
 | `--model_local` | Use local LLM endpoint `http://localhost:8000/v1`; enables local embedding by default. |
 | `--embedding_local` | Force `USE_LOCAL_EMBEDDING=true`. |
+| `--embedding_device DEVICE` | Force local embedding and select `auto`, `cpu`, `cuda`, `cuda:0`, or `cuda:1`. |
 | `--model_base_url URL` | Override `OPENAI_BASE_URL`. |
 | `--model_name NAME` | Override `MODEL_NAME`. |
 | `--api_key KEY` | Override `OPENAI_API_KEY`. Prefer `.env` for secrets. |
@@ -522,6 +523,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `INSIGHT_MODEL_NAME` | empty | Optional A09 model; falls back to `MODEL_NAME`. |
 | `USE_LOCAL_EMBEDDING` | `true` | Use local SentenceTransformer instead of embedding API. |
 | `EMBEDDING_MODEL` | `BAAI/bge-m3` | Local or remote embedding model; BGE-M3 vectors are 1024-dimensional. |
+| `EMBEDDING_DEVICE` | `auto` | Device for online local retrieval embeddings. On Kaggle use `cuda:0`; `auto` selects CUDA when available. |
 | `EMBEDDING_BASE_URL` | `http://127.0.0.1:1234/v1` | Used only when `USE_LOCAL_EMBEDDING=false`. |
 | `RETRIEVER_CACHE_SIZE` | `512` | In-memory LRU cache size for normalized embedding queries, primary retrieval, and DSM-5 retrieval during one run. Set `0` to disable. |
 | `NUM_QA_PAIRS` | `100` | Default attempt count. |
@@ -623,6 +625,32 @@ uv run python test/add_embeddings.py --collection mental --overwrite
 # Recompute DSM-5 vectors used by clinical A06 safety retrieval
 uv run python test/add_embeddings.py --collection DSM-5 --overwrite
 ```
+
+### Kaggle với 2× T4 GPU
+
+Với pipeline sinh MCQ, embedding được gọi theo từng query retrieval; chỉ cần
+đặt một GPU cho local embedding để tránh tranh chấp VRAM với model generator:
+
+```bash
+uv run python main.py --embedding_local --embedding_device cuda:0 --num_qa_pairs 20
+```
+
+Khi tạo lại embedding cho cả collection, dùng batch multi-GPU để
+SentenceTransformers chia các batch qua toàn bộ CUDA GPU nhìn thấy. Trên Kaggle
+2× T4, tăng `--batch-size` dần theo VRAM còn trống (ví dụ `128`):
+
+```bash
+uv run python test/add_embeddings.py \
+  --collection mental \
+  --overwrite \
+  --device cuda:0 \
+  --multi-gpu \
+  --batch-size 128
+```
+
+`--multi-gpu` yêu cầu tối thiểu hai CUDA GPU và sẽ dừng với lỗi rõ ràng nếu
+Kaggle chỉ cấp một GPU. Không bật nó cho workflow retrieval online vì mỗi lần
+gọi chỉ embed một query, nên overhead liên tiến trình sẽ làm chậm hơn.
 
 The script stores `embedding_model=BAAI/bge-m3` with each document and rejects
 vectors that are not 1024-dimensional.

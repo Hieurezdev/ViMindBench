@@ -25,6 +25,12 @@ def parse_args() -> argparse.Namespace:
         help="Use local sentence-transformers embedding model",
     )
     parser.add_argument(
+        "--embedding_device",
+        type=str,
+        default=None,
+        help="Local embedding device: auto, cpu, cuda, cuda:0, or cuda:1",
+    )
+    parser.add_argument(
         "--model_base_url", type=str, default=None, help="Override OPENAI_BASE_URL"
     )
     parser.add_argument(
@@ -272,6 +278,11 @@ def main():
     if args.embedding_local:
         os.environ["USE_LOCAL_EMBEDDING"] = "true"
         print("Using local embedding model via sentence-transformers")
+
+    if args.embedding_device:
+        os.environ["EMBEDDING_DEVICE"] = args.embedding_device
+        os.environ["USE_LOCAL_EMBEDDING"] = "true"
+        print(f"Using local embedding device: {args.embedding_device}")
 
     if args.model_base_url:
         os.environ["OPENAI_BASE_URL"] = args.model_base_url
