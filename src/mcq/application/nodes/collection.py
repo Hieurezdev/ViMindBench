@@ -114,6 +114,7 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         "next_record_id": record_number + 1,
         "anchor": None,
         "mcq": {},
+        "generation_draft": {},
         "judge_reports": {},
         "evidence_report": {},
         "single_answer_report": {},

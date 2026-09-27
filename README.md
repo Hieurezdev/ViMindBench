@@ -7,6 +7,15 @@ A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety
 → bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
 judge failure memory.
 
+Với `full` và `rag_judges`, khi judge hoặc quality gate báo lỗi, A03 nhận lại
+bản nháp hiện tại cùng feedback để sửa ngay trong cùng iteration và ID. Giữ
+nguyên ca, blueprint và nguồn, chỉ sửa phần sai và các phần liên quan để bảo đảm
+nhất quán. Feedback schema/preflight cũng đi kèm bản nháp cần sửa. Lỗi đáp án,
+distractor, tóm tắt hoặc trích dẫn ưu tiên sửa tại A03; thiếu nguồn DSM-5/giáo
+trình thì retrieve lại ngay, còn lỗi blueprint/nguồn lệch nhau chỉ lập kế hoạch
+lại khi vẫn lặp lại sau một lượt sửa. Mặc định tối đa 2 lượt retry sau lần sinh
+đầu; chỉ ghi verified hoặc quarantine sau khi hoàn tất sửa và kiểm tra lại.
+
 Mỗi mẫu `clinical_scenario` có thêm `clinical_case` (tình huống) và
 `case_summary` (tóm tắt 2–3 câu theo yêu cầu prompt). Nội dung tập trung vào triệu
 chứng, diễn tiến/thời gian và ảnh hưởng chức năng. Có thể sáng tạo tuổi, nghề,
@@ -524,7 +533,7 @@ báo cáo tách riêng, không được dùng thay nhãn chuyên gia.
 | `--embedding_base_url URL` | Override `EMBEDDING_BASE_URL`. |
 | `--num_qa_pairs N` | Number of attempted MCQs. Verified count may be lower because failures go to quarantine. |
 | `--output_path PATH` | Verified JSONL path. Sidecars use the same basename. |
-| `--max_generation_retries N` | Retry A03 after a failed judge pass, preserving blueprint and evidence. `0` disables regeneration. |
+| `--max_generation_retries N` | Same-item draft repair with judge/quality-gate feedback; replan missing or persistently misaligned sources. Default `2`; `0` disables regeneration. |
 | `--log_level LEVEL` | Console/file level: `DEBUG`, `INFO`, `WARNING`, or `ERROR`. |
 | `--log_path PATH` | Override the default `<output>.run.log` log file. |
 | `--output_flush_interval N` | Append JSONL checkpoints after every `N` completed items; default `5`. |
@@ -584,7 +593,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `PLAYBOOK_BULLET_MERGE_ENABLED` | `true` | Let A09 consider embedding-similar same-section bullet pairs for an LLM-approved MERGE. |
 | `PLAYBOOK_MERGE_SIMILARITY_THRESHOLD` | `0.88` | Cosine similarity required to send a pair to the Insight LLM for a merge decision. |
 | `PLAYBOOK_MERGE_MAX_PAIRS` | `1` | Maximum similar bullet pairs merged by A09 during one curation pass. |
-| `MAX_GENERATION_RETRIES` | `2` | Maximum retries after the initial A03 generation. Judge feedback is injected while blueprint/evidence remain fixed. |
+| `MAX_GENERATION_RETRIES` | `2` | Maximum retries after initial A03 generation within the same iteration/ID. Repair the draft first; replan missing or persistently misaligned sources. |
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
 | `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |
 | `A03_HARD_MAX_OPTION_WORD_GAP` | `5` | Maximum allowed difference in word count between the longest and shortest hard-item option. |

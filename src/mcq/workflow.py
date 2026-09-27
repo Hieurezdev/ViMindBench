@@ -55,6 +55,9 @@ def _trace_node(
             summary.append(f"issues={len(update['quarantine_reason'])}")
         if "playbook_delta" in update:
             summary.append(f"playbook_delta={len(update['playbook_delta'])}")
+        if "regeneration_route" in update:
+            summary.append(f"repair_route={update['regeneration_route']}")
+            summary.append(f"feedback={len(update.get('judge_feedback', []))}")
         logger.info("[%s] done%s", name, f" | {', '.join(summary)}" if summary else "")
         return update
 
@@ -185,7 +188,7 @@ def route_after_quality_gate(state: MCQState) -> str:
 
 
 def route_after_prepare_regeneration(state: MCQState) -> str:
-    """Re-plan/retrieve only for evidence or blueprint alignment failures."""
+    """Prefer same-item repair before replanning persistent source alignment failures."""
     route = "plan" if state.get("regeneration_route") == "replan" else "generate"
     logger.info("[prepare_regeneration] route=%s", route)
     return route

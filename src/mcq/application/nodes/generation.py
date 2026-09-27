@@ -156,6 +156,7 @@ def _generate_mcq(
     evidence_plan: Dict[str, Any],
     judge_feedback: List[Dict[str, Any]],
     required_answer: str,
+    previous_mcq: Dict[str, Any],
 ) -> Dict[str, Any]:
     return _request_generation_json(
         blueprint,
@@ -166,6 +167,7 @@ def _generate_mcq(
             evidence_plan=evidence_plan,
             judge_feedback=judge_feedback,
             required_answer=required_answer,
+            previous_mcq=previous_mcq,
         ),
         max_tokens=2600 if blueprint.get("level") == "clinical_scenario" else 1800,
     )
@@ -243,6 +245,7 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
     issue = (
         "dsm5_evidence_missing" if "dsm5_evidence_missing" in detail
         else "textbook_evidence_missing" if "textbook_evidence_missing" in detail
+        else "missing_retrieved_evidence" if "missing_retrieved_evidence" in detail
         else "generator_refusal" if "cannot fulfill" in detail
         else f"generator_error:{type(exc).__name__}"
     )
@@ -252,11 +255,15 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
         "feedback": (
             "Retrieve both eligible DSM-5 and Tier 1 textbook evidence before generating a clinical case."
             if issue in {"dsm5_evidence_missing", "textbook_evidence_missing"}
+            else "Retrieve eligible evidence excerpts before generating the item."
+            if issue == "missing_retrieved_evidence"
             else "Return only the requested Vietnamese MCQ JSON. Use the retrieved evidence and educational framing; do not add a refusal or prose."
         ),
     }
     return {
         "mcq": {},
+        # Keep an invalid draft available for repair without sending it to judges.
+        "generation_draft": state.get("generation_draft") or state.get("mcq", {}),
         "generation_attempt": state.get("generation_attempt", 0) + 1,
         "judge_reports": {
             "generation": {"passed": False, "issues": [issue], "severity": "blocking", "feedback": feedback["feedback"]}
@@ -293,6 +300,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     )
 
     feedback = list(state.get("judge_feedback", []))
+    mcq = state.get("generation_draft") or state.get("mcq", {})
     try:
         mcq = _generate_mcq(
             blueprint=blueprint,
@@ -301,6 +309,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             evidence_plan=evidence_plan,
             judge_feedback=feedback,
             required_answer=required_answer,
+            previous_mcq=mcq,
         )
         mcq, schema_report = _normalize_and_validate_mcq(
             mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
@@ -320,11 +329,19 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
                 evidence_plan=evidence_plan,
                 judge_feedback=feedback,
                 required_answer=required_answer,
+                previous_mcq=mcq,
             )
             mcq, schema_report = _normalize_and_validate_mcq(
                 mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
             )
             if not schema_report["passed"]:
+                feedback.append(
+                    {
+                        "judge": "a03_schema",
+                        "issues": schema_report["issues"],
+                        "feedback": schema_report["feedback"],
+                    }
+                )
                 raise ValueError("A03 schema repair failed: " + ", ".join(schema_report["issues"]))
         preflight = (
             {"passed": True, "issues": [], "feedback": ""}
@@ -346,16 +363,27 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
                 evidence_plan=evidence_plan,
                 judge_feedback=feedback,
                 required_answer=required_answer,
+                previous_mcq=mcq,
             )
             mcq, schema_report = _normalize_and_validate_mcq(
                 mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
             )
             if not schema_report["passed"]:
+                feedback.append(
+                    {
+                        "judge": "a03_schema",
+                        "issues": schema_report["issues"],
+                        "feedback": schema_report["feedback"],
+                    }
+                )
                 raise ValueError("A03 preflight repair broke schema: " + ", ".join(schema_report["issues"]))
     except Exception as exc:
-        return _generation_failure(state, exc)
+        return _generation_failure(
+            {**state, "generation_draft": mcq, "judge_feedback": feedback}, exc
+        )
     return {
         "mcq": mcq,
+        "generation_draft": {},
         "generation_attempt": state.get("generation_attempt", 0) + 1,
         "judge_reports": {},
         "evidence_report": {},
@@ -367,8 +395,8 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
 
 def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
-    """Route item-local fixes to A03 and alignment failures to A01/A02."""
-    feedback = []
+    """Repair the current item first; replan missing or persistently misaligned sources."""
+    feedback: List[Dict[str, Any]] = []
     for judge, report in state.get("judge_reports", {}).items():
         if not report.get("passed", False):
             feedback.append(
@@ -378,29 +406,62 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
                     "feedback": report.get("feedback", ""),
                 }
             )
+    reported_issues = {
+        f"{item['judge']}:{issue}"
+        for item in feedback
+        for issue in item.get("issues", [])
+    }
+    gate_issues = [
+        issue for issue in state.get("quarantine_reason", [])
+        if issue not in reported_issues
+    ]
+    if gate_issues:
+        feedback.append(
+            {
+                "judge": "quality_gate",
+                "issues": gate_issues,
+                "feedback": "Repair these quality-gate failures while preserving the valid parts of the current item.",
+            }
+        )
     issues = [
         str(issue)
         for item in feedback
         for issue in item.get("issues", [])
     ]
-    replan_markers = (
+    previous_feedback = state.get("judge_feedback", [])
+    previous_issues = [
+        str(issue) for item in previous_feedback for issue in item.get("issues", [])
+    ]
+    alignment_markers = (
         "blueprint_mismatch",
         "blueprint_topic_mismatch",
         "subtopic_mismatch",
         "subtopic_unsupported",
         "retrieval_query_mismatch",
-        "evidence_ref_mismatch",
         "evidence_missing_primary_chunk",
-        "keyed_option_unsupported",
-        "dsm5_evidence_missing",
-        "textbook_evidence_missing",
-        "unsupported_option_claims",
-        "unsupported_key",
     )
-    needs_replan = any(marker in issue for issue in issues for marker in replan_markers)
-    return {
-        "judge_feedback": feedback,
+    missing_sources = any(
+        marker in issue for issue in issues
+        for marker in ("dsm5_evidence_missing", "textbook_evidence_missing", "missing_retrieved_evidence")
+    )
+    repeated_alignment = (
+        state.get("generation_attempt", 0) > 1
+        and state.get("regeneration_route", "generate") == "generate"
+        and any(
+            any(marker in issue for issue in issues)
+            and any(marker in issue for issue in previous_issues)
+            for marker in alignment_markers
+        )
+    )
+    needs_replan = missing_sources or repeated_alignment
+    accumulated_feedback = [item for item in previous_feedback if item not in feedback] + feedback
+    update: Dict[str, Any] = {
+        "judge_feedback": accumulated_feedback,
         "planning_feedback": feedback if needs_replan else [],
         "regeneration_route": "replan" if needs_replan else "generate",
         "dsm5_safety_docs": [],
     }
+    if needs_replan:
+        # A new source pairing must not inherit a draft grounded in old evidence.
+        update.update({"mcq": {}, "generation_draft": {}})
+    return update

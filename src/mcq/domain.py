@@ -53,6 +53,7 @@ class MCQState(TypedDict, total=False):
     evidence_docs: List[Document]
     dsm5_safety_docs: List[Document]
     mcq: Dict[str, Any]
+    generation_draft: Dict[str, Any]
     judge_reports: Dict[str, Dict[str, Any]]
     evidence_report: Dict[str, Any]
     single_answer_report: Dict[str, Any]

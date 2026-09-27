@@ -36,6 +36,7 @@ from src.mcq.application.failure_memory import (
     retrieve_similar_failures,
 )
 from src.mcq.workflow import create_mcq_graph, route_after_judge_baseline, route_after_quality_gate
+from src.mcq import workflow
 from src.mcq.application.nodes.baseline import baseline_accept_node, direct_blueprint_node, direct_context_node
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
@@ -791,6 +792,7 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(generate.call_count, 3)
         self.assertEqual(result["mcq"]["question"], "Bản sửa")
         self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_preflight")
+        self.assertIn(json.dumps(first, ensure_ascii=False), generate.call_args_list[-1].args[0])
 
     def test_generator_repairs_malformed_contract_before_judges(self) -> None:
         malformed = {"question": "", "options": [{"letter": "A", "text": "a"}], "answer": ""}
@@ -808,6 +810,34 @@ class QualityAndPlaybookTests(unittest.TestCase):
         self.assertEqual(generate.call_count, 2)
         self.assertEqual(result["mcq"]["answer"], "B")
         self.assertEqual(result["judge_feedback"][-1]["judge"], "a03_schema")
+        draft = generate.call_args_list[1].kwargs["previous_mcq"]
+        self.assertEqual(draft["options"], malformed["options"])
+        self.assertEqual(draft["question"], malformed["question"])
+
+    def test_failed_schema_repair_retains_draft_and_feedback_for_next_retry(self) -> None:
+        state = passing_state()
+        state.update({"experiment_method": "rag_judges", "next_record_id": 2})
+        first = {**state["mcq"], "case_summary": ""}
+        second = {**state["mcq"], "options": {"A": "a"}}
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", side_effect=[first, second]
+        ):
+            failed = mcq_generator_node(state)
+        self.assertEqual(failed["mcq"], {})
+        self.assertEqual(failed["generation_draft"], second)
+        self.assertTrue(any(
+            "schema:options_must_be_mapping_A_to_D" in item["issues"]
+            for item in failed["judge_feedback"]
+        ))
+        retry_state = {**state, **failed}
+        retry_state.update(prepare_regeneration_node(retry_state))
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", return_value=state["mcq"]
+        ) as generate, patch.object(generation, "_preflight_report", return_value={"passed": True}):
+            repaired = mcq_generator_node(retry_state)
+        self.assertEqual(generate.call_args.kwargs["previous_mcq"], second)
+        self.assertEqual(repaired["generation_draft"], {})
+        self.assertEqual(repaired["generation_attempt"], 2)
 
     def test_generator_refusal_becomes_a_retryable_failure(self) -> None:
         state = {
@@ -1341,7 +1371,7 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
-    def test_blueprint_or_evidence_failure_requests_replanning(self) -> None:
+    def test_blueprint_failure_first_requests_same_item_repair(self) -> None:
         result = prepare_regeneration_node(
             {
                 "judge_reports": {
@@ -1349,23 +1379,132 @@ class RegenerationRoutingTests(unittest.TestCase):
                 }
             }
         )
-        self.assertEqual(result["regeneration_route"], "replan")
-        self.assertEqual(len(result["planning_feedback"]), 1)
+        self.assertEqual(result["regeneration_route"], "generate")
+        self.assertEqual(result["planning_feedback"], [])
 
-    def test_topic_and_retrieval_evidence_failures_request_replanning(self) -> None:
-        result = prepare_regeneration_node(
-            {
-                "judge_reports": {
-                    "evidence": {
-                        "passed": False,
-                        "issues": ["blueprint_topic_mismatch", "subtopic_unsupported_by_evidence"],
-                        "feedback": "Retrieved chunks do not support the planned subtopic.",
-                    }
+    def test_persistent_topic_and_retrieval_failure_replans_after_repair(self) -> None:
+        state = {
+            "generation_attempt": 1,
+            "mcq": {"question": "Bản nháp"},
+            "generation_draft": {"question": "Bản nháp lỗi"},
+            "judge_reports": {
+                "evidence": {
+                    "passed": False,
+                    "issues": ["blueprint_topic_mismatch", "subtopic_unsupported_by_evidence"],
+                    "feedback": "Retrieved chunks do not support the planned subtopic.",
                 }
             }
-        )
+        }
+        first = prepare_regeneration_node(state)
+        self.assertEqual(first["regeneration_route"], "generate")
+        result = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
         self.assertEqual(result["regeneration_route"], "replan")
         self.assertEqual(len(result["planning_feedback"]), 1)
+        self.assertEqual(result["mcq"], {})
+        self.assertEqual(result["generation_draft"], {})
+
+    def test_unsupported_claims_and_citations_stay_on_generation_repair(self) -> None:
+        for issue in ("unsupported_key", "keyed_option_unsupported", "unsupported_option_claims", "evidence_ref_mismatch"):
+            with self.subTest(issue=issue):
+                feedback = {"judge": "evidence", "issues": [issue], "feedback": "Use supported claims."}
+                state = {
+                    "generation_attempt": 2, "judge_feedback": [feedback],
+                    "judge_reports": {"evidence": {"passed": False, **feedback}},
+                }
+                result = prepare_regeneration_node(state)
+                self.assertEqual(result["regeneration_route"], "generate")
+                self.assertEqual(result["judge_feedback"], [feedback])
+
+    def test_quality_gate_findings_join_existing_feedback_without_mutating_it(self) -> None:
+        previous = [{"judge": "a03_preflight", "issues": ["option_balance"], "feedback": "Balance options."}]
+        state = {
+            "judge_feedback": previous,
+            "judge_reports": {"evidence": {"passed": False, "issues": ["unsupported_key"], "feedback": "Narrow the key."}},
+            "quarantine_reason": ["evidence:unsupported_key", "contains_han_script"],
+        }
+        result = prepare_regeneration_node(state)
+        self.assertEqual(len(previous), 1)
+        self.assertEqual([item["judge"] for item in result["judge_feedback"]], ["a03_preflight", "evidence", "quality_gate"])
+        self.assertEqual(result["judge_feedback"][-1]["issues"], ["contains_han_script"])
+
+    def test_quality_gate_cues_reach_generator_even_when_judges_pass(self) -> None:
+        state = passing_state()
+        state.update({"next_record_id": 2, "generation_attempt": 1})
+        state["mcq"]["options"] = {
+            "A": "Hoàn toàn do một nguyên nhân.", "B": "b", "C": "c", "D": "d",
+        }
+        state.update(quality_gate_node(state))
+        self.assertEqual(state["quarantine_reason"], ["surface_cue:absolute_wording"])
+        self.assertEqual(route_after_quality_gate(state), "prepare_regeneration")
+        state.update(prepare_regeneration_node(state))
+        self.assertEqual(state["regeneration_route"], "generate")
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "request_json", return_value=passing_state()["mcq"]
+        ) as generate, patch.object(generation, "_preflight_report", return_value={"passed": True}):
+            repaired = mcq_generator_node(state)
+        prompt = generate.call_args.args[0]
+        self.assertIn("surface_cue:absolute_wording", prompt)
+        self.assertIn(json.dumps(state["mcq"], ensure_ascii=False), prompt)
+        self.assertEqual(repaired["generation_attempt"], 2)
+        checked = {**state, **repaired, "judge_reports": passing_state()["judge_reports"]}
+        self.assertEqual(quality_gate_node(checked)["verdict"], "verified")
+
+    def test_missing_retrieved_evidence_replans_without_calling_generator(self) -> None:
+        state = {"blueprint": {"level": "theory"}, "evidence_docs": []}
+        with patch.object(generation, "_generate_mcq") as generate:
+            failed = mcq_generator_node(state)
+        generate.assert_not_called()
+        self.assertEqual(failed["judge_reports"]["generation"]["issues"], ["missing_retrieved_evidence"])
+        self.assertEqual(prepare_regeneration_node({**state, **failed})["regeneration_route"], "replan")
+
+    def test_full_graph_repairs_same_item_before_collection_and_bounds_retries(self) -> None:
+        for always_fail, expected_attempts in ((False, 2), (True, 3)):
+            with self.subTest(always_fail=always_fail):
+                state = passing_state()
+                state.update({"experiment_method": "full", "next_record_id": 2, "max_iterations": 1, "max_generation_retries": 2})
+                state["mcq"] = {}
+                draft = passing_state()["mcq"]
+                snapshots = []
+
+                def review(current: dict) -> dict:
+                    snapshots.append((current["iteration_count"], current["next_record_id"], current["generation_attempt"]))
+                    passed = not always_fail and current["generation_attempt"] > 1
+                    return {"evidence_report": {
+                        "passed": passed, "issues": [] if passed else ["unsupported_key"],
+                        "feedback": "Use a narrower supported claim." if not passed else "",
+                    }}
+
+                planner = Mock(return_value={"blueprint": state["blueprint"]})
+                retrieve = Mock(return_value={"evidence_docs": state["evidence_docs"]})
+                reflect = Mock(return_value={})
+                with patch.multiple(
+                    workflow,
+                    select_anchor_node=Mock(return_value={"anchor": state["anchor"]}),
+                    curriculum_planner_node=planner, context_retriever_node=retrieve,
+                    evidence_judge_parallel_node=review,
+                    single_answer_judge_parallel_node=lambda _: {"single_answer_report": {"passed": True}},
+                    dsm5_safety_context_node=lambda _: {"dsm5_safety_docs": []},
+                    safety_bias_judge_parallel_node=lambda _: {"ei_safety_bias_report": {"passed": True}},
+                    adversarial_solver_parallel_node=lambda _: {"adversarial_solver_report": {"passed": True}},
+                    reflector_node=reflect, playbook_curator_node=lambda _: {}, flush_outputs_node=lambda _: {},
+                ), patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+                    generation, "_preflight_report", return_value={"passed": True}
+                ), patch.object(generation, "request_json", return_value=draft) as generate:
+                    result = create_mcq_graph().invoke(state, config={"recursion_limit": 100})
+                self.assertEqual(generate.call_count, expected_attempts)
+                self.assertEqual(snapshots, [(0, 2, attempt) for attempt in range(1, expected_attempts + 1)])
+                planner.assert_called_once()
+                retrieve.assert_called_once()
+                reflect.assert_called_once()
+                self.assertIn(json.dumps(draft, ensure_ascii=False), generate.call_args_list[1].args[0])
+                self.assertIn("Use a narrower supported claim.", generate.call_args_list[1].args[0])
+                self.assertEqual(result["iteration_count"], 1)
+                self.assertEqual(result["next_record_id"], 3)
+                outputs = result["quarantine_outputs"] if always_fail else result["verified_outputs"]
+                self.assertEqual(len(outputs), 1)
+                self.assertEqual(outputs[0]["id"], "PSY-000002")
+                self.assertEqual(outputs[0]["clinical_case"], draft["clinical_case"])
+                self.assertEqual(result["generation_draft"], {})
 
     def test_distractor_failure_stays_on_generation_repair(self) -> None:
         result = prepare_regeneration_node(
