@@ -56,5 +56,12 @@ def direct_context_node(state: MCQState) -> Dict[str, Any]:
 
 
 def baseline_accept_node(state: MCQState) -> Dict[str, Any]:
-    """Publish unfiltered controls so external blind audit can compare methods."""
+    """Publish generated controls for blind audit; quarantine generation failures."""
+    if not state.get("mcq"):
+        return {
+            "verdict": "quarantine",
+            "quarantine_reason": state.get("judge_reports", {}).get(
+                "generation", {}
+            ).get("issues", ["missing_mcq"]),
+        }
     return {"verdict": "verified", "quarantine_reason": []}

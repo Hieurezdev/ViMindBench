@@ -36,7 +36,7 @@ from src.mcq.application.failure_memory import (
     retrieve_similar_failures,
 )
 from src.mcq.workflow import create_mcq_graph, route_after_judge_baseline, route_after_quality_gate
-from src.mcq.application.nodes.baseline import direct_blueprint_node, direct_context_node
+from src.mcq.application.nodes.baseline import baseline_accept_node, direct_blueprint_node, direct_context_node
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
 from src.mcq.infrastructure import llm_gateway
@@ -62,12 +62,14 @@ def passing_state() -> dict:
             "skill": "causal_reasoning",
             "difficulty": "medium",
         },
-        "evidence_docs": [doc("DSM5-DEP-014", "Tier 1", 0.92)],
+        "evidence_docs": [dsm5_doc("DSM5-DEP-014"), textbook_doc("textbook-1")],
         "mcq": {
+            "clinical_case": "Trong tình huống giả định, một người trình bày khó khăn về cảm xúc.",
+            "case_summary": "Người trong tình huống có khó khăn về cảm xúc.",
             "question": "Một người ...?",
             "options": {"A": "a", "B": "b", "C": "c", "D": "d"},
             "answer": "B",
-            "evidence_refs": ["DSM5-DEP-014"],
+            "evidence_refs": ["DSM5-DEP-014", "textbook-1"],
             "rationale_short": "B phù hợp với chunk.",
             "audit_steps": ["identify evidence", "match key", "eliminate distractors"],
             "distractor_analysis": {
@@ -87,6 +89,19 @@ def passing_state() -> dict:
         "verdict": "verified",
         "quarantine_reason": [],
     }
+
+
+def dsm5_doc(chunk_id: str) -> SimpleNamespace:
+    document = doc(chunk_id, "Tier 1", 0.92)
+    document.metadata["source_kind"] = "dsm5"
+    document.metadata["source"] = "DSM-5"
+    return document
+
+
+def textbook_doc(chunk_id: str) -> SimpleNamespace:
+    document = doc(chunk_id, "Tier 1")
+    document.metadata["source_kind"] = "textbook"
+    return document
 
 
 class CurriculumLevelTests(unittest.TestCase):
@@ -113,10 +128,10 @@ class CurriculumLevelTests(unittest.TestCase):
         self.assertEqual(body["properties"]["difficulty"]["const"], "hard")
         self.assertIn("retrieval_query", body["required"])
 
-    def test_default_levels_follow_curriculum_order(self) -> None:
+    def test_default_level_prioritizes_clinical_cases(self) -> None:
         self.assertEqual(
             parse_levels(None),
-            ["theory", "emotion", "educational_scenario", "clinical_scenario"],
+            ["clinical_scenario"],
         )
 
     def test_levels_are_deduplicated_in_requested_order(self) -> None:
@@ -275,6 +290,51 @@ class CurriculumLevelTests(unittest.TestCase):
 
 
 class EvidencePolicyTests(unittest.TestCase):
+    def test_clinical_retrieval_includes_dsm5_and_textbook_without_duplicate_ids(self) -> None:
+        dsm5 = dsm5_doc("dsm5-1")
+        psychology = [doc("dsm5-1", "Tier 2"), textbook_doc("textbook-1"), doc("mental-1", "Tier 2")]
+        dsm5_queries = []
+        retriever = SimpleNamespace(
+            search=lambda query, k, *, tier1_k: psychology,
+            search_dsm5_by_query=lambda query, k: dsm5_queries.append((query, k)) or [dsm5],
+        )
+        state = {"blueprint": {"level": "clinical_scenario", "difficulty": "easy", "retrieval_query": "triệu chứng"}}
+        with patch.object(builtins, "RETRIEVER", retriever, create=True):
+            result = context_retriever_node(state)
+        self.assertEqual(dsm5_queries, [("triệu chứng", 1)])
+        self.assertEqual([item.metadata["chunk_id"] for item in result["evidence_docs"]], ["dsm5-1", "textbook-1"])
+        self.assertEqual(result["evidence_docs"][0].metadata["source_kind"], "dsm5")
+        self.assertEqual(result["evidence_docs"][1].metadata["source_kind"], "textbook")
+
+    def test_dsm5_search_marks_trusted_collection_and_preserves_provenance(self) -> None:
+        retriever = MongoDBRetriever.__new__(MongoDBRetriever)
+        retriever.collection = object()
+        retriever.db = {"DSM-5": SimpleNamespace(aggregate=lambda pipeline: [{
+            "chunk_id": "dsm5-1", "content": "Mô tả triệu chứng.",
+            "disease_name": "Chủ đề lâm sàng", "source": "DSM-5",
+            "chunk_index": 4, "source_sha256": "test-hash",
+        }])}
+        with patch.dict(os.environ, {"MONGO_DSM5_COLLECTION_NAME": "DSM-5", "ALLOW_UNTIERED_EVIDENCE": "false"}):
+            results = retriever.search_dsm5([0.1], k=1)
+            eligible = select_eligible_documents(results)
+        self.assertEqual(len(eligible), 1)
+        self.assertEqual(eligible[0].metadata["source_kind"], "dsm5")
+        self.assertEqual(eligible[0].metadata["chunk_index"], 4)
+        self.assertEqual(eligible[0].metadata["source_sha256"], "test-hash")
+
+    def test_dsm5_search_failure_is_explicit(self) -> None:
+        from pymongo.errors import OperationFailure
+        from unittest.mock import Mock
+
+        failure = OperationFailure("index unavailable")
+        retriever = MongoDBRetriever.__new__(MongoDBRetriever)
+        retriever.collection = object()
+        retriever.db = {"DSM-5": SimpleNamespace(aggregate=Mock(side_effect=failure))}
+        with patch.dict(os.environ, {"MONGO_DSM5_COLLECTION_NAME": "DSM-5"}):
+            with self.assertRaisesRegex(RuntimeError, "DSM-5 vector search failed") as raised:
+                retriever.search_dsm5([0.1], k=1)
+        self.assertIs(raised.exception.__cause__, failure)
+
     @staticmethod
     def _cache_ready_retriever() -> MongoDBRetriever:
         retriever = MongoDBRetriever.__new__(MongoDBRetriever)
@@ -319,6 +379,7 @@ class EvidencePolicyTests(unittest.TestCase):
 
         self.assertEqual([item.metadata["chunk_id"] for item in results], ["textbook-1", "mental-1"])
         self.assertEqual(results[0].metadata["source_tier"], "tier_1")
+        self.assertEqual(results[0].metadata["source_kind"], "textbook")
         self.assertEqual(results[1].metadata["source_tier"], "tier_2")
         self.assertEqual(tier2_queries[0][1], 3)
         self.assertIn("Giáo trình: cơ chế lo âu xã hội.", tier2_queries[0][0])
@@ -1038,6 +1099,96 @@ class JudgeFailureMemoryTests(unittest.TestCase):
         self.assertEqual(memory[0]["issues"], ["unsupported_key"])
 
 
+class ClinicalGenerationTests(unittest.TestCase):
+    def test_generator_repairs_missing_summary_and_dsm5_citation(self) -> None:
+        state = passing_state()
+        state.update({"experiment_method": "rag_only", "next_record_id": 2})
+        state["evidence_docs"].append(doc("mental-1", "Tier 2"))
+        malformed = {**state["mcq"], "case_summary": "", "evidence_refs": ["textbook-1"]}
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", side_effect=[malformed, state["mcq"]]
+        ) as generate:
+            result = mcq_generator_node(state)
+        self.assertEqual(generate.call_count, 2)
+        supplied_refs = generate.call_args_list[0].kwargs["refs"]
+        self.assertEqual(supplied_refs[0]["source_kind"], "dsm5")
+        self.assertEqual(result["mcq"]["case_summary"], state["mcq"]["case_summary"])
+        self.assertEqual(result["judge_feedback"][-1]["issues"], ["schema:missing_case_summary", "schema:missing_dsm5_citation"])
+
+    def test_clinical_generation_requires_dsm5_before_calling_llm(self) -> None:
+        for documents in ([], [doc("mental-1", "Tier 2")]):
+            with self.subTest(documents=len(documents)):
+                state = passing_state()
+                state["evidence_docs"] = documents
+                with patch.object(generation, "_build_evidence_plan") as plan, patch.object(
+                    generation, "_generate_mcq"
+                ) as generate:
+                    result = mcq_generator_node(state)
+                plan.assert_not_called()
+                generate.assert_not_called()
+                self.assertEqual(result["generation_attempt"], 1)
+                self.assertEqual(result["judge_reports"]["generation"]["issues"], ["dsm5_evidence_missing"])
+                retry = prepare_regeneration_node({**state, **result})
+                self.assertEqual(retry["regeneration_route"], "replan")
+
+    def test_clinical_generation_requires_textbook_before_calling_llm(self) -> None:
+        state = passing_state()
+        state["evidence_docs"] = [dsm5_doc("DSM5-DEP-014")]
+        with patch.object(generation, "_build_evidence_plan") as plan, patch.object(
+            generation, "_generate_mcq"
+        ) as generate:
+            result = mcq_generator_node(state)
+        plan.assert_not_called()
+        generate.assert_not_called()
+        self.assertEqual(result["judge_reports"]["generation"]["issues"], ["textbook_evidence_missing"])
+        self.assertEqual(prepare_regeneration_node({**state, **result})["regeneration_route"], "replan")
+
+    def test_generator_repairs_missing_textbook_citation(self) -> None:
+        state = passing_state()
+        state.update({"experiment_method": "rag_only", "next_record_id": 2})
+        malformed = {**state["mcq"], "evidence_refs": ["DSM5-DEP-014"]}
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", side_effect=[malformed, state["mcq"]]
+        ):
+            result = mcq_generator_node(state)
+        self.assertEqual(result["judge_feedback"][-1]["issues"], ["schema:missing_textbook_citation"])
+        self.assertEqual(result["mcq"]["evidence_refs"], ["DSM5-DEP-014", "textbook-1"])
+
+    def test_quality_gate_blocks_missing_case_fields_and_dsm5_citation(self) -> None:
+        for field in ("clinical_case", "case_summary"):
+            with self.subTest(field=field):
+                state = passing_state()
+                del state["mcq"][field]
+                result = quality_gate_node(state)
+                self.assertEqual(result["verdict"], "quarantine")
+                self.assertIn(f"missing_{field}", result["quarantine_reason"])
+        state = passing_state()
+        state["evidence_docs"].append(doc("mental-1", "Tier 2"))
+        state["mcq"]["evidence_refs"] = ["mental-1"]
+        self.assertIn("missing_dsm5_citation", quality_gate_node(state)["quarantine_reason"])
+        state["mcq"]["evidence_refs"] = ["DSM5-DEP-014"]
+        self.assertIn("missing_textbook_citation", quality_gate_node(state)["quarantine_reason"])
+
+    def test_quality_gate_checks_language_in_case_summary(self) -> None:
+        state = passing_state()
+        state["mcq"]["case_summary"] = "Một người có 症状."
+        self.assertIn("contains_han_script", quality_gate_node(state)["quarantine_reason"])
+
+    def test_quality_gate_rejects_missing_textbook_even_when_judges_pass(self) -> None:
+        state = passing_state()
+        state["evidence_docs"] = [dsm5_doc("DSM5-DEP-014")]
+        state["mcq"]["evidence_refs"] = ["DSM5-DEP-014"]
+        result = quality_gate_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertIn("textbook_evidence_missing", result["quarantine_reason"])
+
+    def test_baseline_quarantines_failed_clinical_generation(self) -> None:
+        state = {"mcq": {}, "judge_reports": {"generation": {"issues": ["dsm5_evidence_missing"]}}}
+        result = baseline_accept_node(state)
+        self.assertEqual(result["verdict"], "quarantine")
+        self.assertEqual(result["quarantine_reason"], ["dsm5_evidence_missing"])
+
+
 class OutputSchemaTests(unittest.TestCase):
     def test_verified_record_matches_public_schema(self) -> None:
         output = collect_node(passing_state())["verified_outputs"][0]
@@ -1046,6 +1197,8 @@ class OutputSchemaTests(unittest.TestCase):
             set(output),
             {
                 "id",
+                "clinical_case",
+                "case_summary",
                 "question",
                 "options",
                 "answer",
@@ -1059,6 +1212,21 @@ class OutputSchemaTests(unittest.TestCase):
         )
         self.assertEqual(output["validation"]["evidence_status"], "pass")
         self.assertNotIn("_audit", output)
+
+    def test_collection_preserves_case_summary_and_dsm5_provenance(self) -> None:
+        state = passing_state()
+        output = collect_node(state)["verified_outputs"][0]
+        self.assertEqual(output["clinical_case"], state["mcq"]["clinical_case"])
+        self.assertEqual(output["case_summary"], state["mcq"]["case_summary"])
+        self.assertEqual(output["evidence_refs"][0]["source_kind"], "dsm5")
+        self.assertEqual(output["evidence_refs"][0]["provenance"]["source"], "DSM-5")
+
+    def test_nonclinical_output_keeps_its_case_free_schema(self) -> None:
+        state = passing_state()
+        state["blueprint"]["level"] = "theory"
+        output = collect_node(state)["verified_outputs"][0]
+        self.assertNotIn("clinical_case", output)
+        self.assertNotIn("case_summary", output)
 
     def test_collection_uses_the_persisted_next_record_id(self) -> None:
         state = passing_state()

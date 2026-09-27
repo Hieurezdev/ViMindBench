@@ -3,7 +3,8 @@
 import builtins
 import logging
 from typing import Any, Dict
-from ...domain import LEVELS, MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
+from langchain_core.documents import Document
+from ...domain import MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import select_eligible_documents
 from ...infrastructure.llm_gateway import request_json
 from ...infrastructure.mongo_anchor_repository import select_unused_anchor
@@ -75,7 +76,7 @@ def _unwrap_blueprint(blueprint: Dict[str, Any]) -> Dict[str, Any]:
 
 def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     anchor = state["anchor"]
-    levels = state.get("curriculum_levels", list(LEVELS))
+    levels = state.get("curriculum_levels", ["clinical_scenario"])
     iteration = state.get("iteration_count", 0)
     level = levels[iteration % len(levels)]
 
@@ -159,6 +160,8 @@ def curriculum_planner_node(state: MCQState) -> Dict[str, Any]:
     blueprint["difficulty"] = difficulty
     blueprint["evidence_limit"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["evidence_limit"]
     blueprint["min_evidence_refs"] = RETRIEVAL_DEPTH_BY_DIFFICULTY[difficulty]["min_evidence_refs"]
+    if level == "clinical_scenario":
+        blueprint["min_evidence_refs"] = max(2, blueprint["min_evidence_refs"])
     blueprint["num_options"] = 4
     # An emotion curriculum item is not automatically an EmoBench item. EU/EA
     # needs a person-centred emotional vignette; forcing the rubric on a theory
@@ -187,13 +190,29 @@ def context_retriever_node(state: MCQState) -> Dict[str, Any]:
         logger.warning("A02 received no retrieval_query; using anchor fallback query")
     if not query:
         return {"evidence_docs": []}
+    candidates = retriever.search(
+        query,
+        k=retrieval_depth["candidate_k"],
+        tier1_k=retrieval_depth["tier1_candidate_k"],
+    )
+    if state.get("blueprint", {}).get("level") == "clinical_scenario":
+        # Reserve evidence capacity for DSM-5 before adding psychology context.
+        # These chunks are answer/case evidence, distinct from A06-only context.
+        dsm5_docs = retriever.search_dsm5_by_query(
+            query, k=max(1, retrieval_depth["evidence_limit"] // 2)
+        )
+        candidates = [*dsm5_docs, *candidates]
+    unique: dict[str, Document] = {}
+    for candidate in candidates:
+        chunk_id = str(
+            candidate.metadata.get("chunk_id")
+            or candidate.metadata.get("uuid")
+            or candidate.metadata.get("_id", "")
+        )
+        if chunk_id and candidate.page_content.strip() and chunk_id not in unique:
+            unique[chunk_id] = candidate
     return {
         "evidence_docs": select_eligible_documents(
-            retriever.search(
-                query,
-                k=retrieval_depth["candidate_k"],
-                tier1_k=retrieval_depth["tier1_candidate_k"],
-            ),
-            limit=retrieval_depth["evidence_limit"],
+            list(unique.values()), limit=retrieval_depth["evidence_limit"]
         )
     }

@@ -25,6 +25,8 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
             "chunk_id": ref["chunk_id"],
             "relation": "supports_answer",
             "support_strength": ref["score"],
+            "source_kind": ref["source_kind"],
+            "provenance": ref["provenance"],
         }
         for ref in evidence_refs(state.get("evidence_docs", []))
         if ref["chunk_id"] in cited
@@ -96,6 +98,9 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
             "playbook_delta": state.get("playbook_delta", []),
         },
     }
+    if blueprint.get("level") == "clinical_scenario":
+        record["clinical_case"] = mcq.get("clinical_case", "")
+        record["case_summary"] = mcq.get("case_summary", "")
     key = (
         "verified_outputs"
         if state.get("verdict") == "verified"

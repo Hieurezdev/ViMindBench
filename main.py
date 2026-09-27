@@ -124,7 +124,7 @@ def parse_args() -> argparse.Namespace:
         "--levels",
         type=str,
         default=None,
-        help="Comma-separated MCQ levels: theory,emotion,educational_scenario,clinical_scenario",
+        help="Comma-separated MCQ levels (default: clinical_scenario): theory,emotion,educational_scenario,clinical_scenario",
     )
     parser.add_argument(
         "--difficulties",
@@ -241,7 +241,7 @@ def parse_levels(raw_levels: str | None) -> list[str]:
     """Validate the optional curriculum filter before starting external clients."""
     allowed = {"theory", "emotion", "educational_scenario", "clinical_scenario"}
     if not raw_levels:
-        return ["theory", "emotion", "educational_scenario", "clinical_scenario"]
+        return ["clinical_scenario"]
     levels = [level.strip() for level in raw_levels.split(",") if level.strip()]
     invalid = sorted(set(levels) - allowed)
     if not levels or invalid:

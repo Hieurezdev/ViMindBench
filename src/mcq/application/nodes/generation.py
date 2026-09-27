@@ -44,7 +44,11 @@ def _required_answer_position(state: MCQState) -> str:
 
 
 def _normalize_and_validate_mcq(
-    mcq: Any, *, refs: List[Dict[str, Any]], required_answer: str
+    mcq: Any,
+    *,
+    refs: List[Dict[str, Any]],
+    required_answer: str,
+    blueprint: Dict[str, Any],
 ) -> tuple[Dict[str, Any], Dict[str, Any]]:
     """Normalize tolerated citation shapes and enforce A03's public contract.
 
@@ -67,6 +71,16 @@ def _normalize_and_validate_mcq(
     answer = normalized.get("answer")
     analyses = normalized.get("distractor_analysis")
     issues: List[str] = []
+    if blueprint.get("level") == "clinical_scenario":
+        for field in ("clinical_case", "case_summary"):
+            if not isinstance(normalized.get(field), str) or not normalized[field].strip():
+                issues.append(f"schema:missing_{field}")
+        dsm5_ids = {ref["chunk_id"] for ref in refs if ref.get("source_kind") == "dsm5"}
+        if dsm5_ids and not dsm5_ids.intersection(normalized["evidence_refs"]):
+            issues.append("schema:missing_dsm5_citation")
+        textbook_ids = {ref["chunk_id"] for ref in refs if ref.get("source_kind") == "textbook"}
+        if textbook_ids and not textbook_ids.intersection(normalized["evidence_refs"]):
+            issues.append("schema:missing_textbook_citation")
 
     if not isinstance(normalized.get("question"), str) or not normalized["question"].strip():
         issues.append("schema:missing_question")
@@ -97,6 +111,11 @@ def _normalize_and_validate_mcq(
                 "Repair the JSON contract exactly. Return a non-empty Vietnamese question; "
                 f"options as {{A,B,C,D}} strings; answer exactly {required_answer}; and "
                 "distractor_analysis for exactly the other three letters."
+                + (
+                    " Include non-empty clinical_case and case_summary, "
+                    "and cite at least one supplied DSM-5 chunk and one textbook chunk when available."
+                    if blueprint.get("level") == "clinical_scenario" else ""
+                )
             ),
         }
     return normalized, {"passed": True, "issues": [], "feedback": ""}
@@ -108,7 +127,7 @@ def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) 
         plan = _request_generation_json(
             blueprint,
             a03_evidence_plan.render(blueprint=blueprint, evidence=refs),
-            max_tokens=700,
+            max_tokens=1800 if blueprint.get("level") == "clinical_scenario" else 700,
         )
         if isinstance(plan, dict):
             return plan
@@ -148,7 +167,7 @@ def _generate_mcq(
             judge_feedback=judge_feedback,
             required_answer=required_answer,
         ),
-        max_tokens=1800,
+        max_tokens=2600 if blueprint.get("level") == "clinical_scenario" else 1800,
     )
 
 
@@ -221,11 +240,20 @@ def _preflight_report(
 def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
     """Turn malformed/refused generator output into a bounded workflow retry."""
     detail = str(exc).lower()
-    issue = "generator_refusal" if "cannot fulfill" in detail else f"generator_error:{type(exc).__name__}"
+    issue = (
+        "dsm5_evidence_missing" if "dsm5_evidence_missing" in detail
+        else "textbook_evidence_missing" if "textbook_evidence_missing" in detail
+        else "generator_refusal" if "cannot fulfill" in detail
+        else f"generator_error:{type(exc).__name__}"
+    )
     feedback = {
         "judge": "generator",
         "issues": [issue],
-        "feedback": "Return only the requested Vietnamese MCQ JSON. Use the retrieved evidence and educational framing; do not add a refusal or prose.",
+        "feedback": (
+            "Retrieve both eligible DSM-5 and Tier 1 textbook evidence before generating a clinical case."
+            if issue in {"dsm5_evidence_missing", "textbook_evidence_missing"}
+            else "Return only the requested Vietnamese MCQ JSON. Use the retrieved evidence and educational framing; do not add a refusal or prose."
+        ),
     }
     return {
         "mcq": {},
@@ -239,13 +267,23 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
 
 def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     refs = evidence_refs(state.get("evidence_docs", []))
+    blueprint = state["blueprint"]
+    method = state.get("experiment_method", "full")
     if not refs:
-        return {"mcq": {}}
+        issue = (
+            "dsm5_evidence_missing"
+            if blueprint.get("level") == "clinical_scenario" and method != "direct"
+            else "missing_retrieved_evidence"
+        )
+        return _generation_failure(state, ValueError(issue))
 
     full_playbook = state.get("playbook", "")
-    blueprint = state["blueprint"]
     required_answer = _required_answer_position(state)
-    method = state.get("experiment_method", "full")
+    if blueprint.get("level") == "clinical_scenario" and method != "direct":
+        if not any(ref.get("source_kind") == "dsm5" for ref in refs):
+            return _generation_failure(state, ValueError("dsm5_evidence_missing"))
+        if not any(ref.get("source_kind") == "textbook" for ref in refs):
+            return _generation_failure(state, ValueError("textbook_evidence_missing"))
     # Direct is the source-only control. It must not receive an additional
     # evidence-planning call or any LLM-as-judge preflight signal.
     evidence_plan = (
@@ -265,7 +303,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
             required_answer=required_answer,
         )
         mcq, schema_report = _normalize_and_validate_mcq(
-            mcq, refs=refs, required_answer=required_answer
+            mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
         )
         if not schema_report["passed"]:
             feedback.append(
@@ -284,7 +322,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
                 required_answer=required_answer,
             )
             mcq, schema_report = _normalize_and_validate_mcq(
-                mcq, refs=refs, required_answer=required_answer
+                mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
             )
             if not schema_report["passed"]:
                 raise ValueError("A03 schema repair failed: " + ", ".join(schema_report["issues"]))
@@ -310,7 +348,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
                 required_answer=required_answer,
             )
             mcq, schema_report = _normalize_and_validate_mcq(
-                mcq, refs=refs, required_answer=required_answer
+                mcq, refs=refs, required_answer=required_answer, blueprint=blueprint
             )
             if not schema_report["passed"]:
                 raise ValueError("A03 preflight repair broke schema: " + ", ".join(schema_report["issues"]))
@@ -354,6 +392,8 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         "evidence_ref_mismatch",
         "evidence_missing_primary_chunk",
         "keyed_option_unsupported",
+        "dsm5_evidence_missing",
+        "textbook_evidence_missing",
         "unsupported_option_claims",
         "unsupported_key",
     )

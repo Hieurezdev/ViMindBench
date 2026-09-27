@@ -1,14 +1,46 @@
-# Evidence-gated psychology MCQ pipeline
+# Clinical case and summary generation with evidence-gated MCQs
 
-Pipeline sinh câu hỏi trắc nghiệm tâm lý có evidence gate. LangGraph điều phối
+Pipeline mặc định sinh **tình huống lâm sàng giả định và tóm tắt tình huống bằng
+tiếng Việt**, kèm câu hỏi trắc nghiệm có evidence gate. DSM-5 được retrieve trước
+A03 và dùng cùng giáo trình Tier 1 làm bằng chứng sinh dữ liệu. LangGraph điều phối
 A01–A09: curriculum → retrieval → MCQ → evidence/single-answer/EI-safety judge
 → bounded regenerate on feedback → verified hoặc quarantine → ACE playbook và
 judge failure memory.
 
+Mỗi mẫu `clinical_scenario` có thêm `clinical_case` (tình huống) và
+`case_summary` (tóm tắt 2–3 câu theo yêu cầu prompt). Nội dung tập trung vào triệu
+chứng, diễn tiến/thời gian và ảnh hưởng chức năng. Có thể sáng tạo tuổi, nghề,
+bối cảnh, tiền sử, triệu chứng, thời gian, tần suất và dữ kiện thăm khám để xây
+dựng ca giả định nhất quán với lý thuyết DSM-5 và giáo trình. Những chi tiết của
+người giả định không cần xuất hiện nguyên văn trong nguồn; tiêu chí bệnh, cơ chế
+và lập luận lâm sàng phải có bằng chứng. Dữ kiện không được nêu vẫn là chưa biết.
+Tóm tắt chỉ rút gọn tình huống đã sinh, không thêm dữ kiện,
+chẩn đoán, điều trị hay đáp án câu hỏi. A03 kiểm tra hai trường không rỗng; A04
+kiểm tra bằng chứng, tính nhất quán với câu hỏi và độ trung thực của tóm tắt;
+A06 kiểm tra an toàn trên cả tình huống lẫn tóm tắt.
+
+A02 dành tối đa 1/2/3 chunk DSM-5 tương ứng easy/medium/hard, rồi bổ sung nguồn
+tâm lý Tier 1/2 trong tổng giới hạn 2/4/6 chunk. DSM-5 được đánh dấu Tier 1 theo
+collection nguồn và `source_kind=dsm5`. Mẫu lâm sàng phải trích dẫn ít nhất một
+chunk DSM-5 và ít nhất một chunk giáo trình (`source_kind=textbook`) trong
+`evidence_refs`; output giữ `source_kind` và `provenance` để truy vết. Thiếu một
+trong hai nguồn hợp lệ thì không gọi generator: pipeline có
+judge thử lập kế hoạch/retrieve lại trong retry budget, còn `rag_only` đưa mẫu
+lỗi vào quarantine. Lỗi kết nối/index DSM-5 dừng retrieval với thông báo lỗi.
+
+DSM-5 dùng để xây dựng ca học tập từ mô tả được hỗ trợ, không kết luận chẩn đoán
+cho người trong tình huống từ các tiêu chí chưa đầy đủ. Context DSM-5 lấy thêm
+sau A03 vẫn chỉ dành cho A06; chỉ chunk trong `evidence_docs` mới được trích dẫn
+làm bằng chứng sinh dữ liệu. Điều kiện `direct` giữ nguồn anchor duy nhất và
+không retrieve thêm DSM-5 để bảo toàn control của RQ2.
+
 Mỗi record verified bắt buộc có `evidence_refs` gồm các `chunk_id` đã retrieve:
-easy=1–2, medium=1–4, hard=2–6. Câu hard phải tổng hợp các claim được hỗ trợ
-trực tiếp từ ít nhất hai chunk khác nhau. Ở mọi độ khó, mọi chi tiết thực tế
-trong stem/ví dụ phải được hỗ trợ bởi một chunk trong `evidence_refs`. Nếu muốn
+easy=1–2, medium=1–4, hard=2–6. Mẫu clinical dùng tối thiểu 2 trích dẫn ở mọi
+difficulty để bao gồm cả DSM-5 và giáo trình. Câu hard phải tổng hợp các claim
+được hỗ trợ trực tiếp từ ít nhất hai chunk khác nhau. Với clinical, trích dẫn
+hỗ trợ lý thuyết và cách diễn giải ca giả định; không yêu cầu chứng minh từng
+chi tiết hư cấu. Các level khác vẫn yêu cầu bằng chứng cho từng chi tiết thực tế
+trong stem/ví dụ. Nếu muốn
 quy dẫn trong câu hỏi, A03 dùng văn phong tự nhiên như “Theo quan điểm của
 chuyên gia tâm lý, ...”, không bao giờ hiện `chunk_id` hay mã trích dẫn.
 Pipeline không lưu `<think>` tự do. Trường `reasoning.steps` chỉ chứa audit steps
@@ -16,7 +48,7 @@ ngắn, có thể kiểm tra được, không phải chain-of-thought.
 
 ```mermaid
 flowchart LR
-    A01["A01 Plan"] --> A02["A02 Retrieve\nTier 1/2"] --> A03["A03 Generate"]
+    A01["A01 Plan"] --> A02["A02 Retrieve\nDSM-5 + Tier 1/2"] --> A03["A03 Case + Summary + MCQ"]
     A03 --> A04["A04 Evidence"]
     A03 --> A05["A05 Single answer"]
     A03 --> Solver["A07 Adversarial solver"]
@@ -94,7 +126,7 @@ của MCQ vẫn chỉ là các chunk Tier 1/2 từ MongoDB trong giới hạn di
 - MongoDB Tier 1 textbook collection and Tier 2 `mental` collection, each with
   a compatible vector index (`vector_index` by default).
 - DSM-5 collection (default `DSM-5`) with the same vector index for clinical
-  safety review.
+  generation evidence and supplementary safety review.
 - An OpenAI-compatible chat endpoint or a local endpoint at port `8000`.
 - An embedding source: local `SentenceTransformer` or an OpenAI-compatible
   embedding endpoint.
@@ -178,13 +210,14 @@ uv run python main.py \
 
 ### 3. Chạy mặc định
 
-Uses values from `.env`, all four curriculum levels in this order:
-`theory → emotion → educational_scenario → clinical_scenario`.
+Uses values from `.env`; the default level is `clinical_scenario`.
+Pass `--levels theory,emotion,educational_scenario,clinical_scenario` to request
+the previous four-level curriculum explicitly.
 
 ```bash
 uv run python main.py \
   --num_qa_pairs 100 \
-  --output_path data/output/psychology_mcq.jsonl
+  --output_path data/output/clinical_cases.jsonl
 ```
 
 ### 4. Chỉ cấu hình Generator local
@@ -296,7 +329,7 @@ generator không thể mặc định đặt đáp án đúng ở A.
 ### 8. Chọn level và difficulty
 
 ```bash
-# Only clinical MCQs; retrieves DSM-5 safety context before A06
+# Clinical cases + summaries + MCQs; DSM-5 evidence is retrieved before A03
 uv run python main.py --levels clinical_scenario --num_qa_pairs 100
 
 # Alternate only between theory and emotion, and only generate hard questions
@@ -309,7 +342,7 @@ uv run python main.py \
   --num_qa_pairs 20 \
   --output_path data/output/emotion_medium.jsonl
 
-# Câu clinical hard: A02 đọc 3 evidence chunks, A06 lấy DSM-5 safety context
+# Câu clinical hard: A02 đọc tối đa 6 chunk, gồm tối đa 3 chunk DSM-5 trước A03
 # và A07 kiểm key có lộ qua cue bề mặt hay không
 uv run python main.py \
   --levels clinical_scenario \
@@ -336,16 +369,25 @@ plausible near-misses. Each distractor differs from the key by a small,
 evidence-checkable detail; the key alone synthesizes direct support from at
 least two cited chunks. This is checked by A03 preflight, A05, and Quality Gate.
 
-Stem grounding applies to `easy`, `medium`, and `hard`: A03 first extracts
-`stem_safe_claims`, then A03 preflight and A04 reject an invented or uncited
-factual detail. A natural-language attribution may appear in the stem, but only
+For clinical scenarios at every difficulty, A03 extracts clinical constraints
+into `stem_safe_claims` and creates patient details consistent with those
+constraints. Preflight and A04 check clinical interpretation, meaningful DSM-5
+and textbook citations, internal consistency and summary fidelity. A valid
+fictional age, occupation or course is not itself a reason for quarantine.
+Unsupported diagnostic rules, clinical contradictions, inaccurate summaries
+and other quality failures still trigger rejection. This policy takes precedence
+over older playbook bullets or judge feedback requiring literal source matches
+for fictional patient details. A09 retains this distinction when learning rules.
+For other levels, preflight and A04 still reject invented or uncited factual
+stem details. A natural-language attribution may appear in the stem, but only
 with a verified named expert or a generic professional phrase; database IDs and
 bracketed citation markers are forbidden.
 
 ### Retrieval depth by difficulty
 
-The final record cites approved Tier 1/2 chunks up to its difficulty-specific
-limit. A02 reads more context for harder items:
+The final record cites approved Tier 1/2 chunks, including retrieved DSM-5
+generation evidence for clinical items, up to its difficulty-specific limit.
+A02 reads more context for harder items:
 
 | Difficulty | Vector-search candidates | Approved evidence chunks supplied to A03–A06 | Required final citations |
 |---|---:|---:|
@@ -353,7 +395,8 @@ limit. A02 reads more context for harder items:
 | `medium` | 16 | 4 | 1–4 |
 | `hard` | 24 | 6 | 2–6 |
 
-A04 still requires every cited chunk to directly support the keyed answer.
+A04 requires every cited chunk to directly support the keyed answer or a case/
+stem fact. Hard keys must still synthesize claims from at least two chunks.
 
 ### 9. Theo dõi output khi chạy
 
@@ -501,7 +544,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `MONGO_URI` | `mongodb+srv://...` | MongoDB connection string. |
 | `MONGO_DB_NAME` | `Data` | Database containing source collections. |
 | `MONGO_COLLECTION_NAME` | `mental` | Main psychology evidence collection; approved as Tier 2 after backfill. |
-| `MONGO_DSM5_COLLECTION_NAME` | `DSM-5` | DSM-5 collection for clinical safety context. |
+| `MONGO_DSM5_COLLECTION_NAME` | `DSM-5` | DSM-5 collection for clinical generation evidence and safety context. |
 | `TIER1_MONGO_URI` | empty | Separate MongoDB URI for the primary textbook corpus. Set it through an untracked local environment file, shell variable, or Colab Secret; never commit it. |
 | `TIER1_MONGO_DB_NAME` | `gtrinh` | Database containing textbook chunks. |
 | `TIER1_MONGO_COLLECTION_NAME` | `gtrinh` | Textbook collection, always exported as Tier 1 evidence. |
@@ -622,7 +665,7 @@ from different models in one collection, even if their dimensions match.
 # Recompute main Tier-2 evidence vectors
 uv run python test/add_embeddings.py --collection mental --overwrite
 
-# Recompute DSM-5 vectors used by clinical A06 safety retrieval
+# Recompute DSM-5 vectors used by clinical generation and A06 safety retrieval
 uv run python test/add_embeddings.py --collection DSM-5 --overwrite
 ```
 

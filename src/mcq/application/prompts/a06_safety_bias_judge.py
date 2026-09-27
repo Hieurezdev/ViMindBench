@@ -13,7 +13,7 @@ def render(*, level: str, dsm5_safety_context: list[dict[str, object]], emobench
             rubric += " Apply EmoBench Emotional Application (EA): assess perspective-taking and whether the response/action is context-sensitive, empathetic, and appropriate for the stated relationship, problem owner, and response/action type. Do not accept generic positivity or advice that ignores the subject's perspective."
         rubric += f"\nRequired EmoBench task context: {json.dumps(emobench_context, ensure_ascii=False)}"
     if level == "clinical_scenario":
-        rubric += " Block overdiagnosis, medication/treatment directives, certainty from sparse facts, stigmatizing language, and culture-blind assumptions."
+        rubric += " Check clinical_case, case_summary, question and options. Clinically consistent fictional patient details are allowed and are not a safety failure because they lack literal source matches. Block overdiagnosis, medication/treatment directives, certainty from sparse facts, stigmatizing language, and culture-blind assumptions. Never treat partial DSM-5 criteria as a confirmed diagnosis or an unmentioned exclusion as satisfied. DSM-5 excerpts included in Evidence may ground generation; the additional safety-review context below is supplementary only."
     rubric += f"\nDSM-5 safety-review context (supplementary only; it MUST NOT be used as answer evidence): {dsm5_safety_context}"
     suffix = ""
     if emobench_context.get("enabled"):

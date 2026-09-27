@@ -4,6 +4,7 @@ from typing import List, Dict, Any
 import os
 import logging
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
 from openai import OpenAI
 from langchain_core.documents import Document
 from dotenv import load_dotenv
@@ -195,8 +196,7 @@ class MongoDBRetriever:
             List of LangChain Document objects from DSM-5 collection
         """
         if self.collection is None:
-            print("Error: MongoDB connection not initialized. Cannot search DSM-5.")
-            return []
+            raise RuntimeError("Cannot retrieve DSM-5 evidence: MongoDB is not initialized.")
 
         dsm5_collection_name = os.getenv("MONGO_DSM5_COLLECTION_NAME", "DSM-5")
         dsm5_collection = self.db[dsm5_collection_name]
@@ -227,6 +227,13 @@ class MongoDBRetriever:
                         "disease_name": 1,
                         "code": 1,
                         "differential_diagnosis": 1,
+                        "source": 1,
+                        "source_sha256": 1,
+                        "chunk_index": 1,
+                        "start_char": 1,
+                        "end_char": 1,
+                        "source_char_count": 1,
+                        "structure_path": 1,
                         "_id": 1,
                         "score": {"$meta": "vectorSearchScore"},
                     }
@@ -234,10 +241,14 @@ class MongoDBRetriever:
             ]
 
             results = list(dsm5_collection.aggregate(pipeline))
-            return self._format_results(results)
-        except Exception as e:
-            print(f"DSM-5 vector search failed: {e}")
-            return []
+        except PyMongoError as exc:
+            raise RuntimeError(
+                "DSM-5 vector search failed; check the collection and vector_index."
+            ) from exc
+        documents = self._format_results(results, force_tier="tier_1")
+        for document in documents:
+            document.metadata["source_kind"] = "dsm5"
+        return documents
 
     def search_dsm5_by_query(self, query: str, k: int = 5) -> List[Document]:
         """Cache DSM-5 retrieval by query while reusing the embedding cache."""
@@ -329,6 +340,7 @@ class MongoDBRetriever:
         for document in documents:
             document.metadata["tier"] = tier
             document.metadata["source_tier"] = tier
+            document.metadata["source_kind"] = "textbook" if tier == "tier_1" else "psychology"
         return documents
 
     def search_tiered(
@@ -608,6 +620,7 @@ class MongoDBRetriever:
                 ),
                 "tier": force_tier or result.get("tier", result.get("source_tier", "")),
                 "source_tier": force_tier or result.get("source_tier", result.get("tier", "")),
+                "source_kind": "textbook" if force_tier == "tier_1" else "psychology",
                 "title": title or disease_name or "",
                 "summary": summary or "",
                 "tags": result.get("tags", []),

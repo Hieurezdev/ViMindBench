@@ -11,9 +11,12 @@ Representative feedback: {sample_feedback[:1800] or "(no extra feedback recorded
 
 Write exactly one concise, actionable playbook rule that prevents this pattern
 or replicates the successful pattern. The rule must be in English, must be
-generalizable, must not invent clinical facts, must not mention this prompt,
+generalizable, must not invent clinical theory, must not mention this prompt,
 and must not expose chain-of-thought. Return JSON only:
 {{"rule": "one imperative rule, 20-500 characters"}}
+Clinical scenarios may invent patient details consistent with cited clinical
+theory. Do not learn a rule requiring those details to occur literally in a
+source. Protect clinical correctness and faithful summaries of generated cases.
 """
 
 
@@ -45,6 +48,8 @@ rule and an empty bullet_id. For UPDATE, bullet_id must be exactly one ID from
 Selected bullets. Never mention IDs, counters, prompts, sources, or
 chain-of-thought in the rule. Return JSON only:
 {{"action": "ADD|UPDATE|KEEP", "bullet_id": "required only for UPDATE", "rule": "required only for UPDATE"}}
+Allow synthetic clinical patient details consistent with cited theory; preserve
+clinical correctness and summary fidelity, not literal source-patient copying.
 """
 
 
@@ -65,6 +70,7 @@ If and only if merging is safe, return merge=true and write one concise,
 actionable rule that preserves every non-conflicting requirement. Otherwise
 return merge=false and an empty rule. Do not mention bullet IDs, counts, the
 merge process, prompts, sources, or chain-of-thought. Write in English, remain
-generalizable, and do not invent clinical facts. Return JSON only:
+generalizable, and do not invent clinical theory. Allow synthetic patient details
+consistent with cited theory and require faithful case summaries. Return JSON only:
 {{"merge": true, "rule": "required only when merge is true"}}
 """

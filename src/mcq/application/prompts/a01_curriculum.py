@@ -74,6 +74,15 @@ Plan exactly one item with these fixed settings:
 
 For clinical_scenario, set a safety guardrail for educational/supportive next
 steps only; never diagnosis, medication, prognosis, or emergency advice.
+Prioritize a synthetic clinical case and its concise summary. Choose a clinical
+topic and retrieval_query that can retrieve DSM-5 symptom descriptions, duration,
+functional impairment, and relevant exclusions. Plan reasoning about observed
+features or missing assessment information; do not plan a recall-only question.
+The same query must also retrieve Tier 1 textbook context for psychological
+mechanisms or functional impact. The clinical item must use both source kinds.
+DSM-5 criteria may inform an educational case, but do not establish a real
+person's diagnosis. Plan a new synthetic case whose patient details may be
+invented while its clinical pattern and interpretation follow retrieved theory.
 For emotion, set requires_emobench=true and choose exactly one EmoBench task
 (EU: identify an emotion/cause; EA: select an effective response/action) ONLY
 when the planned item will be a person-centred emotional vignette with an

@@ -53,6 +53,7 @@ def evidence_refs(docs: List[Any]) -> List[Dict[str, Any]]:
                     meta.get("chunk_id") or meta.get("uuid") or meta.get("_id", "")
                 ),
                 "tier": document_tier(doc),
+                "source_kind": meta.get("source_kind", "psychology"),
                 "title": meta.get("title", ""),
                 "score": meta.get("score", 0.0),
                 "excerpt": doc.page_content[:1200],

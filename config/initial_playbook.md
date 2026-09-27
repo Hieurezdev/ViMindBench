@@ -1,12 +1,12 @@
 <!-- playbook_version: v0.2 -->
 
 ## STRATEGIES & INSIGHTS
-[str-00001] helpful=0 harmful=0 :: Match the item level to the curriculum: theory, emotion, educational scenario, then clinical scenario. Do not force a clinical vignette when the evidence only supports a concept question.
+[str-00001] helpful=0 harmful=0 :: Prioritize synthetic clinical cases and concise case summaries by default. Respect an explicitly selected curriculum level. Clinical cases require both retrieved DSM-5 and Tier 1 textbook evidence; do not substitute a theory question when clinical evidence is missing.
 
 ## EVIDENCE & GROUNDING
 [evi-00002] helpful=0 harmful=0 :: Key an answer only when one or more retrieved Tier 1/2 chunks directly support it. Cite only retrieved chunk_id values; do not use background knowledge as evidence.
 [evi-00003] helpful=0 harmful=0 :: A relevant chunk is insufficient: reject an item if the cited excerpt cannot distinguish the keyed option from its distractors.
-[evi-00004] helpful=0 harmful=0 :: Every MCQ must export evidence_refs with chunk_id, relation=supports_answer, and support_strength, up to the difficulty policy limit: easy=1–2, medium=1–4, hard=2–6. For every difficulty, each factual detail in the question stem, vignette, or example must be supported by a chunk listed in evidence_refs; never invent scenario facts. A hard key must synthesize directly supported claims from at least two distinct cited chunks. Public wording must never show chunk_id or a database citation marker. When attribution is useful, phrase it naturally (for example, "Theo quan điểm của chuyên gia tâm lý, ..."); name an expert only when that name is present in verified metadata.
+[evi-00004] helpful=0 harmful=0 :: Every MCQ must export evidence_refs with chunk_id, relation=supports_answer, and support_strength, up to the difficulty policy limit: easy=1–2, medium=1–4, hard=2–6. Clinical scenarios may invent patient details consistent with cited DSM-5 and textbook theory; cite clinical concepts and reasoning rather than exact fictional patient details. For other levels, each factual stem detail must be supported by a cited chunk. A hard key must synthesize directly supported claims from at least two distinct cited chunks. Public wording must never show chunk_id or a database citation marker. Use natural attribution; name an expert only when present in verified metadata.
 
 ## QUESTION & DISTRACTOR DESIGN
 [qad-00004] helpful=0 harmful=0 :: Write exactly four mutually distinct options, keyed exactly A, B, C, and D, with one and only one clearly best answer. Never add, omit, merge, or use meta-options such as "all of the above" or "A and B". Each distractor must be plausible yet demonstrably less appropriate from the evidence.
@@ -20,7 +20,7 @@
 [ei-00006] helpful=0 harmful=0 :: For emotion items, preserve the subject's perspective, distinguish emotion from cause, and choose context-sensitive empathetic responses rather than generic reassurance.
 
 ## CLINICAL SAFETY & BIAS
-[cli-00007] helpful=0 harmful=0 :: For clinical scenarios, ask for the safest supportive or educational next step. Do not diagnose from sparse facts, prescribe medication, imply certainty, stigmatize, or ignore cultural context.
+[cli-00007] helpful=0 harmful=0 :: Create new hypothetical clinical cases: demographics, context, symptoms, history, duration, frequency and assessment findings may be synthetic when clinically coherent. Ground clinical theory and interpretation in both DSM-5 and textbooks; do not invent diagnostic thresholds, causal claims or medical effects. case_summary must faithfully compress the generated case without adding facts, diagnosis, treatment or the key. Ask about features, missing assessment information or safe educational next steps. Partial criteria do not establish a diagnosis; unmentioned exclusions remain unknown. Do not prescribe medication, imply certainty or stigmatize.
 
 ## COMMON MISTAKES TO AVOID
 

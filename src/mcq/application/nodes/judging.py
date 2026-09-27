@@ -288,7 +288,7 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
             errors.append("surface_cue:option_length_imbalance")
     language_fields = {
         key: state.get("mcq", {}).get(key)
-        for key in ("question", "options", "rationale_short", "distractor_analysis", "audit_steps")
+        for key in ("clinical_case", "case_summary", "question", "options", "rationale_short", "distractor_analysis", "audit_steps")
     }
     if _contains_han_script(language_fields):
         errors.append("contains_han_script")
@@ -308,6 +308,27 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
         or not cited.issubset(available)
     ):
         errors.append("invalid_evidence_refs")
+    if state.get("blueprint", {}).get("level") == "clinical_scenario":
+        for field in ("clinical_case", "case_summary"):
+            value = state.get("mcq", {}).get(field)
+            if not isinstance(value, str) or not value.strip():
+                errors.append(f"missing_{field}")
+        dsm5_ids = {
+            ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))
+            if ref.get("source_kind") == "dsm5"
+        }
+        if not dsm5_ids:
+            errors.append("dsm5_evidence_missing")
+        elif not cited.intersection(dsm5_ids):
+            errors.append("missing_dsm5_citation")
+        textbook_ids = {
+            ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))
+            if ref.get("source_kind") == "textbook"
+        }
+        if not textbook_ids:
+            errors.append("textbook_evidence_missing")
+        elif not cited.intersection(textbook_ids):
+            errors.append("missing_textbook_citation")
     adversarial_is_blocking = os.getenv(
         "A07_ADVERSARIAL_BLOCKING", "false"
     ).lower() in {"1", "true", "yes"}

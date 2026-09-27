@@ -28,6 +28,7 @@ def dsm5_safety_context_node(state: MCQState) -> Dict[str, Any]:
         part
         for part in (
             state["blueprint"].get("topic", ""),
+            _query_text(mcq.get("clinical_case", "")),
             _query_text(mcq.get("question", "")),
             _query_text(mcq.get("options", {})),
         )
