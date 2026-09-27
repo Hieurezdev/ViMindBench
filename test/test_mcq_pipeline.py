@@ -11,7 +11,7 @@ import unittest
 from collections import OrderedDict
 from threading import RLock
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from main import load_next_record_id, parse_levels
 from src.mcq.application.nodes.collection import collect_node
@@ -580,6 +580,63 @@ class JudgeGatewayTests(unittest.TestCase):
             "Here is the result:\n```json\n{\"answer\": \"B\"}\n```\n"
         )
         self.assertEqual(parsed, {"answer": "B"})
+
+    def test_thinking_setting_is_sent_only_when_configured(self) -> None:
+        for setting in (None, "false", "true"):
+            with self.subTest(setting=setting):
+                response = SimpleNamespace(choices=[SimpleNamespace(
+                    message=SimpleNamespace(content='{"answer":"B"}')
+                )])
+                create = Mock(return_value=response)
+                client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+                environment = {} if setting is None else {"LLM_ENABLE_THINKING": setting}
+                with patch.dict(os.environ, environment, clear=True), patch.object(
+                    llm_gateway, "OpenAI", return_value=client
+                ):
+                    result = llm_gateway._request_json(
+                        "prompt", max_tokens=100, base_url="http://sglang.test/v1",
+                        api_key="EMPTY", model="qwen-test",
+                        response_format={"type": "json_object"},
+                    )
+                self.assertEqual(result, {"answer": "B"})
+                self.assertEqual(create.call_args.kwargs["response_format"], {"type": "json_object"})
+                if setting is None:
+                    self.assertNotIn("extra_body", create.call_args.kwargs)
+                else:
+                    self.assertEqual(create.call_args.kwargs["extra_body"], {
+                        "chat_template_kwargs": {"enable_thinking": setting == "true"},
+                    })
+
+    def test_json_repair_preserves_disabled_thinking(self) -> None:
+        create = Mock(side_effect=[
+            SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="invalid JSON"))]),
+            SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content='{"answer":"B"}'))]),
+        ])
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+        with patch.dict(os.environ, {"LLM_ENABLE_THINKING": "false"}, clear=True), patch.object(
+            llm_gateway, "OpenAI", return_value=client
+        ):
+            result = llm_gateway._request_json(
+                "prompt", max_tokens=100, base_url="http://sglang.test/v1",
+                api_key="EMPTY", model="qwen-test",
+            )
+        self.assertEqual(result, {"answer": "B"})
+        self.assertEqual(create.call_count, 2)
+        for call in create.call_args_list:
+            self.assertEqual(call.kwargs["extra_body"], {
+                "chat_template_kwargs": {"enable_thinking": False},
+            })
+
+    def test_invalid_thinking_setting_fails_before_request(self) -> None:
+        with patch.dict(os.environ, {"LLM_ENABLE_THINKING": "invalid"}, clear=True), patch.object(
+            llm_gateway, "OpenAI"
+        ) as client:
+            with self.assertRaisesRegex(ValueError, "LLM_ENABLE_THINKING must be true or false"):
+                llm_gateway._request_json(
+                    "prompt", max_tokens=100, base_url="http://sglang.test/v1",
+                    api_key="EMPTY", model="qwen-test",
+                )
+        client.assert_not_called()
 
     def test_judges_use_a_separate_configured_endpoint(self) -> None:
         environment = {

@@ -21,11 +21,18 @@ def _parse_json_object(raw: str) -> Dict[str, Any]:
     return value
 
 
-def _repair_json(client: OpenAI, *, raw: str, model: str, max_tokens: int) -> str:
+def _repair_json(
+    client: OpenAI,
+    *,
+    raw: str,
+    model: str,
+    max_tokens: int,
+    chat_template_kwargs: dict[str, bool] | None,
+) -> str:
     """Ask once for a syntax-only repair when a local model emits invalid JSON."""
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
+    request_kwargs: Dict[str, Any] = {
+        "model": model,
+        "messages": [
             {
                 "role": "user",
                 "content": (
@@ -36,10 +43,13 @@ def _repair_json(client: OpenAI, *, raw: str, model: str, max_tokens: int) -> st
                 ),
             }
         ],
-        temperature=0,
-        max_tokens=max_tokens,
-        timeout=120,
-    )
+        "temperature": 0,
+        "max_tokens": max_tokens,
+        "timeout": 120,
+    }
+    if chat_template_kwargs is not None:
+        request_kwargs["extra_body"] = {"chat_template_kwargs": chat_template_kwargs}
+    response = client.chat.completions.create(**request_kwargs)
     return (response.choices[0].message.content or "").strip()
 
 
@@ -53,6 +63,13 @@ def _request_json(
     system_instruction: str | None = None,
     response_format: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
+    thinking_setting = os.getenv("LLM_ENABLE_THINKING")
+    chat_template_kwargs: dict[str, bool] | None = None
+    if thinking_setting is not None:
+        normalized_thinking = thinking_setting.strip().lower()
+        if normalized_thinking not in {"true", "false"}:
+            raise ValueError("LLM_ENABLE_THINKING must be true or false, or unset.")
+        chat_template_kwargs = {"enable_thinking": normalized_thinking == "true"}
     client = OpenAI(
         base_url=base_url,
         api_key=api_key,
@@ -70,12 +87,18 @@ def _request_json(
     }
     if response_format is not None:
         request_kwargs["response_format"] = response_format
+    # Older SGLang releases accept this request field without a server default flag.
+    if chat_template_kwargs is not None:
+        request_kwargs["extra_body"] = {"chat_template_kwargs": chat_template_kwargs}
     response = client.chat.completions.create(**request_kwargs)
     raw = (response.choices[0].message.content or "").strip()
     try:
         return _parse_json_object(raw)
     except (json.JSONDecodeError, ValueError) as initial_error:
-        repaired = _repair_json(client, raw=raw, model=model, max_tokens=max_tokens)
+        repaired = _repair_json(
+            client, raw=raw, model=model, max_tokens=max_tokens,
+            chat_template_kwargs=chat_template_kwargs,
+        )
         try:
             return _parse_json_object(repaired)
         except (json.JSONDecodeError, ValueError) as repair_error:

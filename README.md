@@ -558,6 +558,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `OPENAI_BASE_URL` | `https://api.openai.com/v1` | Chat completion endpoint. |
 | `OPENAI_API_KEY` | secret / `EMPTY` for local | Endpoint credential. |
 | `MODEL_NAME` | `Qwen/Qwen3-30B-A3B-Instruct-2507` | Chat model used by A01 planner and A03 generator. |
+| `LLM_ENABLE_THINKING` | unset | Optional `true`/`false` for Qwen on SGLang/vLLM. Sends `extra_body.chat_template_kwargs.enable_thinking` to generator, judges, A09 and JSON repair. Leave unset for endpoints that do not support this field. |
 | `JUDGE_OPENAI_BASE_URL` | empty | Optional OpenAI-compatible endpoint used only by A04–A07. |
 | `JUDGE_OPENAI_API_KEY` | empty / `EMPTY` local | Credential for the optional judge endpoint. |
 | `JUDGE_MODEL_NAME` | empty | Optional model used only by A04–A07; falls back to `MODEL_NAME` when unset or when the separate judge endpoint fails. |
