@@ -96,6 +96,12 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
             "verdict": state.get("verdict"),
             "quarantine_reason": state.get("quarantine_reason", []),
             "playbook_delta": state.get("playbook_delta", []),
+            "generation_attempts": state.get("generation_attempt", 0),
+            "max_generation_retries": state.get("max_generation_retries", 2),
+            "repair_history": state.get("repair_history", []),
+            "generation_feedback": state.get("judge_feedback", []),
+            "failed_generation_draft": state.get("generation_draft", {}),
+            "retrieved_chunk_ids": [ref["chunk_id"] for ref in evidence_refs(state.get("evidence_docs", []))],
         },
     }
     if blueprint.get("level") == "clinical_scenario":
@@ -115,6 +121,7 @@ def collect_node(state: MCQState) -> Dict[str, Any]:
         "anchor": None,
         "mcq": {},
         "generation_draft": {},
+        "repair_history": [],
         "judge_reports": {},
         "evidence_report": {},
         "single_answer_report": {},

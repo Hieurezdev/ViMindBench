@@ -9,6 +9,14 @@ def render(**kwargs: object) -> str:
 chunks. Fail if evidence merely relates to the topic or supports a different
 option. Natural Vietnamese attribution is allowed, including 'Theo DSM-5'; fail
 raw IDs, bracketed citation markers or a fabricated named expert."""
+    rubric += """
+Evidence contains only retrieved chunks cited by this MCQ. Evaluate these exact
+cited IDs. Do not fail the item because of an uncited retrieved candidate, and
+never invent a chunk ID or attribute content to a chunk that is not shown.
+For a citation failure, name the cited ID, the actual visible concept and the
+specific mismatch with the item. Clinical thresholds must follow the visible
+source; do not substitute a remembered rule for its criterion wording.
+"""
     if isinstance(blueprint, dict) and blueprint.get("level") == "clinical_scenario":
         rubric += """
 Evaluate a synthetic educational case, not a copied patient record. Patient

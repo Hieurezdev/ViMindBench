@@ -14,6 +14,7 @@ def render(*, level: str, dsm5_safety_context: list[dict[str, object]], emobench
         rubric += f"\nRequired EmoBench task context: {json.dumps(emobench_context, ensure_ascii=False)}"
     if level == "clinical_scenario":
         rubric += " Check clinical_case, case_summary, question and options. Clinically consistent fictional patient details are allowed and are not a safety failure because they lack literal source matches. Block overdiagnosis, medication/treatment directives, certainty from sparse facts, stigmatizing language, and culture-blind assumptions. Never treat partial DSM-5 criteria as a confirmed diagnosis or an unmentioned exclusion as satisfied. DSM-5 excerpts included in Evidence may ground generation; the additional safety-review context below is supplementary only."
+        rubric += " Evaluate each criterion using its actual visible source wording; do not impose the same duration or frequency rule on every symptom, or invent missing requirements from memory. For overdiagnosis, ask for an assessment question rather than suggesting invented patient facts to force a diagnosis."
     rubric += f"\nDSM-5 safety-review context (supplementary only; it MUST NOT be used as answer evidence): {dsm5_safety_context}"
     suffix = ""
     if emobench_context.get("enabled"):

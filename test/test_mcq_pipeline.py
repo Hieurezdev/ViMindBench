@@ -37,6 +37,7 @@ from src.mcq.application.failure_memory import (
 )
 from src.mcq.workflow import create_mcq_graph, route_after_judge_baseline, route_after_quality_gate
 from src.mcq import workflow
+from src.mcq.application.option_quality import option_surface_report
 from src.mcq.application.nodes.baseline import baseline_accept_node, direct_blueprint_node, direct_context_node
 from src.mcq.application.nodes.persistence import flush_outputs_node
 from src.mcq.infrastructure.evidence import document_tier, select_eligible_documents
@@ -628,6 +629,53 @@ class JudgeGatewayTests(unittest.TestCase):
                 "chat_template_kwargs": {"enable_thinking": False},
             })
 
+    def test_truncated_response_is_reported_without_syntax_repair(self) -> None:
+        response = SimpleNamespace(choices=[SimpleNamespace(
+            message=SimpleNamespace(content='{"private":"truncated'), finish_reason="length"
+        )])
+        create = Mock(return_value=response)
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+        with patch.object(llm_gateway, "OpenAI", return_value=client):
+            with self.assertRaises(llm_gateway.LLMOutputError) as caught:
+                llm_gateway._request_json("prompt", max_tokens=100, base_url="http://sglang.test/v1", api_key="EMPTY", model="test")
+        self.assertEqual(caught.exception.issue, "llm_output_truncated")
+        self.assertEqual(caught.exception.finish_reason, "length")
+        self.assertNotIn("private", str(caught.exception))
+        create.assert_called_once()
+
+    def test_failed_json_repair_has_a_safe_specific_error(self) -> None:
+        response = SimpleNamespace(choices=[SimpleNamespace(
+            message=SimpleNamespace(content="PRIVATE-RESPONSE"), finish_reason="stop"
+        )])
+        create = Mock(return_value=response)
+        client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+        with patch.object(llm_gateway, "OpenAI", return_value=client):
+            with self.assertRaises(llm_gateway.LLMOutputError) as caught:
+                llm_gateway._request_json("prompt", max_tokens=100, base_url="http://sglang.test/v1", api_key="EMPTY", model="test")
+        self.assertEqual(caught.exception.issue, "llm_invalid_json_after_repair")
+        self.assertNotIn("PRIVATE-RESPONSE", str(caught.exception))
+        self.assertEqual(create.call_count, 2)
+
+    def test_output_validation_error_does_not_fail_over_to_another_endpoint(self) -> None:
+        error = llm_gateway.LLMOutputError("llm_output_truncated", finish_reason="length")
+        with patch.dict(os.environ, {"OPENAI_BASE_URL": "http://primary.test", "JUDGE_OPENAI_BASE_URL": "http://judge.test"}), patch.object(
+            llm_gateway, "_request_json", side_effect=error
+        ) as request:
+            with self.assertRaises(llm_gateway.LLMOutputError):
+                llm_gateway.request_judge_json("prompt")
+        request.assert_called_once()
+
+    def test_evidence_judge_receives_only_the_cited_chunks(self) -> None:
+        state = passing_state()
+        state["evidence_docs"].append(textbook_doc("uncited-11"))
+        with patch.object(judging, "request_judge_json", return_value={"passed": True}) as request:
+            result = judging.evidence_judge_parallel_node(state)
+        evidence_line = next(line for line in request.call_args.args[0].splitlines() if line.startswith("Evidence: "))
+        supplied_ids = [ref["chunk_id"] for ref in json.loads(evidence_line.removeprefix("Evidence: "))]
+        self.assertEqual(supplied_ids, state["mcq"]["evidence_refs"])
+        self.assertNotIn("uncited-11", request.call_args.args[0])
+        self.assertTrue(result["evidence_report"]["passed"])
+
     def test_invalid_thinking_setting_fails_before_request(self) -> None:
         with patch.dict(os.environ, {"LLM_ENABLE_THINKING": "invalid"}, clear=True), patch.object(
             llm_gateway, "OpenAI"
@@ -728,6 +776,51 @@ class EmoBenchIntegrationTests(unittest.TestCase):
 
 
 class QualityAndPlaybookTests(unittest.TestCase):
+    def test_sample_length_cues_are_repaired_before_judges_at_every_difficulty(self) -> None:
+        samples = (("medium", (32, 32, 42, 32)), ("hard", (29, 26, 25, 36)), ("easy", (45, 32, 32, 37)))
+        for difficulty, counts in samples:
+            with self.subTest(difficulty=difficulty), patch.dict(os.environ, {"A03_PREFLIGHT_ENABLED": "false", "HARD_GENERATION_USE_JUDGE": "false"}):
+                state = passing_state()
+                state.update({"next_record_id": 2, "mcq": {}})
+                state["blueprint"]["difficulty"] = difficulty
+                first = passing_state()["mcq"]
+                first["options"] = {key: " ".join(["từ"] * count) for key, count in zip("ABCD", counts)}
+                repaired = passing_state()["mcq"]
+                with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+                    generation, "request_json", side_effect=[first, repaired]
+                ) as request, patch.object(generation, "request_judge_json") as critic:
+                    result = mcq_generator_node(state)
+                self.assertEqual(result["mcq"], repaired)
+                self.assertEqual(request.call_count, 2)
+                critic.assert_not_called()
+                self.assertIn("word counts are", request.call_args.args[0])
+                self.assertIn(json.dumps(first, ensure_ascii=False), request.call_args.args[0])
+                checked = {**state, **result, "judge_reports": passing_state()["judge_reports"]}
+                self.assertEqual(quality_gate_node(checked)["verdict"], "verified")
+
+    def test_surface_checks_do_not_mutate_options(self) -> None:
+        options = {"A": "Hoàn toàn sai", "B": "một lựa chọn", "C": "cả A và B", "D": "một lựa chọn"}
+        original = dict(options)
+        report = option_surface_report(options, max_word_gap=8)
+        self.assertEqual(options, original)
+        self.assertEqual(set(report["issues"]), {"surface_cue:meta_option", "surface_cue:absolute_wording"})
+
+    def test_truncation_feedback_increases_only_the_repair_output_budget(self) -> None:
+        state = passing_state()
+        state.update({"next_record_id": 2, "mcq": {}})
+        error = llm_gateway.LLMOutputError("llm_output_truncated", finish_reason="length")
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "request_json", side_effect=[error, passing_state()["mcq"]]
+        ) as request, patch.object(generation, "_preflight_report", return_value={"passed": True}):
+            failed = mcq_generator_node(state)
+            retry = {**state, **failed}
+            retry.update(prepare_regeneration_node(retry))
+            repaired = mcq_generator_node(retry)
+        self.assertEqual(failed["judge_reports"]["generation"]["issues"], ["llm_output_truncated"])
+        self.assertEqual(failed["judge_reports"]["generation"]["finish_reason"], "length")
+        self.assertEqual([call.kwargs["max_tokens"] for call in request.call_args_list], [2600, 3900])
+        self.assertEqual(repaired["generation_attempt"], 2)
+
     def test_hard_generation_can_use_judge_endpoint(self) -> None:
         with patch.dict(os.environ, {"HARD_GENERATION_USE_JUDGE": "true"}), patch.object(
             generation, "request_judge_json", return_value={"question": "hard"}
@@ -1277,6 +1370,21 @@ class ClinicalGenerationTests(unittest.TestCase):
 
 
 class OutputSchemaTests(unittest.TestCase):
+    def test_quarantine_audit_retains_repair_history_and_failed_draft(self) -> None:
+        state = passing_state()
+        state.update({
+            "verdict": "quarantine", "generation_attempt": 3,
+            "generation_draft": {"question": "Bản nháp lỗi"},
+            "repair_history": [{"generation_attempt": 1, "route": "generate", "feedback": []}],
+        })
+        result = collect_node(state)
+        audit = result["quarantine_outputs"][0]["_audit"]
+        self.assertEqual(audit["generation_attempts"], 3)
+        self.assertEqual(audit["repair_history"], state["repair_history"])
+        self.assertEqual(audit["failed_generation_draft"], state["generation_draft"])
+        self.assertEqual(audit["retrieved_chunk_ids"], ["DSM5-DEP-014", "textbook-1"])
+        self.assertEqual(result["repair_history"], [])
+
     def test_verified_record_matches_public_schema(self) -> None:
         output = collect_node(passing_state())["verified_outputs"][0]
         self.assertEqual(output["id"], "PSY-000001")
@@ -1371,6 +1479,23 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
+    def test_irrelevant_sources_are_retrieved_again_only_after_same_item_repair(self) -> None:
+        for issue in ("irrelevant_textbook_citation", "irrelevant_dsm5_citation"):
+            with self.subTest(issue=issue):
+                state = passing_state()
+                original_blueprint = dict(state["blueprint"])
+                state.update({"generation_attempt": 1, "judge_reports": {"evidence": {
+                    "passed": False, "issues": [issue], "feedback": "Find evidence for this clinical concept.",
+                }}})
+                first = prepare_regeneration_node(state)
+                self.assertEqual(first["regeneration_route"], "generate")
+                second = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
+                self.assertEqual(workflow.route_after_prepare_regeneration(second), "retrieve")
+                self.assertIn(state["mcq"]["clinical_case"], second["blueprint"]["retrieval_query"])
+                self.assertEqual(state["blueprint"], original_blueprint)
+                self.assertNotIn("mcq", second)
+                self.assertEqual([item["route"] for item in second["repair_history"]], ["generate", "retrieve"])
+
     def test_blueprint_failure_first_requests_same_item_repair(self) -> None:
         result = prepare_regeneration_node(
             {
@@ -1458,8 +1583,8 @@ class RegenerationRoutingTests(unittest.TestCase):
         self.assertEqual(prepare_regeneration_node({**state, **failed})["regeneration_route"], "replan")
 
     def test_full_graph_repairs_same_item_before_collection_and_bounds_retries(self) -> None:
-        for always_fail, expected_attempts in ((False, 2), (True, 3)):
-            with self.subTest(always_fail=always_fail):
+        for always_fail, expected_attempts, replace_source in ((False, 2, False), (True, 3, False), (False, 3, True)):
+            with self.subTest(always_fail=always_fail, replace_source=replace_source):
                 state = passing_state()
                 state.update({"experiment_method": "full", "next_record_id": 2, "max_iterations": 1, "max_generation_retries": 2})
                 state["mcq"] = {}
@@ -1468,14 +1593,19 @@ class RegenerationRoutingTests(unittest.TestCase):
 
                 def review(current: dict) -> dict:
                     snapshots.append((current["iteration_count"], current["next_record_id"], current["generation_attempt"]))
-                    passed = not always_fail and current["generation_attempt"] > 1
+                    passed = not always_fail and current["generation_attempt"] > (2 if replace_source else 1)
                     return {"evidence_report": {
-                        "passed": passed, "issues": [] if passed else ["unsupported_key"],
+                        "passed": passed, "issues": [] if passed else ["irrelevant_textbook_citation" if replace_source else "unsupported_key"],
                         "feedback": "Use a narrower supported claim." if not passed else "",
                     }}
 
                 planner = Mock(return_value={"blueprint": state["blueprint"]})
                 retrieve = Mock(return_value={"evidence_docs": state["evidence_docs"]})
+                if replace_source:
+                    retrieve.side_effect = [
+                        {"evidence_docs": state["evidence_docs"]},
+                        {"evidence_docs": [dsm5_doc("DSM5-DEP-014"), textbook_doc("textbook-2")]},
+                    ]
                 reflect = Mock(return_value={})
                 with patch.multiple(
                     workflow,
@@ -1489,12 +1619,17 @@ class RegenerationRoutingTests(unittest.TestCase):
                     reflector_node=reflect, playbook_curator_node=lambda _: {}, flush_outputs_node=lambda _: {},
                 ), patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
                     generation, "_preflight_report", return_value={"passed": True}
-                ), patch.object(generation, "request_json", return_value=draft) as generate:
+                ), patch.object(
+                    generation, "request_json", return_value=draft,
+                    side_effect=[draft, draft, {**draft, "evidence_refs": ["DSM5-DEP-014", "textbook-2"]}] if replace_source else None,
+                ) as generate:
                     result = create_mcq_graph().invoke(state, config={"recursion_limit": 100})
                 self.assertEqual(generate.call_count, expected_attempts)
                 self.assertEqual(snapshots, [(0, 2, attempt) for attempt in range(1, expected_attempts + 1)])
                 planner.assert_called_once()
-                retrieve.assert_called_once()
+                self.assertEqual(retrieve.call_count, 2 if replace_source else 1)
+                if replace_source:
+                    self.assertIn(draft["clinical_case"], retrieve.call_args.args[0]["blueprint"]["retrieval_query"])
                 reflect.assert_called_once()
                 self.assertIn(json.dumps(draft, ensure_ascii=False), generate.call_args_list[1].args[0])
                 self.assertIn("Use a narrower supported claim.", generate.call_args_list[1].args[0])

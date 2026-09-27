@@ -62,6 +62,7 @@ class MCQState(TypedDict, total=False):
     judge_feedback: List[Dict[str, Any]]
     planning_feedback: List[Dict[str, Any]]
     regeneration_route: str
+    repair_history: List[Dict[str, Any]]
     verdict: str
     quarantine_reason: List[str]
     verified_outputs: List[Dict[str, Any]]

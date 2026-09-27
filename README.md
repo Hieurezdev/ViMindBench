@@ -12,9 +12,17 @@ bản nháp hiện tại cùng feedback để sửa ngay trong cùng iteration v
 nguyên ca, blueprint và nguồn, chỉ sửa phần sai và các phần liên quan để bảo đảm
 nhất quán. Feedback schema/preflight cũng đi kèm bản nháp cần sửa. Lỗi đáp án,
 distractor, tóm tắt hoặc trích dẫn ưu tiên sửa tại A03; thiếu nguồn DSM-5/giáo
-trình thì retrieve lại ngay, còn lỗi blueprint/nguồn lệch nhau chỉ lập kế hoạch
-lại khi vẫn lặp lại sau một lượt sửa. Mặc định tối đa 2 lượt retry sau lần sinh
+trình thì lập kế hoạch/retrieve lại ngay. Nguồn vẫn bị đánh giá không liên quan
+sau một lượt sửa sẽ được retrieve lại theo ca hiện tại, giữ ca và ID; lỗi
+blueprint/nguồn lệch nhau mới lập kế hoạch lại. Mặc định tối đa 2 lượt retry sau lần sinh
 đầu; chỉ ghi verified hoặc quarantine sau khi hoàn tất sửa và kiểm tra lại.
+
+Kiểm tra cue dùng chung giữa A03 và quality gate ở mọi difficulty, kể cả khi
+tắt LLM preflight. Feedback độ dài có số từ của A–D và mức chênh lệch cho phép
+(easy/medium mặc định 8 từ, hard 5 từ). A04 chỉ nhận các chunk thực sự được
+trích dẫn. Audit quarantine ghi số lần sinh, lịch sử route/feedback, IDs nguồn
+retrieve và bản nháp lỗi còn giữ được. Lỗi JSON được phân biệt với phản hồi bị
+cắt do giới hạn output token; chỉ retry lỗi cắt mới tăng ngân sách sinh 50%.
 
 Mỗi mẫu `clinical_scenario` có thêm `clinical_case` (tình huống) và
 `case_summary` (tóm tắt 2–3 câu theo yêu cầu prompt). Nội dung tập trung vào triệu
@@ -595,7 +603,7 @@ Use [`.env.example`](.env.example) as the canonical template.
 | `PLAYBOOK_MERGE_MAX_PAIRS` | `1` | Maximum similar bullet pairs merged by A09 during one curation pass. |
 | `MAX_GENERATION_RETRIES` | `2` | Maximum retries after initial A03 generation within the same iteration/ID. Repair the draft first; replan missing or persistently misaligned sources. |
 | `A03_PREFLIGHT_ENABLED` | `true` | Before A04–A07, extract evidence-supported claims and use the Judge model once to check unsupported key claims and hard-item surface cues; A03 repairs once when it fails. |
-| `A03_HARD_GUARD_ENABLED` | `true` | Deterministically rewrites hard items containing emphatic wording or option-length imbalance before A04–A07. |
+| `A03_HARD_GUARD_ENABLED` | `true` | Enable extra hard-item wording checks and the A03 hard length limit. Shared quality-gate cue checks still run before A04–A07 for all difficulties. |
 | `A03_HARD_MAX_OPTION_WORD_GAP` | `5` | Maximum allowed difference in word count between the longest and shortest hard-item option. |
 | `HARD_GENERATION_USE_JUDGE` | `false` | When `true`, A03 evidence planning and MCQ generation for `hard` use `JUDGE_*`; errors automatically fall back to the primary Generator endpoint. |
 | `LANGGRAPH_MAX_CONCURRENCY` | `4` | Concurrent-node limit; A04, A05, A07, and DSM-5 retrieval use this fan-out capacity. |

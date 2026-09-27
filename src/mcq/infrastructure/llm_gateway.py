@@ -9,12 +9,21 @@ from openai import OpenAI
 logger = logging.getLogger("mcq.llm_gateway")
 
 
+class LLMOutputError(ValueError):
+    """Expose a machine-readable output failure without including response text."""
+
+    def __init__(self, issue: str, *, finish_reason: str | None) -> None:
+        self.issue = issue
+        self.finish_reason = finish_reason
+        super().__init__(f"{issue}; finish_reason={finish_reason}")
+
+
 def _parse_json_object(raw: str) -> Dict[str, Any]:
     """Extract one JSON object while tolerating Markdown fences and prose."""
     cleaned = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
     start = cleaned.find("{")
     if start < 0:
-        raise ValueError(f"Model did not return a JSON object: {cleaned[:240]}")
+        raise ValueError("Model did not return a JSON object")
     value, _ = json.JSONDecoder().raw_decode(cleaned[start:])
     if not isinstance(value, dict):
         raise ValueError("Model returned JSON but the top-level value is not an object")
@@ -50,6 +59,8 @@ def _repair_json(
     if chat_template_kwargs is not None:
         request_kwargs["extra_body"] = {"chat_template_kwargs": chat_template_kwargs}
     response = client.chat.completions.create(**request_kwargs)
+    if getattr(response.choices[0], "finish_reason", None) == "length":
+        raise LLMOutputError("llm_output_truncated", finish_reason="length")
     return (response.choices[0].message.content or "").strip()
 
 
@@ -91,10 +102,14 @@ def _request_json(
     if chat_template_kwargs is not None:
         request_kwargs["extra_body"] = {"chat_template_kwargs": chat_template_kwargs}
     response = client.chat.completions.create(**request_kwargs)
+    finish_reason = getattr(response.choices[0], "finish_reason", None)
+    if finish_reason == "length":
+        # Syntax repair cannot recover fields never emitted by the model.
+        raise LLMOutputError("llm_output_truncated", finish_reason=finish_reason)
     raw = (response.choices[0].message.content or "").strip()
     try:
         return _parse_json_object(raw)
-    except (json.JSONDecodeError, ValueError) as initial_error:
+    except (json.JSONDecodeError, ValueError):
         repaired = _repair_json(
             client, raw=raw, model=model, max_tokens=max_tokens,
             chat_template_kwargs=chat_template_kwargs,
@@ -102,11 +117,7 @@ def _request_json(
         try:
             return _parse_json_object(repaired)
         except (json.JSONDecodeError, ValueError) as repair_error:
-            raise ValueError(
-                "Model returned invalid JSON after one repair attempt; "
-                f"endpoint={base_url!r}; model={model!r}; initial={initial_error}; "
-                f"repair={repair_error}; raw={raw[:240]!r}"
-            ) from repair_error
+            raise LLMOutputError("llm_invalid_json_after_repair", finish_reason=finish_reason) from repair_error
 
 
 def request_json(
@@ -146,6 +157,9 @@ def request_judge_json(prompt: str, *, max_tokens: int = 1800) -> Dict[str, Any]
             model=judge_model,
         )
     except Exception as judge_error:
+        if isinstance(judge_error, LLMOutputError):
+            # Output validation needs item repair, not an endpoint failover.
+            raise
         configured_separately = (
             judge_base_url != primary_base_url or judge_model != primary_model
         )

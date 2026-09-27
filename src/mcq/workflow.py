@@ -153,7 +153,7 @@ def create_mcq_graph(experiment_method: str = "full"):
         graph.add_conditional_edges(
             "prepare_regeneration",
             route_after_prepare_regeneration,
-            {"plan": "plan", "generate": "generate"},
+            {"plan": "plan", "retrieve": "retrieve", "generate": "generate"},
         )
     graph.add_conditional_edges(
         "flush_outputs",
@@ -189,7 +189,7 @@ def route_after_quality_gate(state: MCQState) -> str:
 
 def route_after_prepare_regeneration(state: MCQState) -> str:
     """Prefer same-item repair before replanning persistent source alignment failures."""
-    route = "plan" if state.get("regeneration_route") == "replan" else "generate"
+    route = {"replan": "plan", "retrieve": "retrieve"}.get(state.get("regeneration_route", "generate"), "generate")
     logger.info("[prepare_regeneration] route=%s", route)
     return route
 

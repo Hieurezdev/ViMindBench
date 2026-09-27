@@ -5,8 +5,9 @@ import re
 from typing import Any, Dict, List
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
-from ...infrastructure.llm_gateway import request_json, request_judge_json
+from ...infrastructure.llm_gateway import LLMOutputError, request_json, request_judge_json
 from ..prompts import a03_evidence_plan, a03_mcq, a03_preflight
+from ..option_quality import option_surface_report
 
 HARD_EMPHATIC_WORDING = re.compile(
     r"\b(hoàn\s+toàn|tuyệt\s+đối|luôn\s+luôn|không\s+bao\s+giờ|duy\s+nhất|chắc\s+chắn|triệt\s+để|ngay\s+lập\s+tức|tự\s+ý|tất\s+cả)\b",
@@ -158,6 +159,9 @@ def _generate_mcq(
     required_answer: str,
     previous_mcq: Dict[str, Any],
 ) -> Dict[str, Any]:
+    max_tokens = 2600 if blueprint.get("level") == "clinical_scenario" else 1800
+    if any("llm_output_truncated" in item.get("issues", []) for item in judge_feedback):
+        max_tokens = max_tokens * 3 // 2
     return _request_generation_json(
         blueprint,
         a03_mcq.render(
@@ -169,15 +173,12 @@ def _generate_mcq(
             required_answer=required_answer,
             previous_mcq=previous_mcq,
         ),
-        max_tokens=2600 if blueprint.get("level") == "clinical_scenario" else 1800,
+        max_tokens=max_tokens,
     )
 
 
 def _hard_guard_report(blueprint: Dict[str, Any], mcq: Dict[str, Any]) -> Dict[str, Any]:
-    """Deterministically reject common hard-item cues before LLM judging."""
-    if blueprint.get("difficulty") != "hard" or os.getenv("A03_HARD_GUARD_ENABLED", "true").lower() not in {"1", "true", "yes"}:
-        return {"passed": True, "issues": [], "feedback": ""}
-
+    """Catch gate-blocking cues at every difficulty, plus optional hard-item rules."""
     options = mcq.get("options")
     if not isinstance(options, dict) or set(options) != {"A", "B", "C", "D"} or not all(isinstance(text, str) and text.strip() for text in options.values()):
         return {
@@ -186,14 +187,15 @@ def _hard_guard_report(blueprint: Dict[str, Any], mcq: Dict[str, Any]) -> Dict[s
             "feedback": "Return four non-empty string options A–D in the same grammatical frame.",
         }
 
-    issues: List[str] = []
-    details: List[str] = []
-    counts = {key: len(re.findall(r"\w+", text, re.UNICODE)) for key, text in options.items()}
-    max_gap = int(os.getenv("A03_HARD_MAX_OPTION_WORD_GAP", "5"))
-    if max(counts.values()) - min(counts.values()) > max_gap:
-        issues.append("hard_guard:option_length_imbalance")
-        details.append(f"word counts are {counts}; keep the gap at most {max_gap}")
-
+    is_hard = blueprint.get("difficulty") == "hard"
+    max_gap = int(os.getenv("A07_HARD_MAX_OPTION_WORD_GAP" if is_hard else "A07_MAX_OPTION_WORD_GAP", "5" if is_hard else "8"))
+    if is_hard and os.getenv("A03_HARD_GUARD_ENABLED", "true").lower() in {"1", "true", "yes"}:
+        max_gap = min(max_gap, int(os.getenv("A03_HARD_MAX_OPTION_WORD_GAP", "5")))
+    surface = option_surface_report(options, max_word_gap=max_gap)
+    if not is_hard or os.getenv("A03_HARD_GUARD_ENABLED", "true").lower() not in {"1", "true", "yes"}:
+        return surface
+    issues = [issue.replace("surface_cue:", "hard_guard:") for issue in surface["issues"]]
+    details = [surface["feedback"]] if surface["feedback"] else []
     emphatic = {
         key: sorted({match.group(0).lower() for match in HARD_EMPHATIC_WORDING.finditer(text)})
         for key, text in options.items()
@@ -221,7 +223,10 @@ def _preflight_report(
         return hard_guard
     try:
         report = request_judge_json(
-            a03_preflight.render(blueprint=blueprint, mcq=mcq, evidence=refs),
+            a03_preflight.render(
+                blueprint=blueprint, mcq=mcq,
+                evidence=[ref for ref in refs if ref["chunk_id"] in mcq.get("evidence_refs", [])],
+            ),
             max_tokens=450,
         )
         if not isinstance(report, dict):
@@ -243,7 +248,10 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
     """Turn malformed/refused generator output into a bounded workflow retry."""
     detail = str(exc).lower()
     issue = (
-        "dsm5_evidence_missing" if "dsm5_evidence_missing" in detail
+        exc.issue if isinstance(exc, LLMOutputError)
+        else "generator_schema_repair_failed" if detail.startswith("a03 schema repair failed")
+        else "generator_preflight_repair_broke_schema" if detail.startswith("a03 preflight repair broke schema")
+        else "dsm5_evidence_missing" if "dsm5_evidence_missing" in detail
         else "textbook_evidence_missing" if "textbook_evidence_missing" in detail
         else "missing_retrieved_evidence" if "missing_retrieved_evidence" in detail
         else "generator_refusal" if "cannot fulfill" in detail
@@ -257,6 +265,10 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
             if issue in {"dsm5_evidence_missing", "textbook_evidence_missing"}
             else "Retrieve eligible evidence excerpts before generating the item."
             if issue == "missing_retrieved_evidence"
+            else "The response reached the output token limit. Shorten the case, options and explanations; return one complete MCQ JSON. The next generation has a larger output budget."
+            if issue == "llm_output_truncated"
+            else "Repair the specific schema findings above without changing the valid clinical case. Return the complete MCQ JSON."
+            if issue in {"generator_schema_repair_failed", "generator_preflight_repair_broke_schema"}
             else "Return only the requested Vietnamese MCQ JSON. Use the retrieved evidence and educational framing; do not add a refusal or prose."
         ),
     }
@@ -266,7 +278,11 @@ def _generation_failure(state: MCQState, exc: Exception) -> Dict[str, Any]:
         "generation_draft": state.get("generation_draft") or state.get("mcq", {}),
         "generation_attempt": state.get("generation_attempt", 0) + 1,
         "judge_reports": {
-            "generation": {"passed": False, "issues": [issue], "severity": "blocking", "feedback": feedback["feedback"]}
+            "generation": {
+                "passed": False, "issues": [issue], "severity": "blocking", "feedback": feedback["feedback"],
+                "error_type": type(exc).__name__,
+                "finish_reason": exc.finish_reason if isinstance(exc, LLMOutputError) else None,
+            }
         },
         "judge_feedback": [*state.get("judge_feedback", []), feedback],
     }
@@ -416,11 +432,15 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         if issue not in reported_issues
     ]
     if gate_issues:
+        options = state.get("mcq", {}).get("options", {})
+        surface_feedback = ""
+        if isinstance(options, dict) and set(options) == set(ANSWER_LABELS) and all(isinstance(text, str) for text in options.values()):
+            surface_feedback = _hard_guard_report(state.get("blueprint", {}), state["mcq"])["feedback"]
         feedback.append(
             {
                 "judge": "quality_gate",
                 "issues": gate_issues,
-                "feedback": "Repair these quality-gate failures while preserving the valid parts of the current item.",
+                "feedback": "Repair these quality-gate failures while preserving the valid parts of the current item. " + surface_feedback,
             }
         )
     issues = [
@@ -454,14 +474,41 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         )
     )
     needs_replan = missing_sources or repeated_alignment
+    source_markers = ("irrelevant_textbook_citation", "irrelevant_dsm5_citation", "insufficient_evidence_support")
+    needs_retrieval = (
+        not needs_replan
+        and bool(state.get("mcq"))
+        and state.get("generation_attempt", 0) > 1
+        and state.get("regeneration_route", "generate") == "generate"
+        and any(
+            any(marker in issue for issue in issues)
+            and any(marker in issue for issue in previous_issues)
+            for marker in source_markers
+        )
+    )
     accumulated_feedback = [item for item in previous_feedback if item not in feedback] + feedback
+    route = "replan" if needs_replan else "retrieve" if needs_retrieval else "generate"
     update: Dict[str, Any] = {
         "judge_feedback": accumulated_feedback,
         "planning_feedback": feedback if needs_replan else [],
-        "regeneration_route": "replan" if needs_replan else "generate",
+        "regeneration_route": route,
+        "repair_history": [*state.get("repair_history", []), {
+            "generation_attempt": state.get("generation_attempt", 0),
+            "route": route,
+            "feedback": feedback,
+        }],
         "dsm5_safety_docs": [],
     }
     if needs_replan:
         # A new source pairing must not inherit a draft grounded in old evidence.
         update.update({"mcq": {}, "generation_draft": {}})
+    elif needs_retrieval:
+        # Search for evidence matching the repaired case, not just the broad anchor topic.
+        blueprint = state["blueprint"]
+        mcq = state["mcq"]
+        query = " ".join(
+            value for value in (blueprint.get("topic"), mcq.get("clinical_case"), mcq.get("question"))
+            if isinstance(value, str) and value.strip()
+        )[:1500]
+        update["blueprint"] = {**blueprint, "retrieval_query": query}
     return update

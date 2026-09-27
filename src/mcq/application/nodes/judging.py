@@ -9,22 +9,12 @@ from ...infrastructure.evidence import evidence_refs
 from ...infrastructure.llm_gateway import request_judge_json
 from ..emobench import judge_context, validate_judge_report
 from ..failure_memory import prompt_context, retrieve_similar_failures
+from ..option_quality import option_surface_report
 from ..prompts import a04_evidence_judge, a05_single_answer_judge, a06_safety_bias_judge, a07_adversarial_solver
 
 HAN_CHARACTER = re.compile(r"[\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]")
 logger = logging.getLogger("mcq.judging")
 SURFACE_CUE_TYPES = {"length", "absolute_wording", "grammar"}
-ABSOLUTE_OPTION_WORDING = re.compile(
-    r"\b(hoàn\s+toàn|tuyệt\s+đối|luôn\s+luôn|không\s+bao\s+giờ|duy\s+nhất|"
-    r"chắc\s+chắn|triệt\s+để|tất\s+cả)\b",
-    re.IGNORECASE,
-)
-META_OPTION_WORDING = re.compile(
-    r"\b(tất\s+cả\s+(?:các\s+)?đáp\s+án\s+(?:trên|đúng)|"
-    r"cả\s+[abcd]\s+(?:và|lẫn)\s+[abcd]|"
-    r"[abcd]\s+(?:và|lẫn)\s+[abcd]\s+(?:đều\s+)?đúng)\b",
-    re.IGNORECASE,
-)
 
 
 def _contains_han_script(value: Any) -> bool:
@@ -51,6 +41,9 @@ def _run_judge(
             "issues": ["missing_mcq_or_evidence"],
             "severity": "blocking",
         }
+    if judge_name == "evidence":
+        cited = mcq.get("evidence_refs", [])
+        refs = [ref for ref in refs if ref["chunk_id"] in cited]
     try:
         similar = retrieve_similar_failures(
             state.get("judge_failure_memory", []),
@@ -270,12 +263,6 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
     if valid_options_mapping and all(
         isinstance(text, str) and text.strip() for text in options.values()
     ):
-        option_texts = list(options.values())
-        if any(META_OPTION_WORDING.search(text) for text in option_texts):
-            errors.append("surface_cue:meta_option")
-        if any(ABSOLUTE_OPTION_WORDING.search(text) for text in option_texts):
-            errors.append("surface_cue:absolute_wording")
-        word_counts = [len(re.findall(r"\w+", text, re.UNICODE)) for text in option_texts]
         max_gap = int(
             os.getenv(
                 "A07_HARD_MAX_OPTION_WORD_GAP"
@@ -284,8 +271,7 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
                 "5" if state.get("blueprint", {}).get("difficulty") == "hard" else "8",
             )
         )
-        if max(word_counts) - min(word_counts) > max_gap:
-            errors.append("surface_cue:option_length_imbalance")
+        errors.extend(option_surface_report(options, max_word_gap=max_gap)["issues"])
     language_fields = {
         key: state.get("mcq", {}).get(key)
         for key in ("clinical_case", "case_summary", "question", "options", "rationale_short", "distractor_analysis", "audit_steps")
