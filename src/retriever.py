@@ -248,6 +248,10 @@ class MongoDBRetriever:
         documents = self._format_results(results, force_tier="tier_1")
         for document in documents:
             document.metadata["source_kind"] = "dsm5"
+        logger.info(
+            "DSM-5 vector retrieval: collection=%s requested=%s returned=%s",
+            dsm5_collection_name, k, len(documents),
+        )
         return documents
 
     def search_dsm5_by_query(self, query: str, k: int = 5) -> List[Document]:
@@ -255,6 +259,7 @@ class MongoDBRetriever:
         key = (self._cache_key(query), k)
         cached = self._cache_get(self._dsm5_search_cache, key)
         if cached is not None:
+            logger.info("DSM-5 retrieval cache hit: requested=%s returned=%s", k, len(cached))
             return list(cached)
         results = self.search_dsm5(self.generate_embedding(query), k=k)
         self._cache_set(self._dsm5_search_cache, key, list(results))

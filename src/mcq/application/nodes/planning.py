@@ -211,8 +211,14 @@ def context_retriever_node(state: MCQState) -> Dict[str, Any]:
         )
         if chunk_id and candidate.page_content.strip() and chunk_id not in unique:
             unique[chunk_id] = candidate
-    return {
-        "evidence_docs": select_eligible_documents(
-            list(unique.values()), limit=retrieval_depth["evidence_limit"]
+    evidence_docs = select_eligible_documents(
+        list(unique.values()), limit=retrieval_depth["evidence_limit"]
+    )
+    if state.get("blueprint", {}).get("level") == "clinical_scenario":
+        logger.info(
+            "A02 clinical evidence selected: dsm5=%s textbook=%s total=%s",
+            sum(doc.metadata.get("source_kind") == "dsm5" for doc in evidence_docs),
+            sum(doc.metadata.get("source_kind") == "textbook" for doc in evidence_docs),
+            len(evidence_docs),
         )
-    }
+    return {"evidence_docs": evidence_docs}

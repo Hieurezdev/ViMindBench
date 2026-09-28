@@ -301,12 +301,15 @@ class EvidencePolicyTests(unittest.TestCase):
             search_dsm5_by_query=lambda query, k: dsm5_queries.append((query, k)) or [dsm5],
         )
         state = {"blueprint": {"level": "clinical_scenario", "difficulty": "easy", "retrieval_query": "triệu chứng"}}
-        with patch.object(builtins, "RETRIEVER", retriever, create=True):
+        with patch.object(builtins, "RETRIEVER", retriever, create=True), self.assertLogs(
+            "mcq.planning", level="INFO"
+        ) as logs:
             result = context_retriever_node(state)
         self.assertEqual(dsm5_queries, [("triệu chứng", 1)])
         self.assertEqual([item.metadata["chunk_id"] for item in result["evidence_docs"]], ["dsm5-1", "textbook-1"])
         self.assertEqual(result["evidence_docs"][0].metadata["source_kind"], "dsm5")
         self.assertEqual(result["evidence_docs"][1].metadata["source_kind"], "textbook")
+        self.assertIn("dsm5=1 textbook=1 total=2", logs.output[0])
 
     def test_dsm5_search_marks_trusted_collection_and_preserves_provenance(self) -> None:
         retriever = MongoDBRetriever.__new__(MongoDBRetriever)
@@ -316,13 +319,16 @@ class EvidencePolicyTests(unittest.TestCase):
             "disease_name": "Chủ đề lâm sàng", "source": "DSM-5",
             "chunk_index": 4, "source_sha256": "test-hash",
         }])}
-        with patch.dict(os.environ, {"MONGO_DSM5_COLLECTION_NAME": "DSM-5", "ALLOW_UNTIERED_EVIDENCE": "false"}):
+        with patch.dict(os.environ, {"MONGO_DSM5_COLLECTION_NAME": "DSM-5", "ALLOW_UNTIERED_EVIDENCE": "false"}), self.assertLogs(
+            "mcq.retriever", level="INFO"
+        ) as logs:
             results = retriever.search_dsm5([0.1], k=1)
             eligible = select_eligible_documents(results)
         self.assertEqual(len(eligible), 1)
         self.assertEqual(eligible[0].metadata["source_kind"], "dsm5")
         self.assertEqual(eligible[0].metadata["chunk_index"], 4)
         self.assertEqual(eligible[0].metadata["source_sha256"], "test-hash")
+        self.assertIn("collection=DSM-5 requested=1 returned=1", logs.output[0])
 
     def test_dsm5_search_failure_is_explicit(self) -> None:
         from pymongo.errors import OperationFailure
@@ -354,6 +360,17 @@ class EvidencePolicyTests(unittest.TestCase):
         self.assertEqual(retriever.generate_embedding("Stress   học tập"), [0.1, 0.2])
         self.assertEqual(retriever.generate_embedding(" stress học tập "), [0.1, 0.2])
         self.assertEqual(calls, ["Stress   học tập"])
+
+    def test_dsm5_retrieval_reports_cache_hits(self) -> None:
+        retriever = self._cache_ready_retriever()
+        retriever.generate_embedding = Mock(return_value=[0.1])
+        retriever.search_dsm5 = Mock(return_value=[dsm5_doc("dsm5-1")])
+        with self.assertLogs("mcq.retriever", level="INFO") as logs:
+            first = retriever.search_dsm5_by_query("Lo âu", k=1)
+            second = retriever.search_dsm5_by_query(" lo âu ", k=1)
+        self.assertEqual(first, second)
+        retriever.search_dsm5.assert_called_once_with([0.1], k=1)
+        self.assertIn("DSM-5 retrieval cache hit: requested=1 returned=1", logs.output[0])
 
     def test_retrieval_cache_reuses_query_and_k(self) -> None:
         retriever = self._cache_ready_retriever()
@@ -603,6 +620,18 @@ class JudgeGatewayTests(unittest.TestCase):
         ):
             cue = adversarial_solver_node(state)
         self.assertFalse(cue["judge_reports"]["adversarial_solver"]["passed"])
+
+    def test_adversarial_solver_output_failure_reports_the_specific_issue(self) -> None:
+        state = passing_state()
+        error = llm_gateway.LLMOutputError("llm_output_truncated", finish_reason="length")
+        with patch.object(judging, "request_judge_json", side_effect=error) as request:
+            report = adversarial_solver_node(state)["judge_reports"]["adversarial_solver"]
+        self.assertEqual(request.call_args.kwargs["max_tokens"], 500)
+        self.assertEqual(report["issues"], ["solver_error:llm_output_truncated"])
+        self.assertEqual(report["finish_reason"], "length")
+        state["judge_reports"]["adversarial_solver"] = report
+        with patch.dict(os.environ, {"A07_ADVERSARIAL_BLOCKING": "false"}):
+            self.assertEqual(quality_gate_node(state)["verdict"], "verified")
 
     def test_json_parser_accepts_fenced_json_with_surrounding_prose(self) -> None:
         parsed = llm_gateway._parse_json_object(

@@ -6,7 +6,7 @@ import logging
 from typing import Any, Dict, Callable, Set
 from ...domain import MCQState, RETRIEVAL_DEPTH_BY_DIFFICULTY
 from ...infrastructure.evidence import evidence_refs
-from ...infrastructure.llm_gateway import request_judge_json
+from ...infrastructure.llm_gateway import LLMOutputError, request_judge_json
 from ..emobench import judge_context, validate_judge_report
 from ..failure_memory import prompt_context, retrieve_similar_failures
 from ..option_quality import option_surface_report
@@ -159,7 +159,7 @@ def _adversarial_solver_report(state: MCQState) -> Dict[str, Any]:
                 options=mcq.get("options", {}),
                 difficulty=state.get("blueprint", {}).get("difficulty", "medium")
             ),
-            max_tokens=300,
+            max_tokens=500,
         )
 
         selected_option = solver_response.get("selected_option")
@@ -198,6 +198,12 @@ def _adversarial_solver_report(state: MCQState) -> Dict[str, Any]:
             "surface_cue_type": cue_type,
             "surface_cue_evidence": cue_evidence,
             "blocking_surface_cue": blocking_surface_cue,
+        }
+    except LLMOutputError as exc:
+        return {
+            "passed": False,
+            "issues": [f"solver_error:{exc.issue}"],
+            "finish_reason": exc.finish_reason,
         }
     except Exception as exc:
         return {
@@ -330,10 +336,14 @@ def quality_gate_node(state: MCQState) -> Dict[str, Any]:
                         f"{judge}:{issue}" for issue in report.get("issues", ["failed"])
                     )
                     continue
-                logger.info(
-                    "A07 finding retained as warning (not a verifiable surface cue): %s",
-                    report.get("issues", ["failed"]),
-                )
+                issues = report.get("issues", ["failed"])
+                if all(str(issue).startswith("solver_error:") for issue in issues):
+                    logger.warning("A07 solver unavailable; verdict uses other judges: %s", issues)
+                else:
+                    logger.info(
+                        "A07 finding retained as warning (not a verifiable surface cue): %s",
+                        issues,
+                    )
                 continue
             errors.extend(
                 f"{judge}:{issue}" for issue in report.get("issues", ["failed"])
