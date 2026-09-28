@@ -431,7 +431,7 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
 
 
 def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
-    """Repair the current item first; replan missing or persistently misaligned sources."""
+    """Retrieve mismatched evidence while a repair attempt is still available."""
     feedback: List[Dict[str, Any]] = []
     for judge, report in state.get("judge_reports", {}).items():
         if judge == "adversarial_solver" and all(
@@ -503,23 +503,33 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
             for marker in alignment_markers
         )
     )
-    needs_replan = missing_sources or repeated_alignment
     source_markers = (
-        "irrelevant_textbook_citation", "irrelevant_dsm5_citation",
-        "insufficient_evidence_support", "evidence_mismatch",
-        "insufficient_support_dsm5", "insufficient_support_textbook",
-        "insufficient_support_keyed_option", "key_not_supported_by_evidence",
+        "irrelevant_textbook_citation",
+        "irrelevant_dsm5_citation",
+        "irrelevant_citation",
+        "source_kind_irrelevant",
+        "missing_source_kind_relevance",
+        "missing_source_kind_textbook_support_for_key",
+        "insufficient_evidence_support",
+        "evidence_mismatch",
+        "insufficient_support_dsm5",
+        "insufficient_support_textbook",
+        "insufficient_support_key",
+        "insufficient_support_for_key",
+        "key_not_supported_by_evidence",
+        "keyed_answer_not_supported_by_cited_evidence",
+    )
+    source_mismatch = any(marker in issue for issue in issues for marker in source_markers)
+    needs_replan = missing_sources or repeated_alignment or (
+        state.get("regeneration_route") == "retrieve"
+        and source_mismatch
+        and any(marker in issue for issue in previous_issues for marker in source_markers)
     )
     needs_retrieval = (
         not needs_replan
         and bool(state.get("mcq"))
-        and state.get("generation_attempt", 0) > 1
         and state.get("regeneration_route", "generate") == "generate"
-        and any(
-            any(marker in issue for issue in issues)
-            and any(marker in issue for issue in previous_issues)
-            for marker in source_markers
-        )
+        and source_mismatch
     )
     accumulated_feedback = [item for item in previous_feedback if item not in feedback] + feedback
     route = "replan" if needs_replan else "retrieve" if needs_retrieval else "generate"
@@ -538,12 +548,21 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         # A new source pairing must not inherit a draft grounded in old evidence.
         update.update({"mcq": {}, "generation_draft": {}})
     elif needs_retrieval:
-        # Search for evidence matching the repaired case, not just the broad anchor topic.
+        # Synthetic patient details dilute a search for the clinical concept.
         blueprint = state["blueprint"]
         mcq = state["mcq"]
+        options = mcq.get("options", {})
+        keyed_option = (
+            options.get(mcq.get("answer"), "") if isinstance(options, dict) else ""
+        )
         query = " ".join(
-            value for value in (blueprint.get("topic"), mcq.get("clinical_case"), mcq.get("question"))
+            value for value in (
+                blueprint.get("topic"),
+                blueprint.get("subtopic"),
+                mcq.get("question"),
+                keyed_option,
+            )
             if isinstance(value, str) and value.strip()
-        )[:1500]
+        )[:600]
         update["blueprint"] = {**blueprint, "retrieval_query": query}
     return update

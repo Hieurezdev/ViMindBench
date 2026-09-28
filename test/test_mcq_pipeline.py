@@ -1544,18 +1544,24 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
-    def test_current_evidence_mismatch_codes_trigger_retrieval_after_one_repair(self) -> None:
-        for issue in ("evidence_mismatch_dsm5", "evidence_mismatch_textbook", "evidence_mismatch", "insufficient_support_dsm5", "insufficient_support_keyed_option"):
+    def test_evidence_mismatch_codes_trigger_retrieval_on_first_failure(self) -> None:
+        for issue in (
+            "evidence_mismatch_dsm5",
+            "evidence_mismatch_textbook",
+            "evidence_mismatch",
+            "insufficient_support_dsm5",
+            "insufficient_support_keyed_option",
+            "insufficient_support_for_key",
+            "source_kind_irrelevant",
+        ):
             with self.subTest(issue=issue):
                 state = passing_state()
                 state.update({"generation_attempt": 1, "judge_reports": {"evidence": {
                     "passed": False, "issues": [issue], "feedback": "Source and key do not align.",
                 }}})
-                first = prepare_regeneration_node(state)
-                self.assertEqual(first["regeneration_route"], "generate")
-                second = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
-                self.assertEqual(second["regeneration_route"], "retrieve")
-                self.assertEqual(second["repair_history"][-1]["route"], "retrieve")
+                result = prepare_regeneration_node(state)
+                self.assertEqual(result["regeneration_route"], "retrieve")
+                self.assertEqual(result["repair_history"][-1]["route"], "retrieve")
 
     def test_solver_transport_error_is_not_sent_as_repair_feedback(self) -> None:
         state = passing_state()
@@ -1566,22 +1572,34 @@ class RegenerationRoutingTests(unittest.TestCase):
         result = prepare_regeneration_node(state)
         self.assertEqual([item["judge"] for item in result["judge_feedback"]], ["single_answer"])
 
-    def test_irrelevant_sources_are_retrieved_again_only_after_same_item_repair(self) -> None:
+    def test_irrelevant_sources_are_retrieved_without_patient_details(self) -> None:
         for issue in ("irrelevant_textbook_citation", "irrelevant_dsm5_citation"):
             with self.subTest(issue=issue):
                 state = passing_state()
+                state["mcq"]["options"]["B"] = "Đặc điểm lo âu lan tỏa"
                 original_blueprint = dict(state["blueprint"])
                 state.update({"generation_attempt": 1, "judge_reports": {"evidence": {
                     "passed": False, "issues": [issue], "feedback": "Find evidence for this clinical concept.",
                 }}})
-                first = prepare_regeneration_node(state)
-                self.assertEqual(first["regeneration_route"], "generate")
-                second = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
-                self.assertEqual(workflow.route_after_prepare_regeneration(second), "retrieve")
-                self.assertIn(state["mcq"]["clinical_case"], second["blueprint"]["retrieval_query"])
+                result = prepare_regeneration_node(state)
+                self.assertEqual(workflow.route_after_prepare_regeneration(result), "retrieve")
+                self.assertIn(state["mcq"]["question"], result["blueprint"]["retrieval_query"])
+                self.assertIn(state["mcq"]["options"]["B"], result["blueprint"]["retrieval_query"])
+                self.assertNotIn(state["mcq"]["clinical_case"], result["blueprint"]["retrieval_query"])
                 self.assertEqual(state["blueprint"], original_blueprint)
-                self.assertNotIn("mcq", second)
-                self.assertEqual([item["route"] for item in second["repair_history"]], ["generate", "retrieve"])
+                self.assertNotIn("mcq", result)
+                self.assertEqual([item["route"] for item in result["repair_history"]], ["retrieve"])
+
+    def test_persistent_source_mismatch_replans_after_retrieval(self) -> None:
+        state = passing_state()
+        state.update({"generation_attempt": 1, "judge_reports": {"evidence": {
+            "passed": False, "issues": ["evidence_mismatch_textbook"], "feedback": "Find a matching source.",
+        }}})
+        first = prepare_regeneration_node(state)
+        result = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
+        self.assertEqual(result["regeneration_route"], "replan")
+        self.assertEqual(result["mcq"], {})
+        self.assertEqual([item["route"] for item in result["repair_history"]], ["retrieve", "replan"])
 
     def test_blueprint_failure_first_requests_same_item_repair(self) -> None:
         result = prepare_regeneration_node(
@@ -1670,7 +1688,7 @@ class RegenerationRoutingTests(unittest.TestCase):
         self.assertEqual(prepare_regeneration_node({**state, **failed})["regeneration_route"], "replan")
 
     def test_full_graph_repairs_same_item_before_collection_and_bounds_retries(self) -> None:
-        for always_fail, expected_attempts, replace_source in ((False, 2, False), (True, 3, False), (False, 3, True)):
+        for always_fail, expected_attempts, replace_source in ((False, 2, False), (True, 3, False), (False, 2, True)):
             with self.subTest(always_fail=always_fail, replace_source=replace_source):
                 state = passing_state()
                 state.update({"experiment_method": "full", "next_record_id": 2, "max_iterations": 1, "max_generation_retries": 2})
@@ -1680,7 +1698,7 @@ class RegenerationRoutingTests(unittest.TestCase):
 
                 def review(current: dict) -> dict:
                     snapshots.append((current["iteration_count"], current["next_record_id"], current["generation_attempt"]))
-                    passed = not always_fail and current["generation_attempt"] > (2 if replace_source else 1)
+                    passed = not always_fail and current["generation_attempt"] > 1
                     return {"evidence_report": {
                         "passed": passed, "issues": [] if passed else ["irrelevant_textbook_citation" if replace_source else "unsupported_key"],
                         "feedback": "Use a narrower supported claim." if not passed else "",
@@ -1708,7 +1726,7 @@ class RegenerationRoutingTests(unittest.TestCase):
                     generation, "_preflight_report", return_value={"passed": True}
                 ), patch.object(
                     generation, "request_json", return_value=draft,
-                    side_effect=[draft, draft, {**draft, "evidence_refs": ["DSM5-DEP-014", "textbook-2"]}] if replace_source else None,
+                    side_effect=[draft, {**draft, "evidence_refs": ["DSM5-DEP-014", "textbook-2"]}] if replace_source else None,
                 ) as generate:
                     result = create_mcq_graph().invoke(state, config={"recursion_limit": 100})
                 self.assertEqual(generate.call_count, expected_attempts)
@@ -1716,7 +1734,8 @@ class RegenerationRoutingTests(unittest.TestCase):
                 planner.assert_called_once()
                 self.assertEqual(retrieve.call_count, 2 if replace_source else 1)
                 if replace_source:
-                    self.assertIn(draft["clinical_case"], retrieve.call_args.args[0]["blueprint"]["retrieval_query"])
+                    self.assertIn(draft["question"], retrieve.call_args.args[0]["blueprint"]["retrieval_query"])
+                    self.assertNotIn(draft["clinical_case"], retrieve.call_args.args[0]["blueprint"]["retrieval_query"])
                 reflect.assert_called_once()
                 self.assertIn(json.dumps(draft, ensure_ascii=False), generate.call_args_list[1].args[0])
                 self.assertIn("Use a narrower supported claim.", generate.call_args_list[1].args[0])
