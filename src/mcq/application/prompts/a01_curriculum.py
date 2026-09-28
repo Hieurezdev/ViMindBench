@@ -80,6 +80,11 @@ functional impairment, and relevant exclusions. Plan reasoning about observed
 features or missing assessment information; do not plan a recall-only question.
 The same query must also retrieve Tier 1 textbook context for psychological
 mechanisms or functional impact. The clinical item must use both source kinds.
+Choose a symptom pattern or clinical feature described by DSM-5 and applicable
+Tier 1 textbooks. Do not plan a question focused only on a therapy technique,
+drug mechanism, procedure, or general stress theory when DSM-5 would be an
+unrelated citation. If the anchor is procedural, use a related, source-backed
+clinical presentation rather than forcing its procedure into a DSM-5 question.
 DSM-5 criteria may inform an educational case, but do not establish a real
 person's diagnosis. Plan a new synthetic case whose patient details may be
 invented while its clinical pattern and interpretation follow retrieved theory.

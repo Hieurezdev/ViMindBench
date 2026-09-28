@@ -2,6 +2,7 @@
 
 import os
 import re
+import logging
 from typing import Any, Dict, List
 from ...domain import MCQState
 from ...infrastructure.evidence import evidence_refs
@@ -14,6 +15,7 @@ HARD_EMPHATIC_WORDING = re.compile(
     re.IGNORECASE,
 )
 ANSWER_LABELS = ("A", "B", "C", "D")
+logger = logging.getLogger("mcq.generation")
 
 
 def _normalize_evidence_ref_ids(value: Any) -> List[str]:
@@ -65,6 +67,9 @@ def _normalize_and_validate_mcq(
         }
 
     normalized = dict(mcq)
+    clinical_case = normalized.get("clinical_case")
+    if isinstance(clinical_case, str) and clinical_case.startswith("Hypothetical Case:"):
+        normalized["clinical_case"] = "Tình huống giả định:" + clinical_case.removeprefix("Hypothetical Case:")
     normalized["evidence_refs"] = _normalize_evidence_ref_ids(
         normalized.get("evidence_refs")
     ) or [ref["chunk_id"] for ref in refs]
@@ -132,8 +137,9 @@ def _build_evidence_plan(blueprint: Dict[str, Any], refs: List[Dict[str, Any]]) 
         )
         if isinstance(plan, dict):
             return plan
-    except Exception:
-        pass
+        logger.warning("A03 evidence plan returned a non-object", extra={"response_type": type(plan).__name__})
+    except Exception as exc:
+        logger.warning("A03 evidence plan unavailable", extra={"error_type": type(exc).__name__})
     return {"supported_claims": [], "prohibited_inferences": []}
 
 
@@ -238,9 +244,10 @@ def _preflight_report(
             "issues": [*hard_guard["issues"], *report.get("issues", [])],
             "feedback": " ".join(part for part in (hard_guard.get("feedback", ""), report.get("feedback", "")) if part),
         }
-    except Exception:
+    except Exception as exc:
         # The full A04–A07 chain remains authoritative if this optional early
         # review endpoint is unavailable.
+        logger.warning("A03 preflight unavailable", extra={"error_type": type(exc).__name__})
         return hard_guard
 
 
@@ -316,6 +323,19 @@ def mcq_generator_node(state: MCQState) -> Dict[str, Any]:
     )
 
     feedback = list(state.get("judge_feedback", []))
+    repair_history = state.get("repair_history", [])
+    if repair_history and state.get("regeneration_route") == "replan":
+        feedback = []
+    elif repair_history:
+        # The draft already contains earlier fixes; stale reports distract the model.
+        feedback = list(repair_history[-1]["feedback"])
+        if state.get("judge_reports", {}).get("generation", {}).get("passed") is False:
+            local_feedback = [
+                item for item in state.get("judge_feedback", [])
+                if item.get("judge") in {"a03_schema", "a03_preflight"}
+            ]
+            if local_feedback and local_feedback[-1] not in feedback:
+                feedback.append(local_feedback[-1])
     mcq = state.get("generation_draft") or state.get("mcq", {})
     try:
         mcq = _generate_mcq(
@@ -414,6 +434,16 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
     """Repair the current item first; replan missing or persistently misaligned sources."""
     feedback: List[Dict[str, Any]] = []
     for judge, report in state.get("judge_reports", {}).items():
+        if judge == "adversarial_solver" and all(
+            str(issue).startswith("solver_error:") for issue in report.get("issues", [])
+        ):
+            continue
+        if (
+            not state.get("mcq")
+            and state.get("judge_reports", {}).get("generation", {}).get("passed") is False
+            and judge != "generation"
+        ):
+            continue
         if not report.get("passed", False):
             feedback.append(
                 {
@@ -474,7 +504,12 @@ def prepare_regeneration_node(state: MCQState) -> Dict[str, Any]:
         )
     )
     needs_replan = missing_sources or repeated_alignment
-    source_markers = ("irrelevant_textbook_citation", "irrelevant_dsm5_citation", "insufficient_evidence_support")
+    source_markers = (
+        "irrelevant_textbook_citation", "irrelevant_dsm5_citation",
+        "insufficient_evidence_support", "evidence_mismatch",
+        "insufficient_support_dsm5", "insufficient_support_textbook",
+        "insufficient_support_keyed_option", "key_not_supported_by_evidence",
+    )
     needs_retrieval = (
         not needs_replan
         and bool(state.get("mcq"))

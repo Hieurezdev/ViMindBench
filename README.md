@@ -16,6 +16,14 @@ trình thì lập kế hoạch/retrieve lại ngay. Nguồn vẫn bị đánh gi
 sau một lượt sửa sẽ được retrieve lại theo ca hiện tại, giữ ca và ID; lỗi
 blueprint/nguồn lệch nhau mới lập kế hoạch lại. Mặc định tối đa 2 lượt retry sau lần sinh
 đầu; chỉ ghi verified hoặc quarantine sau khi hoàn tất sửa và kiểm tra lại.
+Each A03 retry receives the current feedback only; the full history remains in
+the quarantine audit. Generation and preflight include rules for the requested
+difficulty. When the evidence planner returns no validated claims, the writer
+grounds the answer in the visible excerpts instead of treating an empty claim
+list as an impossible prohibition. Preflight checks distractors for obvious
+case contradictions, equally true alternatives and mismatched decision types.
+Repeated `evidence_mismatch_*` or `insufficient_support_*` findings trigger
+retrieval again for the same case and ID.
 
 Kiểm tra cue dùng chung giữa A03 và quality gate ở mọi difficulty, kể cả khi
 tắt LLM preflight. Feedback độ dài có số từ của A–D và mức chênh lệch cho phép

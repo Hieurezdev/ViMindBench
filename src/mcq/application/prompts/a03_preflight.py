@@ -17,18 +17,41 @@ def render(*, blueprint: Dict[str, Any], mcq: Dict[str, Any], evidence: List[Dic
    fictional details just because they are not source quotations. Fail invented
    disease theory, contradictory clinical reasoning or unsupported causal claims.
    Unmentioned exclusions are unknown, not evidence that an exclusion is met."""
+    difficulty = blueprint.get("difficulty")
+    distractor_policy = """For easy, wrong options must still be plausible answers
+to the same question; do not make all three trivial contradictions of explicit
+case facts or unrelated diagnoses."""
+    if difficulty == "medium":
+        distractor_policy = """For medium, require one plausible near-miss on
+the same decision axis as the key, wrong on one precise source-checkable detail.
+Fail an equally true alternative or three distractors eliminated by obvious
+contradictions or unrelated diagnoses."""
+    if difficulty == "hard":
+        distractor_policy = """For hard, require four plausible choices on the
+same decision axis. Each wrong choice must differ by one small source-checkable
+distinction; do not pass options eliminated by explicit case negations or
+unrelated diagnoses. The key must synthesize two cited chunks."""
+    hard_check = ""
+    if difficulty == "hard":
+        hard_check = """4. No answer is discoverable solely from length, absolute
+   wording, unique nuance, or qualification; all four options are balanced.
+   The key must cite two chunks and synthesize only directly supported claims."""
+    source_coverage_policy = (
+        "For easy/medium, DSM-5 may support the key while the textbook supports clinical context. "
+        "Do not require every claim to appear in both source kinds."
+        if difficulty != "hard" else
+        "For hard, require the keyed synthesis to draw on two distinct cited chunks."
+    )
     return f"""You are an A03 preflight critic for a Vietnamese psychology MCQ.
 Check only these release blockers before the item reaches the full judge chain:
 1. The declared answer is directly supported by its cited evidence, without an
    added mechanism or claim.
 2. There is exactly one best answer and three incorrect distractors.
+   {distractor_policy}
 3. {stem_policy}
    Natural language attribution is allowed, but raw IDs,
    bracketed citation markers, and fabricated named experts are not.
-4. For difficulty=hard, no answer is discoverable solely from length, absolute
-   wording, unique nuance, or qualification; all four options are balanced,
-   address the same mechanism, and are plausible near-misses. The key must cite
-   at least two chunks and synthesize only directly supported claims.
+{hard_check}
 5. For clinical_scenario, require a coherent clinical_case and concise
    case_summary. The summary must faithfully compress the generated case,
    including fictional patient details, without adding symptoms, duration, impairment,
@@ -37,9 +60,7 @@ Check only these release blockers before the item reaches the full judge chain:
    citations to both a supplied source_kind=dsm5 chunk and a
    source_kind=textbook chunk when available; each must support clinical theory
    used in the case or keyed reasoning. An unrelated textbook citation fails.
-   For easy/medium, different sources may support different parts: DSM-5 may
-   support the key while the textbook supports symptoms or course in the case.
-   Do not require every claim or the key to be supported by BOTH source kinds.
+   {source_coverage_policy}
    A source_kind is missing only if no cited ID has that source_kind metadata;
    insufficient claim support is a separate issue. Preserve the strength and
    scope of case statements in the summary: a limited negative finding cannot

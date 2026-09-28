@@ -30,7 +30,7 @@ from src.mcq.application.nodes.learning import (
     playbook_curator_node,
 )
 from src.mcq.application.nodes import learning
-from src.mcq.application.prompts import a01_curriculum, a03_mcq, a05_single_answer_judge
+from src.mcq.application.prompts import a01_curriculum, a03_mcq, a03_preflight, a05_single_answer_judge
 from src.mcq.application.failure_memory import (
     record_judge_failures,
     retrieve_similar_failures,
@@ -529,6 +529,33 @@ class JudgeGatewayTests(unittest.TestCase):
         self.assertIn("Theo quan điểm của chuyên gia tâm lý", generator_prompt)
         self.assertIn("at least two cited chunks", judge_prompt)
 
+    def test_generator_prompt_uses_only_the_requested_difficulty_rules(self) -> None:
+        prompts = {
+            difficulty: a03_mcq.render(
+                blueprint={"difficulty": difficulty, "level": "clinical_scenario"},
+                playbook="", evidence=[], evidence_plan={"supported_claims": []},
+                judge_feedback=[], required_answer="B",
+            )
+            for difficulty in ("easy", "medium", "hard")
+        }
+        self.assertIn("For easy, use a straightforward", prompts["easy"])
+        self.assertNotIn("For medium, design one near-miss", prompts["easy"])
+        self.assertNotIn("For hard, choose one narrow", prompts["medium"])
+        self.assertIn("No keyed claims were prevalidated", prompts["easy"])
+        self.assertNotIn("The key MUST apply only one or more claims in Allowed keyed claims", prompts["easy"])
+        self.assertIn("For medium, design one near-miss", prompts["medium"])
+        self.assertIn("For hard, choose one narrow", prompts["hard"])
+        grounded = a03_mcq.render(
+            blueprint={"difficulty": "easy"}, playbook="", evidence=[],
+            evidence_plan={"supported_claims": [{"claim": "Supported"}]},
+            judge_feedback=[], required_answer="B",
+        )
+        self.assertIn("The key MUST apply only one or more claims in Allowed keyed claims", grounded)
+        preflight_easy = a03_preflight.render(blueprint={"difficulty": "easy"}, mcq={}, evidence=[])
+        preflight_hard = a03_preflight.render(blueprint={"difficulty": "hard"}, mcq={}, evidence=[])
+        self.assertNotIn("No answer is discoverable solely from length", preflight_easy)
+        self.assertIn("No answer is discoverable solely from length", preflight_hard)
+
     def test_generator_cycles_required_answer_positions(self) -> None:
         positions = [_required_answer_position({"next_record_id": number}) for number in range(1, 9)]
         self.assertEqual(positions, ["A", "B", "C", "D", "A", "B", "C", "D"])
@@ -776,6 +803,44 @@ class EmoBenchIntegrationTests(unittest.TestCase):
 
 
 class QualityAndPlaybookTests(unittest.TestCase):
+    def test_retry_uses_latest_failure_feedback_without_stale_reports(self) -> None:
+        state = passing_state()
+        state.update({"next_record_id": 2, "experiment_method": "rag_only"})
+        stale = {"judge": "single_answer", "issues": ["old_issue"], "feedback": "Old failure."}
+        current = {"judge": "evidence", "issues": ["evidence_mismatch_dsm5"], "feedback": "Fix the cited concept."}
+        state["judge_feedback"] = [stale, current]
+        state["repair_history"] = [{"feedback": [current], "route": "generate"}]
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", return_value=state["mcq"]
+        ) as generate:
+            result = mcq_generator_node(state)
+        self.assertEqual(generate.call_args.kwargs["judge_feedback"], [current])
+        self.assertEqual(result["mcq"]["clinical_case"], state["mcq"]["clinical_case"])
+
+    def test_replanned_item_does_not_inherit_old_source_feedback(self) -> None:
+        state = passing_state()
+        state.update({"next_record_id": 2, "experiment_method": "rag_only", "mcq": {}, "regeneration_route": "replan"})
+        old_feedback = {"judge": "evidence", "issues": ["evidence_mismatch_dsm5"], "feedback": "Old source mismatch."}
+        state["judge_feedback"] = [old_feedback]
+        state["repair_history"] = [{"feedback": [old_feedback], "route": "replan"}]
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", return_value=passing_state()["mcq"]
+        ) as generate:
+            mcq_generator_node(state)
+        self.assertEqual(generate.call_args.kwargs["judge_feedback"], [])
+        self.assertEqual(generate.call_args.kwargs["previous_mcq"], {})
+
+    def test_generator_normalizes_english_hypothetical_heading_without_mutating_draft(self) -> None:
+        state = passing_state()
+        state.update({"next_record_id": 2, "experiment_method": "rag_only"})
+        generated = {**state["mcq"], "clinical_case": "Hypothetical Case: Một người lo lắng kéo dài."}
+        with patch.object(generation, "_build_evidence_plan", return_value={}), patch.object(
+            generation, "_generate_mcq", return_value=generated
+        ):
+            result = mcq_generator_node(state)
+        self.assertEqual(result["mcq"]["clinical_case"], "Tình huống giả định: Một người lo lắng kéo dài.")
+        self.assertEqual(generated["clinical_case"], "Hypothetical Case: Một người lo lắng kéo dài.")
+
     def test_sample_length_cues_are_repaired_before_judges_at_every_difficulty(self) -> None:
         samples = (("medium", (32, 32, 42, 32)), ("hard", (29, 26, 25, 36)), ("easy", (45, 32, 32, 37)))
         for difficulty, counts in samples:
@@ -1479,6 +1544,28 @@ class RecordIdContinuationTests(unittest.TestCase):
 
 
 class RegenerationRoutingTests(unittest.TestCase):
+    def test_current_evidence_mismatch_codes_trigger_retrieval_after_one_repair(self) -> None:
+        for issue in ("evidence_mismatch_dsm5", "evidence_mismatch_textbook", "evidence_mismatch", "insufficient_support_dsm5", "insufficient_support_keyed_option"):
+            with self.subTest(issue=issue):
+                state = passing_state()
+                state.update({"generation_attempt": 1, "judge_reports": {"evidence": {
+                    "passed": False, "issues": [issue], "feedback": "Source and key do not align.",
+                }}})
+                first = prepare_regeneration_node(state)
+                self.assertEqual(first["regeneration_route"], "generate")
+                second = prepare_regeneration_node({**state, **first, "generation_attempt": 2})
+                self.assertEqual(second["regeneration_route"], "retrieve")
+                self.assertEqual(second["repair_history"][-1]["route"], "retrieve")
+
+    def test_solver_transport_error_is_not_sent_as_repair_feedback(self) -> None:
+        state = passing_state()
+        state["judge_reports"] = {
+            "single_answer": {"passed": False, "issues": ["difficulty_mismatch"], "feedback": "Make the options plausible."},
+            "adversarial_solver": {"passed": False, "issues": ["solver_error:LLMOutputError"]},
+        }
+        result = prepare_regeneration_node(state)
+        self.assertEqual([item["judge"] for item in result["judge_feedback"]], ["single_answer"])
+
     def test_irrelevant_sources_are_retrieved_again_only_after_same_item_repair(self) -> None:
         for issue in ("irrelevant_textbook_citation", "irrelevant_dsm5_citation"):
             with self.subTest(issue=issue):
